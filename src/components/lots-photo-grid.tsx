@@ -14,7 +14,10 @@ export type LotsPhotoItem = {
   image?: string;
 };
 
-/** 묘역 4페이지 공통 — 카드 크기·그리드·크림 슬라이드 모달 */
+/**
+ * 묘역 4페이지 공통 — 봉안묘(/lots/columbarium) 표시를 기준.
+ * 고정 4:3 프레임 + object-contain(잘림 없이 전체 표시) + PC 4–5열 + 크림 슬라이드 모달.
+ */
 export function LotsPhotoGrid({ items }: { items: LotsPhotoItem[] }) {
   const [index, setIndex] = useState<number | null>(null);
 
@@ -48,7 +51,7 @@ export function LotsPhotoGrid({ items }: { items: LotsPhotoItem[] }) {
             {item.image ? (
               <button
                 type="button"
-                className="relative aspect-[4/3] w-full cursor-zoom-in overflow-hidden bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="relative aspect-[4/3] w-full cursor-zoom-in overflow-hidden bg-[#f3e6cf] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 onClick={() => openAt(item.image!)}
                 onMouseEnter={() => preload(item.image!)}
                 onFocus={() => preload(item.image!)}
@@ -58,14 +61,14 @@ export function LotsPhotoGrid({ items }: { items: LotsPhotoItem[] }) {
                   src={thumbUrl(item.image)}
                   alt={item.title}
                   fill
-                  className="object-cover"
+                  className="object-contain object-center"
                   sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw"
                   priority={i < 5}
                   loading={i < 5 ? undefined : "lazy"}
                 />
               </button>
             ) : (
-              <div className="flex aspect-[4/3] items-center justify-center bg-muted text-sm text-muted-foreground">
+              <div className="flex aspect-[4/3] items-center justify-center bg-[#f3e6cf] text-sm text-muted-foreground">
                 사진 없음
               </div>
             )}
@@ -89,6 +92,7 @@ export function LotsPhotoGrid({ items }: { items: LotsPhotoItem[] }) {
           items={slides}
           index={Math.min(index, slides.length - 1)}
           onIndexChange={setIndex}
+          imageFit="contain"
         />
       ) : null}
     </>

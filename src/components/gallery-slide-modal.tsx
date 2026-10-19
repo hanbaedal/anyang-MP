@@ -18,12 +18,15 @@ export function GallerySlideModal({
   items,
   index,
   onIndexChange,
+  imageFit = "cover",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   items: SlideModalItem[];
   index: number;
   onIndexChange: (index: number) => void;
+  /** 분양 그리드는 contain(잘림 없음), 갤러리는 기본 cover */
+  imageFit?: "cover" | "contain";
 }) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const current = items[index];
@@ -91,14 +94,22 @@ export function GallerySlideModal({
         onTouchEnd={onTouchEnd}
       >
         <DialogTitle className="sr-only">{current.alt}</DialogTitle>
-        <div className="relative aspect-[4/3] w-full touch-none overflow-hidden rounded-xl bg-muted select-none">
+        <div
+          className={cn(
+            "relative aspect-[4/3] w-full touch-none overflow-hidden rounded-xl select-none",
+            imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-muted",
+          )}
+        >
           <Image
             key={current.src}
             src={mediaUrl(current.src)}
             alt={current.alt}
             fill
             draggable={false}
-            className="pointer-events-none object-cover"
+            className={cn(
+              "pointer-events-none object-center",
+              imageFit === "contain" ? "object-contain" : "object-cover",
+            )}
             sizes="(max-width: 767px) min(100vw, 20rem), min(100vw, 36rem)"
             priority
           />
