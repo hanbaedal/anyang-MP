@@ -72,10 +72,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <SiteSidebar role={session?.role ?? null} />
             <div id="content" className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <div className="h-full min-h-full">{children}</div>
+              <div className="min-h-full">
+                {children}
+                <SiteFooter />
+              </div>
             </div>
           </div>
-          <SiteFooter />
         </LocaleProvider>
       </body>
     </html>
