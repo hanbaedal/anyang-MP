@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import { ensureImageWithinMaxBytes } from "@/lib/compress-image-client";
 import type { GalleryTag } from "@/lib/content";
+import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import { MANAGE_IMAGE_MAX_BYTES, MANAGE_IMAGE_MAX_MB } from "@/lib/image-upload-limits";
 import { thumbUrl } from "@/lib/media";
 
 const field =
   "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+function formatMb(bytes: number) {
+  return (bytes / (1024 * 1024)).toFixed(1);
+}
 
 export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [items, setItems] = useState(initial);
@@ -18,6 +24,7 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState<"전체" | GalleryTag>("전체");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => {
@@ -37,6 +44,39 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
       if (prev) URL.revokeObjectURL(prev);
       return next ? URL.createObjectURL(next) : null;
     });
+  }
+
+  async function onPickFile(next: File | null) {
+    if (!next) {
+      pickFile(null);
+      setMessage("");
+      return;
+    }
+
+    setBusy(true);
+    if (next.size > MANAGE_IMAGE_MAX_BYTES) {
+      setMessage(`${formatMb(next.size)}MB 파일이라 ${MANAGE_IMAGE_MAX_MB}MB 이하로 압축하는 중…`);
+    } else {
+      setMessage("");
+    }
+
+    try {
+      const result = await ensureImageWithinMaxBytes(next);
+      pickFile(result.file);
+      if (result.compressed) {
+        setMessage(
+          `용량이 커서 ${formatMb(next.size)}MB → ${formatMb(result.file.size)}MB로 줄였습니다. 그대로 올려 주세요.`,
+        );
+      } else {
+        setMessage("");
+      }
+    } catch (error) {
+      pickFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setMessage(error instanceof Error ? error.message : "이미지 압축에 실패했습니다. 다른 파일을 선택해 주세요.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function onUpload(event: React.FormEvent) {
@@ -61,6 +101,7 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
       setAlt("");
       setTags(["일반"]);
       pickFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setMessage("올렸습니다. 공개 갤러리와 홈페이지 관리(팝업·분양 사진)에서 바로 고를 수 있습니다.");
       await refresh();
     } finally {
@@ -115,18 +156,26 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <Button type="button" variant="outline" size="sm" className="w-fit" asChild>
-              <label className="cursor-pointer">
+              <label className={`cursor-pointer ${busy ? "pointer-events-none opacity-60" : ""}`}>
                 {file ? "다른 파일 선택" : "파일 선택"}
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/gif"
                   className="sr-only"
-                  onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+                  disabled={busy}
+                  onChange={(e) => void onPickFile(e.target.files?.[0] ?? null)}
                 />
               </label>
             </Button>
-            {file ? <p className="truncate text-xs text-muted-foreground">{file.name}</p> : null}
-            <p className="text-[11px] text-muted-foreground">JPG · PNG · WebP · GIF · 8MB 이하</p>
+            {file ? (
+              <p className="truncate text-xs text-muted-foreground">
+                {file.name} · {formatMb(file.size)}MB
+              </p>
+            ) : null}
+            <p className="text-[11px] text-muted-foreground">
+              JPG · PNG · WebP · GIF · {MANAGE_IMAGE_MAX_MB}MB 이하 (초과 시 자동 압축)
+            </p>
           </div>
         </div>
         <input
