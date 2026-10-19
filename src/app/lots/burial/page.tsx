@@ -1,4 +1,4 @@
-import { ExpandablePhoto } from "@/components/expandable-photo";
+import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { PageHero, Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { BURIAL } from "@/lib/content";
@@ -25,30 +25,9 @@ export default async function BurialPage() {
         lead={cms.lead || t(locale, "burial.lead")}
         image={{ src: "/images/burial.jpg", alt: t(locale, "burial.title") }}
       />
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "burial.body")}</p>}</Prose>
-        <ul className="mt-10 grid gap-6 md:grid-cols-3">
-          {items.map((item, index) => (
-            <li key={item.id || item.title} className="overflow-hidden rounded-xl border bg-card shadow-sm">
-              {item.image ? (
-                <ExpandablePhoto
-                  src={item.image}
-                  alt={item.title}
-                  className="aspect-[4/3] rounded-none"
-                  priority={index < 3}
-                />
-              ) : null}
-              <div className="p-4">
-                <h2 className="text-lg">{item.title}</h2>
-                {item.text ? (
-                  <div className="mt-1 space-y-1 text-sm text-muted-foreground">
-                    <Paragraphs text={item.text} />
-                  </div>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <LotsPhotoGrid items={items} />
       </div>
     </>
   );

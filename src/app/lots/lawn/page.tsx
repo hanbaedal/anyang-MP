@@ -1,4 +1,4 @@
-import { ExpandablePhoto } from "@/components/expandable-photo";
+import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { PageHero, Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { LAWN } from "@/lib/content";
@@ -23,23 +23,9 @@ export default async function LawnPage() {
         lead={cms.lead || t(locale, "lawn.lead")}
         image={{ src: "/images/lawn.jpg", alt: t(locale, "lawn.title") }}
       />
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
-        <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, index) => (
-            <li key={item.id || item.title} className="overflow-hidden rounded-xl border bg-card shadow-sm">
-              {item.image ? (
-                <ExpandablePhoto
-                  src={item.image}
-                  alt={item.title}
-                  className="aspect-[4/3] rounded-none"
-                  priority={index < 3}
-                />
-              ) : null}
-              <h2 className="p-4 text-lg">{item.title}</h2>
-            </li>
-          ))}
-        </ul>
+        <LotsPhotoGrid items={items} />
       </div>
     </>
   );

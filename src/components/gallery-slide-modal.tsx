@@ -5,12 +5,13 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { mediaUrl } from "@/lib/media";
-import type { GalleryItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 const SWIPE_PX = 40;
 
-/** 목록 탭용 — 크림 슬라이드 카드 스케일 모달 + 좌우(또는 상하) 스와이프·화살표 넘김 */
+export type SlideModalItem = { src: string; alt: string };
+
+/** 크림 슬라이드 카드 스케일 모달 + 좌우(또는 상하) 스와이프·화살표 넘김 */
 export function GallerySlideModal({
   open,
   onOpenChange,
@@ -20,7 +21,7 @@ export function GallerySlideModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  items: GalleryItem[];
+  items: SlideModalItem[];
   index: number;
   onIndexChange: (index: number) => void;
 }) {
@@ -107,7 +108,7 @@ export function GallerySlideModal({
                 type="button"
                 aria-label="이전 사진"
                 disabled={index <= 0}
-                className="absolute left-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:h-10 md:w-10"
+                className="absolute left-1 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:flex"
                 onClick={(e) => {
                   e.stopPropagation();
                   go(-1);
@@ -119,7 +120,7 @@ export function GallerySlideModal({
                 type="button"
                 aria-label="다음 사진"
                 disabled={index >= items.length - 1}
-                className="absolute right-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:h-10 md:w-10"
+                className="absolute right-1 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:flex"
                 onClick={(e) => {
                   e.stopPropagation();
                   go(1);
