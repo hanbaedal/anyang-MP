@@ -7,6 +7,7 @@ import { mediaUrl, thumbUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 import { useT } from "@/components/locale-provider";
+import { cn } from "@/lib/utils";
 
 const TAGS: Array<{ value: "전체" | GalleryTag; key: string }> = [
   { value: "전체", key: "gallery.all" },
@@ -18,6 +19,11 @@ const TAGS: Array<{ value: "전체" | GalleryTag; key: string }> = [
   { value: "리모델링", key: "gallery.tag.remodel" },
 ];
 
+function openPreview(src: string) {
+  const img = new window.Image();
+  img.src = mediaUrl(src);
+}
+
 export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; items?: GalleryItem[] }) {
   const t = useT();
   const [tag, setTag] = useState<(typeof TAGS)[number]["value"]>("전체");
@@ -28,49 +34,115 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
     return typeof preview === "number" ? filtered.slice(0, preview) : filtered;
   }, [tag, preview, items]);
 
+  const tickerItems = useMemo(() => {
+    if (itemsFiltered.length === 0) return [];
+    // 한 줄에 3칸이 보이도록 패딩한 뒤 정확히 2배로 복제 → translateX(-50%) 루프
+    let base = [...itemsFiltered];
+    while (base.length < 3) base = base.concat(itemsFiltered);
+    return [...base, ...base];
+  }, [itemsFiltered]);
+
   const current = items.find((item) => item.src === open);
+  const durationSec = Math.max(24, itemsFiltered.length * 4);
+
+  if (preview) {
+    return (
+      <div>
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {itemsFiltered.map((item) => (
+            <li key={item.src}>
+              <button
+                type="button"
+                className="relative block aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted"
+                onClick={() => setOpen(item.src)}
+                onMouseEnter={() => openPreview(item.src)}
+              >
+                <Image src={thumbUrl(item.src)} alt={item.alt} fill className="object-cover" sizes="33vw" />
+              </button>
+              <p className="mt-2 text-sm text-muted-foreground">{item.alt}</p>
+            </li>
+          ))}
+        </ul>
+        {current ? (
+          <ImageLightboxDialog open={Boolean(open)} onOpenChange={(next) => !next && setOpen(null)} src={current.src} alt={current.alt} />
+        ) : null}
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {preview ? null : (
-        <div className="mb-6 flex flex-wrap gap-2">
-          {TAGS.map((item) => (
-            <Button
-              key={item.value}
-              type="button"
-              size="sm"
-              variant={tag === item.value ? "default" : "outline"}
-              onClick={() => setTag(item.value)}
+    <div className="space-y-8">
+      <div className="flex flex-wrap gap-2">
+        {TAGS.map((item) => (
+          <Button
+            key={item.value}
+            type="button"
+            size="sm"
+            variant={tag === item.value ? "default" : "outline"}
+            onClick={() => setTag(item.value)}
+          >
+            {t(item.key)}
+          </Button>
+        ))}
+      </div>
+
+      {itemsFiltered.length > 0 ? (
+        <section
+          aria-label={t("gallery.title")}
+          className="overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3"
+        >
+          <div className="gallery-marquee">
+            <div
+              className="gallery-marquee-track gap-3"
+              style={{ animationDuration: `${durationSec}s` }}
             >
-              {t(item.key)}
-            </Button>
-          ))}
-        </div>
-      )}
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+              {tickerItems.map((item, index) => (
+                <button
+                  key={`${item.src}-${index}`}
+                  type="button"
+                  className="gallery-marquee-card"
+                  onClick={() => setOpen(item.src)}
+                  onMouseEnter={() => openPreview(item.src)}
+                  aria-label={item.alt}
+                >
+                  <Image
+                    src={thumbUrl(item.src)}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      <ul className="space-y-3">
         {itemsFiltered.map((item) => (
           <li key={item.src}>
             <button
               type="button"
-              className="relative block aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted"
+              className={cn(
+                "flex w-full items-stretch gap-4 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors",
+                "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
+              )}
               onClick={() => setOpen(item.src)}
-              onMouseEnter={() => {
-                const img = new window.Image();
-                img.src = mediaUrl(item.src);
-              }}
+              onMouseEnter={() => openPreview(item.src)}
             >
-              <Image
-                src={thumbUrl(item.src)}
-                alt={item.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 16vw"
-              />
+              <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
+                <Image src={thumbUrl(item.src)} alt="" fill className="object-cover" sizes="120px" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
+                <span className="font-medium text-foreground">{item.alt}</span>
+                <span className="text-sm text-muted-foreground">{item.tags.join(" · ")}</span>
+              </span>
             </button>
-            <p className="mt-2 text-sm text-muted-foreground">{item.alt}</p>
           </li>
         ))}
       </ul>
+
       {itemsFiltered.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
       {current ? (
         <ImageLightboxDialog open={Boolean(open)} onOpenChange={(next) => !next && setOpen(null)} src={current.src} alt={current.alt} />

@@ -359,3 +359,64 @@
     print-color-adjust: exact;
   }
 }
+
+/* 공원 갤러리 — 크림 3열 카드 높이의 가로 자동 스크롤 */
+.gallery-marquee {
+  container-type: inline-size;
+  overflow: hidden;
+  width: 100%;
+}
+
+.gallery-marquee-track {
+  display: flex;
+  width: max-content;
+  animation-name: gallery-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.gallery-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.gallery-marquee-card {
+  position: relative;
+  flex: 0 0 auto;
+  aspect-ratio: 4 / 3;
+  width: min(100cqi, 20rem);
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--muted);
+}
+
+@container (min-width: 40rem) {
+  .gallery-marquee-card {
+    width: calc((100cqi - 0.75rem) / 2);
+  }
+}
+
+@container (min-width: 48rem) {
+  .gallery-marquee-card {
+    /* 기존 lg:grid-cols-3 한 칸과 동일 스케일 */
+    width: calc((100cqi - 1.5rem) / 3);
+  }
+}
+
+@keyframes gallery-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-marquee-track {
+    animation: none;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    width: 100%;
+  }
+}

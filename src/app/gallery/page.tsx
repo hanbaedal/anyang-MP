@@ -22,7 +22,7 @@ export default async function GalleryPage() {
         lead={t(locale, "gallery.lead")}
         image={{ src: "/images/park-overview.jpg", alt: t(locale, "gallery.title") }}
       />
-      <div className="w-full px-4 py-12 md:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-12">
         <GalleryGrid items={items} />
       </div>
     </>
