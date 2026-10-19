@@ -16,7 +16,7 @@ export default async function InquiryPage() {
   const items = await listPublicInquiries();
   return (
     <>
-      <PageHero kicker={t(locale, "inquiry.kicker")} title={t(locale, "inquiry.title")} lead={t(locale, "inquiry.lead")} />
+      <PageHero kicker={t(locale, "inquiry.kicker")} title={t(locale, "inquiry.title")} />
       <div className="mx-auto max-w-6xl px-4 py-12">
         <InquiryBoard initial={items} locale={locale} />
       </div>

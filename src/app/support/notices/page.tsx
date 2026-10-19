@@ -25,7 +25,7 @@ export default async function NoticesPage() {
 
   return (
     <>
-      <PageHero kicker={t(locale, "notices.kicker")} title={t(locale, "notices.title")} lead={t(locale, "notices.lead")} />
+      <PageHero kicker={t(locale, "notices.kicker")} title={t(locale, "notices.title")} />
       <div className="mx-auto max-w-6xl px-4 py-12">
         <p className="mb-6 text-sm text-muted-foreground">
           {t(locale, "notices.consult", { phone: SITE.phone })}{" "}
