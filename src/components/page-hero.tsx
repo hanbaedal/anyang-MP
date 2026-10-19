@@ -23,27 +23,27 @@ export function PageHero({
 }) {
   const alt = image?.alt || "안양공원묘원 테라스 묘역 전경";
   return (
-    <section className="relative overflow-hidden border-b bg-primary text-primary-foreground">
+    <section className="relative overflow-hidden border-b bg-[#0a3d66] text-primary-foreground">
       <Image
         src={mediaUrl(PAGE_HERO_IMAGE)}
         alt={alt}
         fill
         priority
-        className="object-cover object-[center_28%] opacity-40"
+        className="object-cover object-[center_28%] opacity-55"
         sizes="100vw"
       />
       <div className="relative mx-auto max-w-6xl px-4 py-4 md:py-6">
-        <p className="text-[10px] tracking-[0.16em] text-primary-foreground/75 uppercase md:text-xs md:tracking-[0.18em]">
+        <p className="text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]">
           {kicker}
         </p>
         <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-1.5 md:text-2xl">{title}</h1>
         {lead ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-sm md:leading-6">
+          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-2 md:text-sm md:leading-6">
             {lead}
           </p>
         ) : null}
         {children ? (
-          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-1.5 md:text-sm md:leading-6">
+          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-1.5 md:text-sm md:leading-6">
             {children}
           </div>
         ) : null}
