@@ -47,7 +47,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
           ))}
         </div>
       )}
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {itemsFiltered.map((item) => (
           <li key={item.src}>
             <button
@@ -59,7 +59,13 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 img.src = mediaUrl(item.src);
               }}
             >
-              <Image src={thumbUrl(item.src)} alt={item.alt} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+              <Image
+                src={thumbUrl(item.src)}
+                alt={item.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 16vw"
+              />
             </button>
             <p className="mt-2 text-sm text-muted-foreground">{item.alt}</p>
           </li>

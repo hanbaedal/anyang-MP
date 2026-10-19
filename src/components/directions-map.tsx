@@ -78,7 +78,8 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
-    const startPromise = readStart();
+    // 네이버 웹만 출발 좌표를 씀. 카카오는 웹/앱 모두 출발 생략(앱 GPS).
+    const startPromise = kind === "naver" ? readStart() : Promise.resolve(null);
     try {
       if (isMobile()) {
         const schemes =
@@ -95,7 +96,7 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
         }
       }
       const start = (await startPromise) ?? undefined;
-      const web = kind === "naver" ? naverDirectionsUrl(start) : kakaoDirectionsUrl(start);
+      const web = kind === "naver" ? naverDirectionsUrl(start) : kakaoDirectionsUrl();
       window.open(web, "_blank", "noopener,noreferrer");
     } finally {
       setBusy(null);

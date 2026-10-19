@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteSidebar } from "@/components/site-sidebar";
 import { LocaleProvider } from "@/components/locale-provider";
+import { NavSwipe } from "@/components/nav-swipe";
 import { SITE, metadataBase } from "@/lib/site";
 import { LOCALE_HTML, t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -73,7 +74,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SiteSidebar role={session?.role ?? null} />
             <div id="content" className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
               <div className="flex min-h-full flex-col">
-                <div className="flex flex-1 flex-col">{children}</div>
+                <NavSwipe>
+                  <div className="flex flex-1 flex-col">{children}</div>
+                </NavSwipe>
                 <SiteFooter />
               </div>
             </div>

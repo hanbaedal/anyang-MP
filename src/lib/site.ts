@@ -118,14 +118,14 @@ export function naverAndroidRouteIntent() {
 }
 
 /**
- * 카카오 웹 폴백.
- * 출발이 있으면 자동차 길찾기(경로+길안내 CTA). 없으면 도착만 — 모바일은 출발=현재위치.
+ * 카카오 웹 폴백 — 도착만(`/link/to/…`).
+ * 출발을 `현재위치`+브라우저 좌표로 넣으면 도로 스냅 실패로
+ * 「출발지 근처에 길이 없어요」가 난다. 출발은 카카오내비/맵 앱 GPS에 맡긴다.
  */
-export function kakaoDirectionsUrl(start?: MapStart) {
+export function kakaoDirectionsUrl(_start?: MapStart) {
+  void _start;
   const destName = encodeURIComponent(DEST_NAME);
-  if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
-  const fromName = encodeURIComponent("현재위치");
-  return `https://map.kakao.com/link/by/car/${fromName},${start.lat},${start.lng}/${destName},${SITE.lat},${SITE.lng}`;
+  return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
 }
 
 /**
@@ -282,12 +282,6 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
   return menus;
 }
 
-export const INTRO_PAGES = [
-  { href: "/intro/greeting", i18n: "nav.greeting" },
-  { href: "/intro/features", i18n: "nav.features" },
-  { href: "/intro/directions", i18n: "nav.directions" },
-] as const;
-
 export const NAV: NavItem[] = [
   {
     href: "/intro/greeting",
@@ -354,6 +348,11 @@ export const NAV: NavItem[] = [
     tone: "more",
   },
 ];
+
+/** 모바일 가로 스와이프 순서 — 공개 1차 메뉴(사이트맵 제외) 하위 페이지 */
+export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) =>
+  (item.children ?? []).map((child) => ({ href: child.href, i18n: child.i18n })),
+);
 
 export const SALE_STEPS = [
   { n: "1", titleKey: "step.1.title", textKey: "step.1.text" },
