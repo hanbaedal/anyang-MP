@@ -23,7 +23,7 @@ export default async function LawnPage() {
         lead={cms.lead || t(locale, "lawn.lead")}
         image={{ src: "/images/lawn.jpg", alt: t(locale, "lawn.title") }}
       />
-      <div className="mx-auto max-w-7xl px-4 py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
         <LotsPhotoGrid items={items} />
       </div>

@@ -25,7 +25,7 @@ export default async function ColumbariumPage() {
         lead={cms.lead || t(locale, "col.lead")}
         image={{ src: "/images/columbarium.jpg", alt: t(locale, "col.title") }}
       />
-      <div className="mx-auto max-w-7xl px-4 py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "col.body")}</p>}</Prose>
         <LotsPhotoGrid items={items} />
       </div>

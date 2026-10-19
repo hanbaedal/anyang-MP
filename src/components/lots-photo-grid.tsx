@@ -42,7 +42,7 @@ export function LotsPhotoGrid({ items }: { items: LotsPhotoItem[] }) {
 
   return (
     <>
-      <ul className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <ul className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {items.map((item, i) => (
           <li
             key={item.id || item.title || String(i)}

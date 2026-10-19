@@ -25,7 +25,7 @@ export default async function BurialPage() {
         lead={cms.lead || t(locale, "burial.lead")}
         image={{ src: "/images/burial.jpg", alt: t(locale, "burial.title") }}
       />
-      <div className="mx-auto max-w-7xl px-4 py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "burial.body")}</p>}</Prose>
         <LotsPhotoGrid items={items} />
       </div>

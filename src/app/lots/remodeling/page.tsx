@@ -25,7 +25,7 @@ export default async function RemodelPage() {
         lead={cms.lead || t(locale, "remodel.lead")}
         image={{ src: "/images/remodel-3.jpg", alt: t(locale, "remodel.title") }}
       />
-      <div className="mx-auto max-w-7xl px-4 py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>
           {cms.body ? (
             <Paragraphs text={cms.body} />
