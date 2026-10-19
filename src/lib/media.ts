@@ -32,6 +32,18 @@ export function uploadMediaUrl(relativeUnderUploads: string) {
   return mediaUrl(`/api/uploads/${clean}`);
 }
 
+/** Public URL for an upload original (`/uploads/…` → `/api/uploads/…`). */
+export function uploadOriginalUrl(path: string) {
+  if (!path) return path;
+  if (/^https?:\/\//i.test(path)) return path;
+  const normalized = resolveImagePath(path);
+  if (normalized.startsWith("/api/uploads/")) return mediaUrl(normalized);
+  if (normalized.startsWith("/uploads/")) {
+    return uploadMediaUrl(normalized.replace(/^\/uploads\//, ""));
+  }
+  return mediaUrl(normalized);
+}
+
 /** GridFS `/api/uploads` (or `/uploads`) — already sized; skip Next image optimizer. */
 export function isUploadMediaPath(path: string) {
   if (!path) return false;

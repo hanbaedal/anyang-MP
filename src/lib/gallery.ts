@@ -219,19 +219,37 @@ export async function updateGalleryPhoto(id: string, input: { alt?: string; tags
   return { ok: true as const, photo: items[idx] };
 }
 
+async function removeGalleryUploadFiles(src: string) {
+  if (!src || (!src.includes("/uploads/") && !src.includes("/api/uploads/"))) return;
+  const { deleteUploadObject } = await import("./upload-store");
+  let rel = src.replace(/^\/+/, "").replace(/^(api\/)?uploads\//, "");
+  if (!rel || rel.includes("..")) return;
+  await deleteUploadObject(`uploads/${rel}`);
+  const thumbRel = rel.startsWith("thumbs/")
+    ? rel
+    : `thumbs/${rel.replace(/\.(png|webp|gif|jpe?g)$/i, ".jpg")}`;
+  await deleteUploadObject(`uploads/${thumbRel}`);
+}
+
 export async function deleteGalleryPhoto(id: string) {
   if (hasMongo()) {
     await ensureMongoMaterialized();
     const db = await getDb();
     if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
+    const existing = await db.collection("gallery").findOne({ id });
+    if (!existing) return { ok: false as const, error: "사진을 찾지 못했습니다." };
+    const src = String((existing as { src?: string }).src ?? "");
     const result = await db.collection("gallery").deleteOne({ id });
     if (result.deletedCount < 1) return { ok: false as const, error: "사진을 찾지 못했습니다." };
+    await removeGalleryUploadFiles(src);
     return { ok: true as const };
   }
 
   const items = await listGallery();
+  const target = items.find((item) => item.id === id);
   const next = items.filter((item) => item.id !== id);
   if (next.length === items.length) return { ok: false as const, error: "사진을 찾지 못했습니다." };
   await persistLocal(next);
+  if (target) await removeGalleryUploadFiles(target.src);
   return { ok: true as const };
 }

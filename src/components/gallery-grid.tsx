@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { GALLERY, type GalleryItem, type GalleryTag } from "@/lib/content";
-import { isUploadMediaPath, mediaUrl, thumbUrl } from "@/lib/media";
+import { isUploadMediaPath, mediaUrl, thumbUrl, uploadOriginalUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
@@ -20,41 +20,45 @@ const TAGS: Array<{ value: "전체" | GalleryTag; key: string }> = [
   { value: "리모델링", key: "gallery.tag.remodel" },
 ];
 
-/** Marquee card display width — px so Next picks ~640, not w=3840. */
-const MARQUEE_SIZES = "(max-width: 767px) 320px, 576px";
-
 function openPreview(src: string) {
   const img = new window.Image();
   img.src = mediaUrl(src);
 }
 
-function MarqueeThumb({
+/** Thumb with original fallback; reports hard failure so parent can drop the slot. */
+function FallbackThumb({
   src,
-  onSettled,
+  className,
+  loading,
+  onOk,
+  onFail,
 }: {
   src: string;
-  onSettled: (src: string) => void;
+  className?: string;
+  loading?: "eager" | "lazy";
+  onOk?: (src: string) => void;
+  onFail: (src: string) => void;
 }) {
-  const thumb = thumbUrl(src);
+  const [uri, setUri] = useState(() => thumbUrl(src));
+  const [phase, setPhase] = useState<"thumb" | "orig">("thumb");
+
   return (
-    <Image
-      src={thumb}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={uri}
       alt=""
-      fill
-      className="object-cover opacity-0 transition-opacity duration-300 data-[loaded=true]:opacity-100"
-      sizes={MARQUEE_SIZES}
-      loading="eager"
+      className={className}
+      loading={loading}
       decoding="async"
       draggable={false}
-      // Pre-sized thumbs; skip optimizer (and avoid transform+lazy gray boxes)
-      unoptimized
-      onLoad={(e) => {
-        e.currentTarget.setAttribute("data-loaded", "true");
-        onSettled(src);
-      }}
-      onError={(e) => {
-        e.currentTarget.style.visibility = "hidden";
-        onSettled(src);
+      onLoad={() => onOk?.(src)}
+      onError={() => {
+        if (phase === "thumb") {
+          setPhase("orig");
+          setUri(uploadOriginalUrl(src));
+          return;
+        }
+        onFail(src);
       }}
     />
   );
@@ -65,58 +69,52 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
   const [tag, setTag] = useState<(typeof TAGS)[number]["value"]>("전체");
   const [open, setOpen] = useState<string | null>(null);
   const [listIndex, setListIndex] = useState<number | null>(null);
+  const [failedSrcs, setFailedSrcs] = useState<Set<string>>(() => new Set());
   const [marqueeReady, setMarqueeReady] = useState(false);
-  const settledSrcs = useRef(new Set<string>());
 
   const itemsFiltered = useMemo(() => {
     const filtered = tag === "전체" ? items : items.filter((item) => item.tags.includes(tag));
     return typeof preview === "number" ? filtered.slice(0, preview) : filtered;
   }, [tag, preview, items]);
 
-  const tickerItems = useMemo(() => {
-    if (itemsFiltered.length === 0) return [];
-    // PC 1.5×(~2칸)·모바일 기존 크기에 맞춰 패딩 후 2배 복제 → translateX(-50%) 루프
-    let base = [...itemsFiltered];
-    while (base.length < 3) base = base.concat(itemsFiltered);
-    return [...base, ...base];
-  }, [itemsFiltered]);
-
-  useEffect(() => {
-    settledSrcs.current = new Set();
-    setMarqueeReady(false);
-  }, [tag, itemsFiltered]);
-
-  const onMarqueeSettled = useCallback(
-    (src: string) => {
-      if (settledSrcs.current.has(src)) return;
-      settledSrcs.current.add(src);
-      const need = Math.min(4, itemsFiltered.length || 1);
-      if (settledSrcs.current.size >= need) setMarqueeReady(true);
-    },
-    [itemsFiltered.length],
+  const visibleItems = useMemo(
+    () => itemsFiltered.filter((item) => !failedSrcs.has(item.src)),
+    [itemsFiltered, failedSrcs],
   );
 
-  // Don't block forever if some thumbs 404 / hang
-  useEffect(() => {
-    if (marqueeReady || itemsFiltered.length === 0) return;
-    const timer = window.setTimeout(() => setMarqueeReady(true), 2800);
-    return () => window.clearTimeout(timer);
-  }, [marqueeReady, itemsFiltered.length, tag]);
+  const tickerItems = useMemo(() => {
+    if (visibleItems.length === 0) return [];
+    let base = [...visibleItems];
+    while (base.length < 3) base = base.concat(visibleItems);
+    return [...base, ...base];
+  }, [visibleItems]);
 
-  // Prefetch list thumbs after first paint (marquee already eagers its own)
   useEffect(() => {
-    if (typeof preview === "number" || itemsFiltered.length === 0) return;
-    const timer = window.setTimeout(() => {
-      for (const item of itemsFiltered.slice(0, 12)) {
-        const img = new window.Image();
-        img.src = thumbUrl(item.src);
-      }
-    }, 120);
+    setFailedSrcs(new Set());
+    setMarqueeReady(false);
+  }, [tag, items]);
+
+  const onMarqueeOk = useCallback(() => {
+    setMarqueeReady(true);
+  }, []);
+
+  const onFail = useCallback((src: string) => {
+    setFailedSrcs((prev) => {
+      if (prev.has(src)) return prev;
+      const next = new Set(prev);
+      next.add(src);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (marqueeReady || visibleItems.length === 0) return;
+    const timer = window.setTimeout(() => setMarqueeReady(true), 2000);
     return () => window.clearTimeout(timer);
-  }, [itemsFiltered, preview]);
+  }, [marqueeReady, visibleItems.length, tag]);
 
   const current = items.find((item) => item.src === open);
-  const durationSec = Math.max(60, itemsFiltered.length * 10);
+  const durationSec = Math.max(60, Math.max(visibleItems.length, 1) * 10);
 
   if (preview) {
     return (
@@ -152,7 +150,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
 
   return (
     <div className="max-w-full min-w-0 space-y-8">
-      {itemsFiltered.length > 0 ? (
+      {visibleItems.length > 0 ? (
         <section
           aria-label={t("gallery.title")}
           className="max-w-full overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3"
@@ -168,13 +166,19 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   type="button"
                   className="gallery-marquee-card"
                   onClick={() => {
-                    const idx = itemsFiltered.findIndex((entry) => entry.src === item.src);
+                    const idx = visibleItems.findIndex((entry) => entry.src === item.src);
                     if (idx >= 0) setListIndex(idx);
                   }}
                   onMouseEnter={() => openPreview(item.src)}
                   aria-label={item.alt}
                 >
-                  <MarqueeThumb src={item.src} onSettled={onMarqueeSettled} />
+                  <FallbackThumb
+                    src={item.src}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading="eager"
+                    onOk={onMarqueeOk}
+                    onFail={onFail}
+                  />
                 </button>
               ))}
             </div>
@@ -206,7 +210,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
       </div>
 
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {itemsFiltered.map((item, index) => (
+        {visibleItems.map((item, index) => (
           <li key={item.src}>
             <button
               type="button"
@@ -218,13 +222,11 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
               onMouseEnter={() => openPreview(item.src)}
             >
               <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
-                <Image
-                  src={thumbUrl(item.src)}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="120px"
-                  unoptimized={isUploadMediaPath(thumbUrl(item.src))}
+                <FallbackThumb
+                  src={item.src}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  onFail={onFail}
                 />
               </span>
               <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
@@ -236,15 +238,15 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         ))}
       </ul>
 
-      {itemsFiltered.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
-      {listIndex !== null ? (
+      {visibleItems.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
+      {listIndex !== null && visibleItems.length > 0 ? (
         <GallerySlideModal
-          open={listIndex !== null}
+          open
           onOpenChange={(next) => {
             if (!next) setListIndex(null);
           }}
-          items={itemsFiltered}
-          index={Math.min(listIndex, Math.max(0, itemsFiltered.length - 1))}
+          items={visibleItems}
+          index={Math.min(listIndex, visibleItems.length - 1)}
           onIndexChange={setListIndex}
         />
       ) : null}

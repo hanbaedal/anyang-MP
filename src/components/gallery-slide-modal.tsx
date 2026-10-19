@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type TouchEvent } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { isUploadMediaPath, thumbUrl } from "@/lib/media";
+import { thumbUrl, uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const SWIPE_PX = 40;
@@ -34,9 +33,9 @@ export function GallerySlideModal({
   imageFit?: "cover" | "contain";
 }) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [uri, setUri] = useState("");
+  const [phase, setPhase] = useState<"thumb" | "orig">("thumb");
   const current = items[index];
-  const thumb = current ? thumbUrl(current.src) : "";
 
   function go(delta: number) {
     const next = index + delta;
@@ -45,7 +44,9 @@ export function GallerySlideModal({
   }
 
   useEffect(() => {
-    setLoaded(false);
+    if (!current) return;
+    setPhase("thumb");
+    setUri(thumbUrl(current.src));
   }, [current?.src]);
 
   // Prefetch neighbors so swipe isn't a gray flash
@@ -119,28 +120,23 @@ export function GallerySlideModal({
             imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-[#ead7b4]/50",
           )}
         >
-          {!loaded ? (
-            <div
-              className="absolute inset-0 animate-pulse bg-[#ead7b4]/40"
-              aria-hidden
-            />
-          ) : null}
-          <Image
+          {/* Native img: avoid Next/Image opacity-0 + missed onLoad on cache hits */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             key={current.src}
-            src={thumb}
+            src={uri || thumbUrl(current.src)}
             alt={current.alt}
-            fill
             draggable={false}
             className={cn(
-              "pointer-events-none object-center transition-opacity duration-200",
+              "pointer-events-none absolute inset-0 h-full w-full object-center",
               imageFit === "contain" ? "object-contain" : "object-cover",
-              loaded ? "opacity-100" : "opacity-0",
             )}
-            sizes="(max-width: 767px) 320px, 576px"
-            priority
-            unoptimized={isUploadMediaPath(thumb)}
-            onLoad={() => setLoaded(true)}
-            onError={() => setLoaded(true)}
+            onError={() => {
+              if (phase === "thumb") {
+                setPhase("orig");
+                setUri(uploadOriginalUrl(current.src));
+              }
+            }}
           />
           {items.length > 1 ? (
             <>
