@@ -19,7 +19,6 @@ export default async function GalleryPage() {
       <PageHero
         kicker={t(locale, "gallery.kicker")}
         title={t(locale, "gallery.title")}
-        lead={t(locale, "gallery.lead")}
         image={{ src: "/images/park-overview.jpg", alt: t(locale, "gallery.title") }}
       />
       <div className="mx-auto max-w-6xl px-4 py-12">
