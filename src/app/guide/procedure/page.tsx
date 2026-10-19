@@ -4,7 +4,6 @@ import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
 import { getCmsPageLocalized } from "@/lib/cms";
-import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -39,7 +38,7 @@ export default async function ProcedurePage() {
         <PastelBox key="consult">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             <p>
-              {t(locale, "proc.consult", { phone: SITE.phone })}{" "}
+              {t(locale, "proc.consult")}{" "}
               <Link href="/support/inquiry" className="underline-offset-4 hover:underline">
                 {t(locale, "proc.form")}
               </Link>
@@ -68,18 +67,7 @@ export default async function ProcedurePage() {
       />
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
         <SaleSteps steps={steps.length ? steps : undefined} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          {noteBoxes}
-          <PastelBox key="phone">
-            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-              <p>
-                <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
-                  {SITE.phone}
-                </a>
-              </p>
-            </Prose>
-          </PastelBox>
-        </div>
+        <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>
       </div>
     </>
   );

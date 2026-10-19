@@ -118,7 +118,7 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
       title: ko["proc.title"],
       lead: ko["proc.lead"],
       body: [
-        ko["proc.consult"].replace("{phone}", SITE.phone) + " " + ko["proc.form"] + ko["proc.consultEnd"],
+        `${ko["proc.consult"]} ${ko["proc.form"]}${ko["proc.consultEnd"]}`,
         ko["proc.account"],
         ko["proc.twoDays"],
       ].join("\n\n"),
