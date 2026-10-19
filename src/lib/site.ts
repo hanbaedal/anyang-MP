@@ -61,8 +61,9 @@ export function metadataBase() {
 }
 
 export const DEST_ADDRESS = "경기 안산시 상록구 오리골길 41";
-/** 길찾기·지도 도착지. 공동묘지관리소·버대길·다른 묘원 이름으로 바꾸지 않음. */
-export const DEST_LABEL = `${DEST_ADDRESS} ${SITE.legalName}`;
+/** 길찾기·지도 도착 표시명. 관리사무소·경유지·다른 묘원 이름으로 바꾸지 않음. */
+export const DEST_NAME = "안양공원묘원";
+export const DEST_LABEL = `${DEST_NAME} ${DEST_ADDRESS}`;
 export const DEST_QUERY = DEST_LABEL;
 
 export type MapStart = { lat: number; lng: number };
@@ -72,15 +73,15 @@ export function destQuery() {
 }
 
 export function naverDirectionsUrl(start?: MapStart) {
-  // /p/directions/{출발}/{도착}/{경유}/car — 도착만 dest, 경유는 항상 '-'
-  const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_LABEL)}`;
+  // /p/directions/{출발}/{도착}/{경유}/car — 도착 칸만 DEST_NAME, 경유는 항상 '-'
+  const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_NAME)}`;
   if (!start) return `https://map.naver.com/p/directions/-/${dest}/-/car`;
   const from = `${start.lng},${start.lat},${encodeURIComponent("현재위치")}`;
   return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
 }
 
 export function kakaoDirectionsUrl(start?: MapStart) {
-  const destName = encodeURIComponent(DEST_LABEL);
+  const destName = encodeURIComponent(DEST_NAME);
   // /link/to/ 와 eName 만 도착. via/vp/eX/eY 없음.
   if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
   return `https://map.kakao.com/?sName=${encodeURIComponent("현재위치")}&sX=${start.lng}&sY=${start.lat}&eName=${destName}`;

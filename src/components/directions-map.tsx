@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   DEST_ADDRESS,
-  DEST_QUERY,
+  DEST_NAME,
   googleMapsEmbedUrl,
   googleMapsViewUrl,
   kakaoDirectionsUrl,
@@ -48,12 +48,12 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
           {t("map.kakao")}
         </Button>
         <Button asChild variant="secondary">
-          <a href={googleMapsViewUrl()} target="_blank" rel="noreferrer" title={`${SITE.legalName} 구글 지도`}>
+          <a href={googleMapsViewUrl()} target="_blank" rel="noreferrer" title={`${DEST_NAME} 구글 지도`}>
             {t("map.view")}
           </a>
         </Button>
       </div>
-      <p className="text-sm text-muted-foreground">{t("map.routeHint", { dest: DEST_QUERY })}</p>
+      <p className="text-sm text-muted-foreground">{t("map.routeHint", { dest: DEST_NAME })}</p>
       {usedStart === false ? <p className="text-sm text-muted-foreground">{t("map.routeNoStart")}</p> : null}
       <p className="text-sm text-muted-foreground">
         {t("site.address")} · {t("phone")}{" "}
@@ -71,7 +71,7 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
           allowFullScreen
         />
         <figcaption className="text-sm font-medium">
-          {SITE.legalName} · {DEST_ADDRESS}
+          {DEST_NAME} · {DEST_ADDRESS}
         </figcaption>
       </figure>
     </div>
