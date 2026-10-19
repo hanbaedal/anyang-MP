@@ -72,13 +72,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SiteHeader signedIn={Boolean(session)} role={session?.role ?? null} />
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <SiteSidebar role={session?.role ?? null} />
-            <div id="content" className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <div className="flex min-h-full flex-col">
+            {/* Mobile: content scrolls, footer pinned to viewport bottom. Desktop: whole column scrolls (footer unfixed). */}
+            <div
+              id="content"
+              className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:overflow-y-auto md:overscroll-y-contain"
+            >
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain md:flex md:min-h-full md:flex-1 md:flex-col md:overflow-visible">
                 <NavSwipe>
                   <div className="flex flex-1 flex-col">{children}</div>
                 </NavSwipe>
-                <SiteFooter />
               </div>
+              <SiteFooter />
             </div>
           </div>
         </LocaleProvider>

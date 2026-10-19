@@ -119,13 +119,20 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         </section>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="tablist"
+        aria-label={t("gallery.title")}
+        className="-mx-1 flex flex-nowrap gap-1.5 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] md:mx-0 md:flex-wrap md:gap-2 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+      >
         {TAGS.map((item) => (
           <Button
             key={item.value}
             type="button"
+            role="tab"
+            aria-selected={tag === item.value}
             size="sm"
             variant={tag === item.value ? "default" : "outline"}
+            className="h-7 shrink-0 px-2.5 text-xs md:h-8 md:px-3 md:text-sm"
             onClick={() => setTag(item.value)}
           >
             {t(item.key)}
