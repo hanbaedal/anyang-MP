@@ -141,7 +141,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
         key={videoSrc}
         ref={videoRef}
         className={cn(
-          "absolute inset-0 h-full w-full object-cover object-[center_center]",
+          "absolute inset-0 h-full w-full object-cover object-[center_32%]",
           videoReady || videoError ? "opacity-100" : "opacity-0",
         )}
         src={videoSrc}
@@ -156,7 +156,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
       />
       {hasSeparateBgm ? <audio key={audioSrc} ref={audioRef} src={audioSrc} loop preload="metadata" /> : null}
       {showSoundPrompt && videoReady && !videoError ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-28 z-[20] flex justify-center px-4 md:bottom-32">
+        <div className="pointer-events-none absolute inset-x-0 top-[42%] z-[20] flex -translate-y-1/2 justify-center px-4">
           <button
             type="button"
             onClick={() => void enableSound()}

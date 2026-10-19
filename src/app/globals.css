@@ -19,6 +19,11 @@
   --border: #d9d0c3;
   --input: #d9d0c3;
   --ring: #3f5d4a;
+  /* 헤더·푸터 소라색 (sky blue); 글자는 남색으로 대비 */
+  --chrome: #7eb6d9;
+  --chrome-foreground: #002b50;
+  --chrome-muted: rgba(0, 43, 80, 0.78);
+  --chrome-border: rgba(0, 43, 80, 0.18);
   --radius: 0.75rem;
 }
 
@@ -41,6 +46,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chrome: var(--chrome);
+  --color-chrome-foreground: var(--chrome-foreground);
   --font-sans: "Noto Sans KR", sans-serif;
   --font-serif: "Noto Serif KR", serif;
   --radius-sm: calc(var(--radius) - 4px);
