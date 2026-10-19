@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef, type TouchEvent } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { mediaUrl } from "@/lib/media";
 import type { GalleryItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
-/** 모바일 목록 탭용 — 크림 슬라이드 카드와 같은 시각 스케일 + 좌우 스와이프 */
+const SWIPE_PX = 40;
+
+/** 모바일 목록 탭용 — 크림 슬라이드 카드와 같은 시각 스케일 + 좌우(또는 상하) 스와이프로 넘김 */
 export function GalleryMobileSlideModal({
   open,
   onOpenChange,
@@ -21,31 +24,36 @@ export function GalleryMobileSlideModal({
   index: number;
   onIndexChange: (index: number) => void;
 }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const syncingRef = useRef(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const current = items[index];
 
-  useEffect(() => {
-    if (!open || !scrollerRef.current) return;
-    const el = scrollerRef.current;
-    const slideW = el.clientWidth;
-    if (slideW <= 0) return;
-    syncingRef.current = true;
-    el.scrollTo({ left: index * slideW, behavior: "auto" });
-    requestAnimationFrame(() => {
-      syncingRef.current = false;
-    });
-  }, [open, index, items.length]);
+  function go(delta: number) {
+    const next = index + delta;
+    if (next < 0 || next >= items.length) return;
+    onIndexChange(next);
+  }
 
-  function onScroll() {
-    if (syncingRef.current) return;
-    const el = scrollerRef.current;
-    if (!el || items.length === 0) return;
-    const slideW = el.clientWidth;
-    if (slideW <= 0) return;
-    const next = Math.round(el.scrollLeft / slideW);
-    const clamped = Math.max(0, Math.min(items.length - 1, next));
-    if (clamped !== index) onIndexChange(clamped);
+  function onTouchStart(e: TouchEvent) {
+    e.stopPropagation();
+    const t = e.changedTouches[0];
+    if (!t) return;
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  }
+
+  function onTouchEnd(e: TouchEvent) {
+    e.stopPropagation();
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    // 가로 우선, 세로 제스처도 같은 넘김으로 허용 (네이티브 overflow 스와이프 회피)
+    const horizontal = Math.abs(dx) >= Math.abs(dy);
+    const dist = horizontal ? dx : dy;
+    if (Math.abs(dist) < SWIPE_PX) return;
+    // 왼쪽/위 스와이프 → 다음, 오른쪽/아래 → 이전
+    go(dist < 0 ? 1 : -1);
   }
 
   if (!current) return null;
@@ -63,31 +71,49 @@ export function GalleryMobileSlideModal({
           "[&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-[#fffcf7]/90 [&_[data-slot=dialog-close]]:p-1.5",
           "[&_[data-slot=dialog-close]]:opacity-100 [&_[data-slot=dialog-close]]:shadow-sm",
         )}
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         <DialogTitle className="sr-only">{current.alt}</DialogTitle>
-        <div
-          ref={scrollerRef}
-          onScroll={onScroll}
-          className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{ WebkitOverflowScrolling: "touch" }}
-        >
-          {items.map((item) => (
-            <figure
-              key={item.src}
-              className="relative aspect-[4/3] min-w-full shrink-0 snap-center snap-always overflow-hidden rounded-xl bg-muted"
-            >
-              <Image
-                src={mediaUrl(item.src)}
-                alt={item.alt}
-                fill
-                className="object-cover"
-                sizes="min(100vw, 20rem)"
-                priority={item.src === current.src}
-              />
-            </figure>
-          ))}
+        <div className="relative aspect-[4/3] w-full touch-none overflow-hidden rounded-xl bg-muted select-none">
+          <Image
+            key={current.src}
+            src={mediaUrl(current.src)}
+            alt={current.alt}
+            fill
+            draggable={false}
+            className="pointer-events-none object-cover"
+            sizes="min(100vw, 20rem)"
+            priority
+          />
+          {items.length > 1 ? (
+            <>
+              <button
+                type="button"
+                aria-label="이전 사진"
+                disabled={index <= 0}
+                className="absolute left-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(-1);
+                }}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="다음 사진"
+                disabled={index >= items.length - 1}
+                className="absolute right-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(1);
+                }}
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          ) : null}
         </div>
         {current.alt ? (
           <p className="mt-2 truncate px-1 text-center text-sm text-foreground/80">{current.alt}</p>
