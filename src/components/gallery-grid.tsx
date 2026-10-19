@@ -49,7 +49,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
   }, [itemsFiltered]);
 
   const current = items.find((item) => item.src === open);
-  const durationSec = Math.max(24, itemsFiltered.length * 4);
+  const durationSec = Math.max(60, itemsFiltered.length * 10);
 
   function openListItem(item: GalleryItem, index: number) {
     if (isMobileViewport()) {
@@ -86,20 +86,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap gap-2">
-        {TAGS.map((item) => (
-          <Button
-            key={item.value}
-            type="button"
-            size="sm"
-            variant={tag === item.value ? "default" : "outline"}
-            onClick={() => setTag(item.value)}
-          >
-            {t(item.key)}
-          </Button>
-        ))}
-      </div>
-
       {itemsFiltered.length > 0 ? (
         <section
           aria-label={t("gallery.title")}
@@ -132,6 +118,20 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
           </div>
         </section>
       ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        {TAGS.map((item) => (
+          <Button
+            key={item.value}
+            type="button"
+            size="sm"
+            variant={tag === item.value ? "default" : "outline"}
+            onClick={() => setTag(item.value)}
+          >
+            {t(item.key)}
+          </Button>
+        ))}
+      </div>
 
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {itemsFiltered.map((item, index) => (
