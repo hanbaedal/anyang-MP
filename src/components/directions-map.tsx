@@ -8,7 +8,6 @@ import {
   googleMapsViewUrl,
   kakaoDirectionsUrl,
   naverDirectionsUrl,
-  SITE,
 } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
@@ -27,12 +26,10 @@ function readStart(): Promise<{ lat: number; lng: number } | null> {
 export function DirectionsMap({ compact = false }: { compact?: boolean }) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
-  const [usedStart, setUsedStart] = useState<boolean | null>(null);
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
     const start = await readStart();
-    setUsedStart(Boolean(start));
     setBusy(null);
     const href = kind === "naver" ? naverDirectionsUrl(start ?? undefined) : kakaoDirectionsUrl(start ?? undefined);
     window.open(href, "_blank", "noopener,noreferrer");
@@ -53,17 +50,9 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
           </a>
         </Button>
       </div>
-      <p className="text-sm text-muted-foreground">{t("map.routeHint", { dest: DEST_NAME })}</p>
-      {usedStart === false ? <p className="text-sm text-muted-foreground">{t("map.routeNoStart")}</p> : null}
-      <p className="text-sm text-muted-foreground">
-        {t("site.address")} · {t("phone")}{" "}
-        <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
-          {SITE.phone}
-        </a>
-      </p>
       <figure className="space-y-2">
         <iframe
-          title={`${t("site.legalName")} ${t("directions")}`}
+          title={`${DEST_NAME} ${t("directions")}`}
           src={googleMapsEmbedUrl()}
           className={compact ? "h-56 w-full rounded-xl border" : "h-80 w-full rounded-xl border md:h-96"}
           loading="lazy"
