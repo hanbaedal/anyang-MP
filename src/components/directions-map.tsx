@@ -7,10 +7,20 @@ import {
   googleMapsEmbedUrl,
   googleMapsViewUrl,
   kakaoDirectionsUrl,
+  kakaoMapAppRouteUrl,
+  kakaoNaviUrl,
   naverDirectionsUrl,
 } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
+
+function launchAppScheme(href: string) {
+  const link = document.createElement("a");
+  link.href = href;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
 
 function readStart(): Promise<{ lat: number; lng: number } | null> {
   if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(null);
@@ -31,8 +41,16 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
     setBusy(kind);
     const start = await readStart();
     setBusy(null);
-    const href = kind === "naver" ? naverDirectionsUrl(start ?? undefined) : kakaoDirectionsUrl(start ?? undefined);
-    window.open(href, "_blank", "noopener,noreferrer");
+    if (kind === "naver") {
+      window.open(naverDirectionsUrl(start ?? undefined), "_blank", "noopener,noreferrer");
+      return;
+    }
+    const point = start ?? undefined;
+    launchAppScheme(kakaoNaviUrl(point));
+    window.setTimeout(() => launchAppScheme(kakaoMapAppRouteUrl(point)), 350);
+    window.setTimeout(() => {
+      window.open(kakaoDirectionsUrl(point), "_blank", "noopener,noreferrer");
+    }, 700);
   }
 
   return (

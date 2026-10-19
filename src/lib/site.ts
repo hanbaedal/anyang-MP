@@ -80,11 +80,26 @@ export function naverDirectionsUrl(start?: MapStart) {
   return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
 }
 
+/** 웹 폴백. 도착 이름 고정. 길안내는 앱 스킴이 담당. */
 export function kakaoDirectionsUrl(start?: MapStart) {
   const destName = encodeURIComponent(DEST_NAME);
-  if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
-  // 웹 sX/sY는 WCONG. WGS84를 넣으면 길 없음. 공식 scheme은 위경도(lat,lng).
-  return `https://m.map.kakao.com/scheme/route?sp=${start.lat},${start.lng}&ep=${SITE.lat},${SITE.lng}&by=car`;
+  void start;
+  return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
+}
+
+/** 카카오내비 길안내. 출발 없으면 앱이 현재위치 사용. */
+export function kakaoNaviUrl(start?: MapStart) {
+  const destination = encodeURIComponent(JSON.stringify({ name: DEST_NAME, x: String(SITE.lng), y: String(SITE.lat) }));
+  const base = `kakaonavi://navigate?coord_type=wgs84&destination=${destination}`;
+  if (!start) return base;
+  const from = encodeURIComponent(JSON.stringify({ name: "현재위치", x: String(start.lng), y: String(start.lat) }));
+  return `${base}&start=${from}`;
+}
+
+/** 카카오맵 앱 길찾기(화면에 길안내 버튼). */
+export function kakaoMapAppRouteUrl(start?: MapStart) {
+  if (!start) return `kakaomap://route?ep=${SITE.lat},${SITE.lng}&by=car`;
+  return `kakaomap://route?sp=${start.lat},${start.lng}&ep=${SITE.lat},${SITE.lng}&by=car`;
 }
 
 export function googleMapsQuery() {
