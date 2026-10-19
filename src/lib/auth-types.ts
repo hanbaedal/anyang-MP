@@ -14,8 +14,8 @@ export function isStaffRole(role: Role | string | undefined | null): role is Rol
   return role === "supervisor" || role === "admin" || role === "ceo";
 }
 
-export function isCmsStaff(role: Role | string | undefined | null): role is "supervisor" | "admin" {
-  return role === "supervisor" || role === "admin";
+export function isCmsStaff(role: Role | string | undefined | null): role is "supervisor" | "admin" | "ceo" {
+  return role === "supervisor" || role === "admin" || role === "ceo";
 }
 
 export function isCeo(role: Role | string | undefined | null): role is "ceo" {

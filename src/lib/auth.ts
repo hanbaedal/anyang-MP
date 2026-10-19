@@ -1,10 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { EXEC_HOME } from "./exec-nav";
 import { afterLoginPath, isCmsStaff, isStaffRole, isStatusStaff, type SessionUser } from "./auth-types";
 import { ensureAuthSeed, findStaffByUsername } from "./staff";
-import { isStaffWorkHour, isWorkHourLimitedRole } from "./work-hours";
 import { verifyPassword } from "./passwords";
 
 export { isStaffRole, isCmsStaff, isCeo, isStatusStaff, afterLoginPath } from "./auth-types";
@@ -31,7 +29,6 @@ export function encodeSession(user: SessionUser) {
       phone: user.phone ?? "",
       email: user.email ?? "",
       title: user.title ?? "",
-      exp: Date.now() + 1000 * 60 * 60 * 24 * 30,
     }),
   ).toString("base64url");
   return `${payload}.${sign(payload)}`;
@@ -46,9 +43,8 @@ export function decodeSession(token: string | undefined | null): SessionUser | n
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SessionUser & { exp?: number };
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SessionUser;
     if (!data.id || !isStaffRole(data.role)) return null;
-    if (data.exp && data.exp < Date.now()) return null;
     return {
       id: data.id,
       username: data.username || "",
@@ -68,15 +64,13 @@ export function sessionCookieOptions() {
     path: "/",
     httpOnly: true,
     sameSite: "lax" as const,
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: 60 * 60 * 24 * 365 * 10,
   };
 }
 
 export async function readSession(): Promise<SessionUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const session = decodeSession(token);
-  if (session && isWorkHourLimitedRole(session.role) && !isStaffWorkHour()) return null;
-  return session;
+  return decodeSession(token);
 }
 
 export async function loginAccount(input: { username: string; password: string }) {
@@ -119,10 +113,7 @@ export async function requireStaff() {
 
 export async function requireCmsStaff(supervisor = false) {
   const session = await readSession();
-  if (!session || !isCmsStaff(session.role)) {
-    if (session?.role === "ceo") redirect(EXEC_HOME);
-    redirect("/?login=1");
-  }
+  if (!session || !isCmsStaff(session.role)) redirect("/?login=1");
   if (supervisor && session.role !== "supervisor") redirect("/manage");
   return session;
 }

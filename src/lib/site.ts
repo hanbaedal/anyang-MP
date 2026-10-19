@@ -60,12 +60,49 @@ export function metadataBase() {
   return url ? new URL(url) : undefined;
 }
 
+export const DEST_ADDRESS = "경기 안산시 상록구 오리골길 41";
+export const DEST_QUERY = `${SITE.legalName} ${DEST_ADDRESS}`;
+
+export type MapStart = { lat: number; lng: number };
+
+export function destQuery() {
+  return DEST_QUERY;
+}
+
+export function naverDirectionsUrl(start?: MapStart) {
+  const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_QUERY)}`;
+  if (!start) return `https://map.naver.com/p/directions/-/-/${dest}/car`;
+  const from = `${start.lng},${start.lat},${encodeURIComponent("현재위치")}`;
+  return `https://map.naver.com/p/directions/${from}/-/${dest}/car`;
+}
+
+export function kakaoDirectionsUrl(start?: MapStart) {
+  const destName = encodeURIComponent(DEST_QUERY);
+  if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
+  return `https://map.kakao.com/?sName=${encodeURIComponent("현재위치")}&sX=${start.lng}&sY=${start.lat}&eName=${destName}&eX=${SITE.lng}&eY=${SITE.lat}`;
+}
+
+export function googleMapsQuery() {
+  return `${SITE.legalName}, ${DEST_ADDRESS}`;
+}
+
+export function googleMapsViewUrl() {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleMapsQuery())}`;
+}
+
+export function googleMapsEmbedUrl() {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(googleMapsQuery())}&z=16&hl=ko&ie=UTF8&iwloc=A&output=embed`;
+}
+
 export const MAP = {
-  placeName: SITE.visitName,
-  naverSearch: `https://map.naver.com/p/search/${encodeURIComponent(SITE.visitName + " " + SITE.addressLine)}`,
-  naverDirections: `https://map.naver.com/p/directions/-/-/${SITE.lng},${SITE.lat},${encodeURIComponent(SITE.visitName)}/car`,
-  kakaoSearch: `https://map.kakao.com/?q=${encodeURIComponent(SITE.address)}`,
-  kakaoDirections: `https://map.kakao.com/link/to/${encodeURIComponent(SITE.visitName)},${SITE.lat},${SITE.lng}`,
+  placeName: SITE.legalName,
+  destQuery: DEST_QUERY,
+  naverSearch: `https://map.naver.com/p/search/${encodeURIComponent(DEST_QUERY)}`,
+  naverDirections: naverDirectionsUrl(),
+  kakaoSearch: `https://map.kakao.com/?q=${encodeURIComponent(DEST_QUERY)}`,
+  kakaoDirections: kakaoDirectionsUrl(),
+  googleView: googleMapsViewUrl(),
+  googleEmbed: googleMapsEmbedUrl(),
   osmEmbed: `https://www.openstreetmap.org/export/embed.html?bbox=${SITE.lng - 0.012}%2C${SITE.lat - 0.008}%2C${SITE.lng + 0.012}%2C${SITE.lat + 0.008}&layer=mapnik&marker=${SITE.lat}%2C${SITE.lng}`,
 };
 

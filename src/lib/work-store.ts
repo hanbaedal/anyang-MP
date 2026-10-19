@@ -671,6 +671,81 @@ export async function searchSupervisorContracts(filters: ContractListFilters & {
   return { hits, total: rows.length, matched: matchedRows.length, page, pageSize };
 }
 
+export async function listContractYearsFast(): Promise<number[]> {
+  if (mongoUriSet()) {
+    try {
+      const db = await getDb();
+      if (db) {
+        const qYears = (await db.collection("contracts").distinct("_q.contractYear")).filter(
+          (y): y is number => typeof y === "number" && y >= 1900 && y <= 2100,
+        );
+        if (qYears.length) return [...new Set(qYears)].sort((a, b) => b - a);
+        const fromDates = await db
+          .collection("contracts")
+          .aggregate([
+            { $project: { y: { $substrBytes: [{ $ifNull: ["$burialDate", ""] }, 0, 4] } } },
+            { $match: { y: { $regex: "^\\d{4}$" } } },
+            { $group: { _id: "$y" } },
+          ])
+          .toArray();
+        const years = fromDates.map((doc) => Number(doc._id)).filter((n) => n >= 1900 && n <= 2100);
+        if (years.length) return [...new Set(years)].sort((a, b) => b - a);
+      }
+    } catch {
+      console.error("[work-store] contract years query failed");
+    }
+  }
+  const dump = await readWorkDumpBySlice("contracts");
+  const years = new Set<number>();
+  for (const row of dump.contracts) {
+    const y = Number(String(row.burialDate || "").replace(/\D/g, "").slice(0, 4));
+    if (y >= 1900 && y <= 2100) years.add(y);
+  }
+  return [...years].sort((a, b) => b - a);
+}
+
+export async function listContractsForYear(year: number): Promise<ContractCopy[]> {
+  if (mongoUriSet()) {
+    try {
+      const db = await getDb();
+      if (db) {
+        const docs = await db
+          .collection("contracts")
+          .find({
+            $or: [{ "_q.contractYear": year }, { burialDate: { $regex: `^${year}` } }],
+          })
+          .project({ tombNo: 1, contractNo: 1, burialDate: 1, userName: 1, familyName: 1, pyeong: 1, address: 1 })
+          .toArray();
+        return withoutMongoId<ContractCopy>(docs);
+      }
+    } catch {
+      console.error("[work-store] contracts-by-year query failed");
+    }
+  }
+  const dump = await readWorkDumpBySlice("contracts");
+  return dump.contracts.filter((row) => String(row.burialDate || "").startsWith(String(year)));
+}
+
+export async function countUndatedContracts(): Promise<number> {
+  if (mongoUriSet()) {
+    try {
+      const db = await getDb();
+      if (db) {
+        return await db.collection("contracts").countDocuments({
+          $and: [
+            { $or: [{ "_q.contractYear": null }, { "_q.contractYear": { $exists: false } }] },
+            { burialDate: { $not: { $regex: "^\\d{4}" } } },
+          ],
+        });
+      }
+    } catch {
+      console.error("[work-store] undated contract count failed");
+    }
+  }
+  const dump = await readWorkDumpBySlice("contracts");
+  return dump.contracts.filter((row) => !/^\d{4}/.test(String(row.burialDate || ""))).length;
+}
+
 export async function readStoredReports(): Promise<ReportCopy[]> {
   if (mongoUriSet()) {
     const db = await getDb();

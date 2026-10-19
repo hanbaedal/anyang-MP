@@ -39,7 +39,7 @@ export default async function ManageHomePage() {
       <PageHero
         kicker="관리"
         title="사이트 관리"
-        lead={`${session.name} 님(${session.role === "supervisor" ? "감독" : "관리자"}) · 공개 화면의 글과 사진을 고칩니다.`}
+        lead={`${session.name} 님(${session.role === "supervisor" ? "감독" : session.role === "ceo" ? "CEO" : "관리자"}) · 공개 화면의 글과 사진을 고칩니다.`}
       />
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-10">
         <ManageI18nMigrate />

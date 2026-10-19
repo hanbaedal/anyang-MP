@@ -4,14 +4,8 @@ import { WorkContractFilter } from "@/components/work-lookup-filters";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import { loadWorkCopyPage } from "@/lib/work";
-import {
-  burialDateInRange,
-  contractDate,
-  contractYearsInCopy,
-  parseIsoYmd,
-  parseYearParam,
-  tombNoMatches,
-} from "@/lib/work-status";
+import { countUndatedContracts, listContractYearsFast, listContractsForYear } from "@/lib/work-store";
+import { burialDateInRange, parseIsoYmd, parseYearParam, tombNoMatches } from "@/lib/work-status";
 
 export const dynamic = "force-dynamic";
 
@@ -26,20 +20,17 @@ export default async function WorkContractsPage({
   searchParams: Promise<{ year?: string; tomb?: string; burialFrom?: string; burialTo?: string }>;
 }) {
   const params = await searchParams;
-  const { locale, session, dump, envReady } = await loadWorkCopyPage("contracts");
-  const years = contractYearsInCopy(dump.contracts);
+  const { locale, session, dump, envReady } = await loadWorkCopyPage("master");
+  const years = await listContractYearsFast();
   const year = parseYearParam(params.year, years);
   const tomb = params.tomb?.trim() ?? "";
   const burialFrom = parseIsoYmd(params.burialFrom);
   const burialTo = parseIsoYmd(params.burialTo);
-  const ofYear = dump.contracts.filter((row) => {
-    const when = contractDate(row);
-    return Boolean(when && when.year === year);
-  });
+  const ofYear = await listContractsForYear(year);
   const matched = ofYear.filter(
     (row) => tombNoMatches(row, tomb) && burialDateInRange(row, burialFrom, burialTo),
   );
-  const undated = dump.contracts.filter((row) => !contractDate(row)).length;
+  const undated = await countUndatedContracts();
   const rows = matched.map((row) => ({
     tombNo: row.tombNo,
     burialDate: row.burialDate,
@@ -48,7 +39,7 @@ export default async function WorkContractsPage({
     pyeong: row.pyeong,
     address: row.address,
   }));
-  const copyMissing = dump.contracts.length === 0;
+  const copyMissing = (dump.meta?.contractCount ?? dump.meta?.listedContractTotal ?? years.length) === 0;
   const lead = copyMissing
     ? undefined
     : [
