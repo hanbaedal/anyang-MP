@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -11,12 +12,14 @@ export function PageHero({
   title,
   lead,
   image,
+  children,
 }: {
   kicker: string;
   title: string;
   lead?: string;
   /** alt만 쓰입니다. 배경은 메뉴 공통 파노라마로 통일합니다. */
   image?: { src?: string; alt: string };
+  children?: ReactNode;
 }) {
   const alt = image?.alt || "안양공원묘원 테라스 묘역 전경";
   return (
@@ -29,10 +32,21 @@ export function PageHero({
         className="object-cover object-[center_28%] opacity-40"
         sizes="100vw"
       />
-      <div className="relative mx-auto max-w-6xl px-4 py-12 md:py-16">
-        <p className="text-xs tracking-[0.18em] text-primary-foreground/75 uppercase">{kicker}</p>
-        <h1 className="mt-2 font-serif text-3xl text-primary-foreground md:text-4xl">{title}</h1>
-        {lead ? <p className="mt-4 max-w-2xl text-base text-primary-foreground/90">{lead}</p> : null}
+      <div className="relative mx-auto max-w-6xl px-4 py-4 md:py-16">
+        <p className="text-[10px] tracking-[0.16em] text-primary-foreground/75 uppercase md:text-xs md:tracking-[0.18em]">
+          {kicker}
+        </p>
+        <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-2 md:text-4xl">{title}</h1>
+        {lead ? (
+          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-4 md:text-base md:leading-7">
+            {lead}
+          </p>
+        ) : null}
+        {children ? (
+          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-base md:leading-7">
+            {children}
+          </div>
+        ) : null}
       </div>
     </section>
   );
