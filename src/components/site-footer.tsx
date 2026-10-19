@@ -9,13 +9,13 @@ export async function SiteFooter() {
   const pathname = (await headers()).get("x-pathname") ?? "/";
   const uiLocale = isGuestLocalePath(pathname) ? locale : "ko";
   return (
-    <footer className="shrink-0 border-t border-primary-foreground/20 bg-primary text-sm leading-6 text-primary-foreground">
-      <div className="flex flex-col items-center gap-3 px-4 py-3 text-center sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:pl-36 lg:pr-6 lg:text-left">
+    <footer className="shrink-0 border-t border-primary-foreground/20 bg-primary text-xs leading-snug text-primary-foreground md:text-sm md:leading-5">
+      <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 text-center sm:px-5 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:py-2 lg:pl-36 lg:pr-5 lg:text-left">
         <div className="min-w-0">
-          <p className="font-serif text-base">{t(uiLocale, "site.legalName")}</p>
-          <p className="mt-1 text-primary-foreground/85">
+          <p className="font-serif text-sm md:text-base">{t(uiLocale, "site.legalName")}</p>
+          <p className="text-primary-foreground/85">
             {t(uiLocale, "site.address")}
-            <br />
+            {" · "}
             {t(uiLocale, "phone")}{" "}
             <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
               {SITE.phone}
@@ -25,7 +25,7 @@ export async function SiteFooter() {
           </p>
         </div>
         <div className="flex shrink-0 justify-center lg:justify-end">
-          <SocialActions />
+          <SocialActions compact />
         </div>
       </div>
     </footer>

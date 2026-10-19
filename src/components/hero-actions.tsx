@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 const logoBtn =
   "inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white";
+const logoBtnSm =
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white";
 
 function FacebookMark() {
   return (
@@ -64,20 +66,23 @@ function NaverBlogMark() {
 function SocialLink({
   href,
   label,
+  compact,
   children,
 }: {
   href: string;
   label: string;
+  compact?: boolean;
   children: React.ReactNode;
 }) {
   const external = href.startsWith("http") || href.startsWith("tel:");
+  const className = compact ? logoBtnSm : logoBtn;
   if (external) {
     return (
       <a
         href={href}
         aria-label={label}
         title={label}
-        className={cn(logoBtn)}
+        className={className}
         {...(href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
       >
         {children}
@@ -85,13 +90,13 @@ function SocialLink({
     );
   }
   return (
-    <Link href={href} aria-label={label} title={label} className={cn(logoBtn)}>
+    <Link href={href} aria-label={label} title={label} className={className}>
       {children}
     </Link>
   );
 }
 
-export function SocialActions() {
+export function SocialActions({ compact = false }: { compact?: boolean }) {
   const items = [
     { href: socialHref("FACEBOOK", SITE.phoneTel), label: "페이스북", icon: <FacebookMark /> },
     { href: socialHref("INSTAGRAM", "/intro/directions"), label: "인스타그램", icon: <InstagramMark /> },
@@ -100,9 +105,12 @@ export function SocialActions() {
   ];
 
   return (
-    <nav aria-label="소셜 바로 가기" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+    <nav
+      aria-label="소셜 바로 가기"
+      className={cn("flex shrink-0 items-center", compact ? "gap-1.5 [&_svg]:size-4" : "gap-2 sm:gap-2.5")}
+    >
       {items.map((item) => (
-        <SocialLink key={item.label} href={item.href} label={item.label}>
+        <SocialLink key={item.label} href={item.href} label={item.label} compact={compact}>
           {item.icon}
         </SocialLink>
       ))}
