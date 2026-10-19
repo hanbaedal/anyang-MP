@@ -36,7 +36,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
 
   const tickerItems = useMemo(() => {
     if (itemsFiltered.length === 0) return [];
-    // 한 줄에 3칸이 보이도록 패딩한 뒤 정확히 2배로 복제 → translateX(-50%) 루프
+    // PC 1.5×(~2칸)·모바일 기존 크기에 맞춰 패딩 후 2배 복제 → translateX(-50%) 루프
     let base = [...itemsFiltered];
     while (base.length < 3) base = base.concat(itemsFiltered);
     return [...base, ...base];
@@ -86,6 +86,30 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         ))}
       </div>
 
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {itemsFiltered.map((item) => (
+          <li key={item.src}>
+            <button
+              type="button"
+              className={cn(
+                "flex h-full w-full items-stretch gap-3 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors sm:gap-4",
+                "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
+              )}
+              onClick={() => setOpen(item.src)}
+              onMouseEnter={() => openPreview(item.src)}
+            >
+              <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
+                <Image src={thumbUrl(item.src)} alt="" fill className="object-cover" sizes="120px" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
+                <span className="font-medium text-foreground">{item.alt}</span>
+                <span className="text-sm text-muted-foreground">{item.tags.join(" · ")}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
       {itemsFiltered.length > 0 ? (
         <section
           aria-label={t("gallery.title")}
@@ -110,7 +134,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                     alt=""
                     fill
                     className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 50vw"
                   />
                 </button>
               ))}
@@ -118,30 +142,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
           </div>
         </section>
       ) : null}
-
-      <ul className="space-y-3">
-        {itemsFiltered.map((item) => (
-          <li key={item.src}>
-            <button
-              type="button"
-              className={cn(
-                "flex w-full items-stretch gap-4 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors",
-                "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
-              )}
-              onClick={() => setOpen(item.src)}
-              onMouseEnter={() => openPreview(item.src)}
-            >
-              <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
-                <Image src={thumbUrl(item.src)} alt="" fill className="object-cover" sizes="120px" />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
-                <span className="font-medium text-foreground">{item.alt}</span>
-                <span className="text-sm text-muted-foreground">{item.tags.join(" · ")}</span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
 
       {itemsFiltered.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
       {current ? (

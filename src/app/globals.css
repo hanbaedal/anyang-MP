@@ -360,7 +360,7 @@
   }
 }
 
-/* 공원 갤러리 — 크림 3열 카드 높이의 가로 자동 스크롤 */
+/* 공원 갤러리 — 크림 가로 자동 스크롤 (모바일 기존 크기, PC만 1.5×) */
 .gallery-marquee {
   container-type: inline-size;
   overflow: hidden;
@@ -383,6 +383,7 @@
   position: relative;
   flex: 0 0 auto;
   aspect-ratio: 4 / 3;
+  /* 모바일: 기존 크기 유지 */
   width: min(100cqi, 20rem);
   overflow: hidden;
   border-radius: var(--radius-xl);
@@ -391,14 +392,15 @@
 
 @container (min-width: 40rem) {
   .gallery-marquee-card {
+    /* 중간폭: 기존 2열 한 칸 */
     width: calc((100cqi - 0.75rem) / 2);
   }
 }
 
 @container (min-width: 48rem) {
   .gallery-marquee-card {
-    /* 기존 lg:grid-cols-3 한 칸과 동일 스케일 */
-    width: calc((100cqi - 1.5rem) / 3);
+    /* PC: 기존 3열 한 칸 × 1.5 ≈ 2칸 스케일 */
+    width: calc((100cqi - 1.5rem) / 2);
   }
 }
 
