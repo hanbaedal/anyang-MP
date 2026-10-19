@@ -73,11 +73,11 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-full min-w-0 space-y-8">
       {itemsFiltered.length > 0 ? (
         <section
           aria-label={t("gallery.title")}
-          className="overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3"
+          className="max-w-full overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3"
         >
           <div className="gallery-marquee">
             <div
@@ -107,25 +107,27 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         </section>
       ) : null}
 
-      <div
-        role="tablist"
-        aria-label={t("gallery.title")}
-        className="-mx-1 flex flex-nowrap gap-1.5 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] md:mx-0 md:flex-wrap md:gap-2 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
-      >
-        {TAGS.map((item) => (
-          <Button
-            key={item.value}
-            type="button"
-            role="tab"
-            aria-selected={tag === item.value}
-            size="sm"
-            variant={tag === item.value ? "default" : "outline"}
-            className="h-7 shrink-0 px-2.5 text-xs md:h-8 md:px-3 md:text-sm"
-            onClick={() => setTag(item.value)}
-          >
-            {t(item.key)}
-          </Button>
-        ))}
+      <div className="max-w-full min-w-0">
+        <div
+          role="tablist"
+          aria-label={t("gallery.title")}
+          className="flex w-full max-w-full min-w-0 flex-nowrap gap-1 overflow-x-auto overscroll-x-contain touch-pan-x pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] md:flex-wrap md:gap-2 md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden"
+        >
+          {TAGS.map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              role="tab"
+              aria-selected={tag === item.value}
+              size="xs"
+              variant={tag === item.value ? "default" : "outline"}
+              className="h-6 shrink-0 px-1.5 text-[11px] leading-none md:h-8 md:px-3 md:text-sm"
+              onClick={() => setTag(item.value)}
+            >
+              {t(item.key)}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

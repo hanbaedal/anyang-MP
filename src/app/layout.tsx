@@ -77,7 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               id="content"
               className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:overflow-y-auto md:overscroll-y-contain"
             >
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain md:flex md:min-h-full md:flex-1 md:flex-col md:overflow-visible">
+              <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain md:flex md:min-h-full md:flex-1 md:flex-col md:overflow-visible">
                 <NavSwipe>
                   <div className="flex flex-1 flex-col">{children}</div>
                 </NavSwipe>
