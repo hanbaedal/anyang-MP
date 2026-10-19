@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useRef, type TouchEvent } from "react";
+import { useEffect, useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { mediaUrl } from "@/lib/media";
+import { isUploadMediaPath, thumbUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const SWIPE_PX = 40;
 
 export type SlideModalItem = { src: string; alt: string };
+
+function preloadThumb(src: string) {
+  const img = new window.Image();
+  img.src = thumbUrl(src);
+}
 
 /** 크림 슬라이드 카드 스케일 모달 + 좌우(또는 상하) 스와이프·화살표 넘김 */
 export function GallerySlideModal({
@@ -29,13 +34,27 @@ export function GallerySlideModal({
   imageFit?: "cover" | "contain";
 }) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const current = items[index];
+  const thumb = current ? thumbUrl(current.src) : "";
 
   function go(delta: number) {
     const next = index + delta;
     if (next < 0 || next >= items.length) return;
     onIndexChange(next);
   }
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [current?.src]);
+
+  // Prefetch neighbors so swipe isn't a gray flash
+  useEffect(() => {
+    if (!open || !items.length) return;
+    for (const i of [index - 1, index + 1, index + 2]) {
+      if (i >= 0 && i < items.length) preloadThumb(items[i].src);
+    }
+  }, [open, index, items]);
 
   useEffect(() => {
     if (!open) return;
@@ -97,21 +116,31 @@ export function GallerySlideModal({
         <div
           className={cn(
             "relative aspect-[4/3] w-full touch-none overflow-hidden rounded-xl select-none",
-            imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-muted",
+            imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-[#ead7b4]/50",
           )}
         >
+          {!loaded ? (
+            <div
+              className="absolute inset-0 animate-pulse bg-[#ead7b4]/40"
+              aria-hidden
+            />
+          ) : null}
           <Image
             key={current.src}
-            src={mediaUrl(current.src)}
+            src={thumb}
             alt={current.alt}
             fill
             draggable={false}
             className={cn(
-              "pointer-events-none object-center",
+              "pointer-events-none object-center transition-opacity duration-200",
               imageFit === "contain" ? "object-contain" : "object-cover",
+              loaded ? "opacity-100" : "opacity-0",
             )}
-            sizes="(max-width: 767px) min(100vw, 20rem), min(100vw, 36rem)"
+            sizes="(max-width: 767px) 320px, 576px"
             priority
+            unoptimized={isUploadMediaPath(thumb)}
+            onLoad={() => setLoaded(true)}
+            onError={() => setLoaded(true)}
           />
           {items.length > 1 ? (
             <>

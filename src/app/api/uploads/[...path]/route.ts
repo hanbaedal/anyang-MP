@@ -11,7 +11,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pat
   return new Response(new Uint8Array(file.buffer), {
     headers: {
       "Content-Type": file.contentType,
-      "Cache-Control": "public, max-age=86400, immutable",
+      "Cache-Control": "public, max-age=604800, stale-while-revalidate=86400, immutable",
     },
   });
 }

@@ -374,12 +374,20 @@
 .gallery-marquee-track {
   display: flex;
   width: max-content;
-  animation-name: gallery-marquee;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
-.gallery-marquee-track:hover {
+/* Wait until first thumbs settle — avoid animating gray placeholders */
+.gallery-marquee-track.is-waiting {
+  animation: none;
+}
+
+.gallery-marquee-track.is-ready {
+  animation-name: gallery-marquee;
+}
+
+.gallery-marquee-track.is-ready:hover {
   animation-play-state: paused;
 }
 

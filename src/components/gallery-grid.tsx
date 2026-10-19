@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { GALLERY, type GalleryItem, type GalleryTag } from "@/lib/content";
-import { mediaUrl, thumbUrl } from "@/lib/media";
+import { isUploadMediaPath, mediaUrl, thumbUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
@@ -20,9 +20,44 @@ const TAGS: Array<{ value: "전체" | GalleryTag; key: string }> = [
   { value: "리모델링", key: "gallery.tag.remodel" },
 ];
 
+/** Marquee card display width — px so Next picks ~640, not w=3840. */
+const MARQUEE_SIZES = "(max-width: 767px) 320px, 576px";
+
 function openPreview(src: string) {
   const img = new window.Image();
   img.src = mediaUrl(src);
+}
+
+function MarqueeThumb({
+  src,
+  onSettled,
+}: {
+  src: string;
+  onSettled: (src: string) => void;
+}) {
+  const thumb = thumbUrl(src);
+  return (
+    <Image
+      src={thumb}
+      alt=""
+      fill
+      className="object-cover opacity-0 transition-opacity duration-300 data-[loaded=true]:opacity-100"
+      sizes={MARQUEE_SIZES}
+      loading="eager"
+      decoding="async"
+      draggable={false}
+      // Pre-sized thumbs; skip optimizer (and avoid transform+lazy gray boxes)
+      unoptimized
+      onLoad={(e) => {
+        e.currentTarget.setAttribute("data-loaded", "true");
+        onSettled(src);
+      }}
+      onError={(e) => {
+        e.currentTarget.style.visibility = "hidden";
+        onSettled(src);
+      }}
+    />
+  );
 }
 
 export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; items?: GalleryItem[] }) {
@@ -30,6 +65,8 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
   const [tag, setTag] = useState<(typeof TAGS)[number]["value"]>("전체");
   const [open, setOpen] = useState<string | null>(null);
   const [listIndex, setListIndex] = useState<number | null>(null);
+  const [marqueeReady, setMarqueeReady] = useState(false);
+  const settledSrcs = useRef(new Set<string>());
 
   const itemsFiltered = useMemo(() => {
     const filtered = tag === "전체" ? items : items.filter((item) => item.tags.includes(tag));
@@ -43,6 +80,40 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
     while (base.length < 3) base = base.concat(itemsFiltered);
     return [...base, ...base];
   }, [itemsFiltered]);
+
+  useEffect(() => {
+    settledSrcs.current = new Set();
+    setMarqueeReady(false);
+  }, [tag, itemsFiltered]);
+
+  const onMarqueeSettled = useCallback(
+    (src: string) => {
+      if (settledSrcs.current.has(src)) return;
+      settledSrcs.current.add(src);
+      const need = Math.min(4, itemsFiltered.length || 1);
+      if (settledSrcs.current.size >= need) setMarqueeReady(true);
+    },
+    [itemsFiltered.length],
+  );
+
+  // Don't block forever if some thumbs 404 / hang
+  useEffect(() => {
+    if (marqueeReady || itemsFiltered.length === 0) return;
+    const timer = window.setTimeout(() => setMarqueeReady(true), 2800);
+    return () => window.clearTimeout(timer);
+  }, [marqueeReady, itemsFiltered.length, tag]);
+
+  // Prefetch list thumbs after first paint (marquee already eagers its own)
+  useEffect(() => {
+    if (typeof preview === "number" || itemsFiltered.length === 0) return;
+    const timer = window.setTimeout(() => {
+      for (const item of itemsFiltered.slice(0, 12)) {
+        const img = new window.Image();
+        img.src = thumbUrl(item.src);
+      }
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [itemsFiltered, preview]);
 
   const current = items.find((item) => item.src === open);
   const durationSec = Math.max(60, itemsFiltered.length * 10);
@@ -59,7 +130,14 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 onClick={() => setOpen(item.src)}
                 onMouseEnter={() => openPreview(item.src)}
               >
-                <Image src={thumbUrl(item.src)} alt={item.alt} fill className="object-cover" sizes="33vw" />
+                <Image
+                  src={thumbUrl(item.src)}
+                  alt={item.alt}
+                  fill
+                  className="object-cover"
+                  sizes="33vw"
+                  unoptimized={isUploadMediaPath(thumbUrl(item.src))}
+                />
               </button>
               <p className="mt-2 text-sm text-muted-foreground">{item.alt}</p>
             </li>
@@ -81,7 +159,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         >
           <div className="gallery-marquee">
             <div
-              className="gallery-marquee-track gap-3"
+              className={cn("gallery-marquee-track gap-3", marqueeReady ? "is-ready" : "is-waiting")}
               style={{ animationDuration: `${durationSec}s` }}
             >
               {tickerItems.map((item, index) => (
@@ -96,13 +174,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   onMouseEnter={() => openPreview(item.src)}
                   aria-label={item.alt}
                 >
-                  <Image
-                    src={thumbUrl(item.src)}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 50vw"
-                  />
+                  <MarqueeThumb src={item.src} onSettled={onMarqueeSettled} />
                 </button>
               ))}
             </div>
@@ -146,7 +218,14 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
               onMouseEnter={() => openPreview(item.src)}
             >
               <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
-                <Image src={thumbUrl(item.src)} alt="" fill className="object-cover" sizes="120px" />
+                <Image
+                  src={thumbUrl(item.src)}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                  unoptimized={isUploadMediaPath(thumbUrl(item.src))}
+                />
               </span>
               <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
                 <span className="font-medium text-foreground">{item.alt}</span>

@@ -32,6 +32,20 @@ export function uploadMediaUrl(relativeUnderUploads: string) {
   return mediaUrl(`/api/uploads/${clean}`);
 }
 
+/** GridFS `/api/uploads` (or `/uploads`) — already sized; skip Next image optimizer. */
+export function isUploadMediaPath(path: string) {
+  if (!path) return false;
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      path = new URL(path).pathname;
+    } catch {
+      return false;
+    }
+  }
+  const normalized = resolveImagePath(path);
+  return normalized.startsWith("/uploads/") || normalized.startsWith("/api/uploads/");
+}
+
 /** Small thumbnail for 둘러보기 grids. Originals stay at the same folder for lightbox. */
 export function thumbUrl(path: string) {
   if (!path) return path;
