@@ -61,37 +61,40 @@ export function metadataBase() {
 }
 
 export const DEST_ADDRESS = "경기 안산시 상록구 오리골길 41";
-export const DEST_QUERY = `${SITE.legalName} ${DEST_ADDRESS}`;
+/** 길찾기·지도 도착지. 공동묘지관리소·버대길·다른 묘원 이름으로 바꾸지 않음. */
+export const DEST_LABEL = `${DEST_ADDRESS} ${SITE.legalName}`;
+export const DEST_QUERY = DEST_LABEL;
 
 export type MapStart = { lat: number; lng: number };
 
 export function destQuery() {
-  return DEST_QUERY;
+  return DEST_LABEL;
 }
 
 export function naverDirectionsUrl(start?: MapStart) {
-  const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_QUERY)}`;
+  const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_LABEL)}`;
   if (!start) return `https://map.naver.com/p/directions/-/-/${dest}/car`;
   const from = `${start.lng},${start.lat},${encodeURIComponent("현재위치")}`;
   return `https://map.naver.com/p/directions/${from}/-/${dest}/car`;
 }
 
 export function kakaoDirectionsUrl(start?: MapStart) {
-  const destName = encodeURIComponent(DEST_QUERY);
+  const destName = encodeURIComponent(DEST_LABEL);
   if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
-  return `https://map.kakao.com/?sName=${encodeURIComponent("현재위치")}&sX=${start.lng}&sY=${start.lat}&eName=${destName}&eX=${SITE.lng}&eY=${SITE.lat}`;
+  // eX/eY에 WGS84를 넣으면 카카오가 도착을 다른 좌표로 읽는다. 도착은 주소+이름만.
+  return `https://map.kakao.com/?sName=${encodeURIComponent("현재위치")}&sX=${start.lng}&sY=${start.lat}&eName=${destName}`;
 }
 
 export function googleMapsQuery() {
-  return `${SITE.legalName}, ${DEST_ADDRESS}`;
+  return DEST_LABEL;
 }
 
 export function googleMapsViewUrl() {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleMapsQuery())}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DEST_LABEL)}`;
 }
 
 export function googleMapsEmbedUrl() {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(googleMapsQuery())}&z=16&hl=ko&ie=UTF8&iwloc=A&output=embed`;
+  return `https://maps.google.com/maps?q=${encodeURIComponent(DEST_LABEL)}&z=16&hl=ko&ie=UTF8&iwloc=A&output=embed`;
 }
 
 export const MAP = {
