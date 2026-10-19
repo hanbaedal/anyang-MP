@@ -11,8 +11,8 @@ export default async function HomePage() {
   return (
     <>
       <SiteAnnouncements />
-      {/* 헤더(h-12) 아래 첫 화면을 채우고, 카피는 하단 가장자리에만 둔다 */}
-      <section className="relative min-h-[calc(100dvh-3rem)] w-full flex-1 overflow-hidden bg-primary text-primary-foreground">
+      {/* 헤더·푸터 사이 스크롤 영역을 채우고, 카피는 하단 가장자리에만 둔다 */}
+      <section className="relative min-h-full w-full flex-1 overflow-hidden bg-primary text-primary-foreground">
         <div className="absolute inset-0">
           <HomeHeroMedia
             videoSrc={heroMedia.videoSrc}

@@ -22,7 +22,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
   const chrome = guestPath ? t : tKo;
 
   return (
-    <header className="sticky top-0 z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur">
+    <header className="relative z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur">
       <div className="flex h-full min-w-0 items-center gap-1 px-1 sm:gap-2 sm:px-3">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
