@@ -19,8 +19,8 @@
   --border: #d9d0c3;
   --input: #d9d0c3;
   --ring: #3f5d4a;
-  /* 헤더·푸터 소라색 (sky blue); 글자는 남색으로 대비 */
-  --chrome: #7eb6d9;
+  /* 헤더·푸터 소라색 (sky blue, 한 단계 밝게); 글자는 남색으로 대비 */
+  --chrome: #9ec9e3;
   --chrome-foreground: #002b50;
   --chrome-muted: rgba(0, 43, 80, 0.78);
   --chrome-border: rgba(0, 43, 80, 0.18);
