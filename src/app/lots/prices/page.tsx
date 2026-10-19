@@ -1,6 +1,5 @@
 import { PageHero, Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
-import { ConfirmNote } from "@/components/confirm-note";
 import { PRICES, REMAINING, UNCONFIRMED } from "@/lib/facts";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export default async function PricesPage() {
         lead={cms.lead || t(locale, "prices.lead")}
       />
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-12">
-        <ConfirmNote>{t(locale, "prices.note")}</ConfirmNote>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead className="bg-muted text-left">

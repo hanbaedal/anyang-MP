@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  DEST_ADDRESS,
   DEST_NAME,
   googleMapsEmbedUrl,
   googleMapsViewUrl,
@@ -119,7 +118,7 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           </a>
         </Button>
       </div>
-      <figure className={cn(fill ? "flex min-h-[14rem] flex-1 flex-col gap-2 md:min-h-0" : "space-y-2")}>
+      <figure className={cn(fill ? "flex min-h-[14rem] flex-1 flex-col md:min-h-0" : undefined)}>
         <iframe
           title={`${DEST_NAME} ${t("directions")}`}
           src={googleMapsEmbedUrl()}
@@ -134,9 +133,6 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           referrerPolicy="no-referrer-when-downgrade"
           allowFullScreen
         />
-        <figcaption className="shrink-0 text-sm font-medium">
-          {DEST_NAME} · {DEST_ADDRESS}
-        </figcaption>
       </figure>
     </div>
   );
