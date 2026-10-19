@@ -72,16 +72,17 @@ export function destQuery() {
 }
 
 export function naverDirectionsUrl(start?: MapStart) {
+  // /p/directions/{출발}/{도착}/{경유}/car — 도착만 dest, 경유는 항상 '-'
   const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_LABEL)}`;
-  if (!start) return `https://map.naver.com/p/directions/-/-/${dest}/car`;
+  if (!start) return `https://map.naver.com/p/directions/-/${dest}/-/car`;
   const from = `${start.lng},${start.lat},${encodeURIComponent("현재위치")}`;
-  return `https://map.naver.com/p/directions/${from}/-/${dest}/car`;
+  return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
 }
 
 export function kakaoDirectionsUrl(start?: MapStart) {
   const destName = encodeURIComponent(DEST_LABEL);
+  // /link/to/ 와 eName 만 도착. via/vp/eX/eY 없음.
   if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
-  // eX/eY에 WGS84를 넣으면 카카오가 도착을 다른 좌표로 읽는다. 도착은 주소+이름만.
   return `https://map.kakao.com/?sName=${encodeURIComponent("현재위치")}&sX=${start.lng}&sY=${start.lat}&eName=${destName}`;
 }
 
