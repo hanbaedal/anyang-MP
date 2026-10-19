@@ -21,6 +21,7 @@ import {
 } from "@/lib/funeral-docs-types";
 import { mediaUrl } from "@/lib/media";
 import { Prose } from "@/components/page-hero";
+import { PastelBox } from "@/components/pastel-box";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 
@@ -91,17 +92,21 @@ export function FuneralDocList({
 
   return (
     <>
-      <div className="grid gap-8 md:grid-cols-2">
-        <Prose>
-          <h2 className="text-xl">{t(locale, "fun.burialDocs")}</h2>
-          <p className="text-sm text-muted-foreground">{t(locale, "fun.docsPublicHint")}</p>
-          <DocItems rows={FUNERAL_BURIAL_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
-        </Prose>
-        <Prose>
-          <h2 className="text-xl">{t(locale, "fun.cremationDocs")}</h2>
-          <p className="text-sm text-muted-foreground">{t(locale, "fun.docsPublicHint")}</p>
-          <DocItems rows={FUNERAL_CREMATION_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
-        </Prose>
+      <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+        <PastelBox>
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            <h2 className="text-xl text-[color:var(--pastel-chrome-fg)]">{t(locale, "fun.burialDocs")}</h2>
+            <p className="text-sm text-[color:var(--pastel-chrome-fg)]/75">{t(locale, "fun.docsPublicHint")}</p>
+            <DocItems rows={FUNERAL_BURIAL_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
+          </Prose>
+        </PastelBox>
+        <PastelBox>
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            <h2 className="text-xl text-[color:var(--pastel-chrome-fg)]">{t(locale, "fun.cremationDocs")}</h2>
+            <p className="text-sm text-[color:var(--pastel-chrome-fg)]/75">{t(locale, "fun.docsPublicHint")}</p>
+            <DocItems rows={FUNERAL_CREMATION_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
+          </Prose>
+        </PastelBox>
       </div>
 
       <Dialog open={Boolean(preview)} onOpenChange={(open) => !open && setPreview(null)}>

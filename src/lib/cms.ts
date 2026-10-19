@@ -117,9 +117,11 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
       slug,
       title: ko["proc.title"],
       lead: ko["proc.lead"],
-      body: [ko["proc.consult"].replace("{phone}", SITE.phone) + " " + ko["proc.form"] + ko["proc.after"], ko["proc.twoDays"]].join(
-        "\n\n",
-      ),
+      body: [
+        ko["proc.consult"].replace("{phone}", SITE.phone) + " " + ko["proc.form"] + ko["proc.consultEnd"],
+        ko["proc.account"],
+        ko["proc.twoDays"],
+      ].join("\n\n"),
       items: SALE_STEPS.map((step) => ({
         id: nid(),
         title: ko[step.titleKey],

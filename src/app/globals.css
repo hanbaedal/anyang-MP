@@ -24,6 +24,10 @@
   --chrome-foreground: #002b50;
   --chrome-muted: rgba(0, 43, 80, 0.78);
   --chrome-border: rgba(0, 43, 80, 0.18);
+  /* 본문 파스텔 박스 — 크롬 틴트(~25%) + 남색 글자 */
+  --pastel-chrome-bg: #e8f4fb;
+  --pastel-chrome-fg: #002b50;
+  --pastel-chrome-border: rgba(0, 43, 80, 0.14);
   --radius: 0.75rem;
 }
 

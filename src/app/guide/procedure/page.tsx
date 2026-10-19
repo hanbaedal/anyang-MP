@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHero, Prose } from "@/components/page-hero";
+import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -21,6 +22,43 @@ export default async function ProcedurePage() {
     text: item.text ?? "",
   }));
 
+  const noteBoxes = cms.body?.trim()
+    ? cms.body
+        .replace(/\r\n/g, "\n")
+        .split(/\n{2,}/)
+        .map((block) => block.trim())
+        .filter(Boolean)
+        .map((block) => (
+          <PastelBox key={block.slice(0, 48)}>
+            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+              <Paragraphs text={block} />
+            </Prose>
+          </PastelBox>
+        ))
+    : [
+        <PastelBox key="consult">
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            <p>
+              {t(locale, "proc.consult", { phone: SITE.phone })}{" "}
+              <Link href="/support/inquiry" className="underline-offset-4 hover:underline">
+                {t(locale, "proc.form")}
+              </Link>
+              {t(locale, "proc.consultEnd")}
+            </p>
+          </Prose>
+        </PastelBox>,
+        <PastelBox key="account">
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            <p>{t(locale, "proc.account")}</p>
+          </Prose>
+        </PastelBox>,
+        <PastelBox key="use-date">
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            <p>{t(locale, "proc.twoDays")}</p>
+          </Prose>
+        </PastelBox>,
+      ];
+
   return (
     <>
       <PageHero
@@ -30,27 +68,18 @@ export default async function ProcedurePage() {
       />
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
         <SaleSteps steps={steps.length ? steps : undefined} />
-        <Prose>
-          {cms.body?.trim() ? (
-            <Paragraphs text={cms.body} />
-          ) : (
-            <>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {noteBoxes}
+          <PastelBox key="phone">
+            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
               <p>
-                {t(locale, "proc.consult", { phone: SITE.phone })}{" "}
-                <Link href="/support/inquiry" className="text-primary underline-offset-4 hover:underline">
-                  {t(locale, "proc.form")}
-                </Link>
-                {t(locale, "proc.after")}
+                <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
+                  {SITE.phone}
+                </a>
               </p>
-              <p>{t(locale, "proc.twoDays")}</p>
-            </>
-          )}
-          <p>
-            <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
-              {SITE.phone}
-            </a>
-          </p>
-        </Prose>
+            </Prose>
+          </PastelBox>
+        </div>
       </div>
     </>
   );

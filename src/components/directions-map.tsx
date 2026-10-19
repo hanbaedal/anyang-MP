@@ -19,6 +19,7 @@ import {
 } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
+import { cn } from "@/lib/utils";
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -72,7 +73,7 @@ function watchAppHandoff(ms: number): Promise<boolean> {
   });
 }
 
-export function DirectionsMap({ compact = false }: { compact?: boolean }) {
+export function DirectionsMap({ compact = false, fill = false }: { compact?: boolean; fill?: boolean }) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
 
@@ -104,8 +105,8 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+    <div className={cn(fill ? "flex min-h-0 flex-1 flex-col gap-3 md:gap-4" : "space-y-4")}>
+      <div className="flex shrink-0 flex-wrap gap-2">
         <Button type="button" disabled={busy !== null} onClick={() => void openRoute("naver")}>
           {t("map.naver")}
         </Button>
@@ -118,16 +119,22 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
           </a>
         </Button>
       </div>
-      <figure className="space-y-2">
+      <figure className={cn(fill ? "flex min-h-[14rem] flex-1 flex-col gap-2 md:min-h-0" : "space-y-2")}>
         <iframe
           title={`${DEST_NAME} ${t("directions")}`}
           src={googleMapsEmbedUrl()}
-          className={compact ? "h-56 w-full rounded-xl border" : "h-80 w-full rounded-xl border md:h-96"}
+          className={
+            compact
+              ? "h-56 w-full rounded-xl border"
+              : fill
+                ? "h-full min-h-[14rem] w-full flex-1 rounded-xl border md:min-h-0"
+                : "h-80 w-full rounded-xl border md:h-96"
+          }
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
           allowFullScreen
         />
-        <figcaption className="text-sm font-medium">
+        <figcaption className="shrink-0 text-sm font-medium">
           {DEST_NAME} · {DEST_ADDRESS}
         </figcaption>
       </figure>

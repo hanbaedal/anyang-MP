@@ -26,25 +26,35 @@ export default async function NoticesPage() {
   return (
     <>
       <PageHero kicker={t(locale, "notices.kicker")} title={t(locale, "notices.title")} />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <p className="mb-6 text-sm text-muted-foreground">
+      <div className="mx-auto max-w-6xl px-4 py-10 md:py-12">
+        <p className="mb-6 text-base text-muted-foreground md:mb-8 md:text-lg">
           {t(locale, "notices.consult", { phone: SITE.phone })}{" "}
           <Link href="/support/inquiry" className="font-medium text-primary underline-offset-4 hover:underline">
             {t(locale, "nav.inquiry")}
           </Link>
         </p>
         {notices.length === 0 ? (
-          <p className="text-muted-foreground">{t(locale, "notices.empty", { phone: SITE.phone })}</p>
+          <p className="text-base text-muted-foreground md:text-lg">
+            {t(locale, "notices.empty", { phone: SITE.phone })}
+          </p>
         ) : (
           <ul className="divide-y rounded-xl border bg-card">
             {notices.map((notice) => (
               <li key={notice.slug}>
-                <Link href={`/support/notices/${notice.slug}`} className="flex flex-col gap-1 px-4 py-4 hover:bg-accent md:flex-row md:items-center md:justify-between">
-                  <span className="font-medium text-primary">
-                    {notice.pinned ? <span className="mr-2 text-xs text-ring">{t(locale, "pinned")}</span> : null}
+                <Link
+                  href={`/support/notices/${notice.slug}`}
+                  className="flex flex-col gap-2 px-5 py-5 hover:bg-accent sm:px-6 sm:py-6 md:flex-row md:items-center md:justify-between md:gap-4 md:px-8 md:py-7"
+                >
+                  <span className="text-base font-medium leading-snug text-primary md:text-lg md:leading-relaxed">
+                    {notice.pinned ? (
+                      <span className="mr-2 text-sm text-ring md:text-base">{t(locale, "pinned")}</span>
+                    ) : null}
                     {notice.title}
                   </span>
-                  <time className="text-sm text-muted-foreground" dateTime={notice.publishedAt}>
+                  <time
+                    className="shrink-0 text-sm text-muted-foreground md:text-base"
+                    dateTime={notice.publishedAt}
+                  >
                     {formatDate(notice.publishedAt, locale)}
                   </time>
                 </Link>
