@@ -72,8 +72,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <SiteSidebar role={session?.role ?? null} />
             <div id="content" className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <div className="min-h-full">
-                {children}
+              <div className="flex min-h-full flex-col">
+                <div className="flex flex-1 flex-col">{children}</div>
                 <SiteFooter />
               </div>
             </div>
