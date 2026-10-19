@@ -5,14 +5,10 @@ import Image from "next/image";
 import { GALLERY, type GalleryItem, type GalleryTag } from "@/lib/content";
 import { mediaUrl, thumbUrl } from "@/lib/media";
 import { Button } from "@/components/ui/button";
-import { GalleryMobileSlideModal } from "@/components/gallery-mobile-slide-modal";
+import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
-
-function isMobileViewport() {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
-}
 
 const TAGS: Array<{ value: "전체" | GalleryTag; key: string }> = [
   { value: "전체", key: "gallery.all" },
@@ -33,7 +29,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
   const t = useT();
   const [tag, setTag] = useState<(typeof TAGS)[number]["value"]>("전체");
   const [open, setOpen] = useState<string | null>(null);
-  const [mobileIndex, setMobileIndex] = useState<number | null>(null);
+  const [listIndex, setListIndex] = useState<number | null>(null);
 
   const itemsFiltered = useMemo(() => {
     const filtered = tag === "전체" ? items : items.filter((item) => item.tags.includes(tag));
@@ -50,14 +46,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
 
   const current = items.find((item) => item.src === open);
   const durationSec = Math.max(60, itemsFiltered.length * 10);
-
-  function openListItem(item: GalleryItem, index: number) {
-    if (isMobileViewport()) {
-      setMobileIndex(index);
-      return;
-    }
-    setOpen(item.src);
-  }
 
   if (preview) {
     return (
@@ -149,7 +137,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 "flex h-full w-full items-stretch gap-3 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors sm:gap-4",
                 "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
               )}
-              onClick={() => openListItem(item, index)}
+              onClick={() => setListIndex(index)}
               onMouseEnter={() => openPreview(item.src)}
             >
               <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
@@ -168,15 +156,15 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
       {current ? (
         <ImageLightboxDialog open={Boolean(open)} onOpenChange={(next) => !next && setOpen(null)} src={current.src} alt={current.alt} />
       ) : null}
-      {mobileIndex !== null ? (
-        <GalleryMobileSlideModal
-          open={mobileIndex !== null}
+      {listIndex !== null ? (
+        <GallerySlideModal
+          open={listIndex !== null}
           onOpenChange={(next) => {
-            if (!next) setMobileIndex(null);
+            if (!next) setListIndex(null);
           }}
           items={itemsFiltered}
-          index={Math.min(mobileIndex, Math.max(0, itemsFiltered.length - 1))}
-          onIndexChange={setMobileIndex}
+          index={Math.min(listIndex, Math.max(0, itemsFiltered.length - 1))}
+          onIndexChange={setListIndex}
         />
       ) : null}
     </div>

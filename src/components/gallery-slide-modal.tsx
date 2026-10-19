@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type TouchEvent } from "react";
+import { useEffect, useRef, type TouchEvent } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 const SWIPE_PX = 40;
 
-/** 모바일 목록 탭용 — 크림 슬라이드 카드와 같은 시각 스케일 + 좌우(또는 상하) 스와이프로 넘김 */
-export function GalleryMobileSlideModal({
+/** 목록 탭용 — 크림 슬라이드 카드 스케일 모달 + 좌우(또는 상하) 스와이프·화살표 넘김 */
+export function GallerySlideModal({
   open,
   onOpenChange,
   items,
@@ -33,6 +33,21 @@ export function GalleryMobileSlideModal({
     onIndexChange(next);
   }
 
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (index > 0) onIndexChange(index - 1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (index < items.length - 1) onIndexChange(index + 1);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, index, items.length, onIndexChange]);
+
   function onTouchStart(e: TouchEvent) {
     e.stopPropagation();
     const t = e.changedTouches[0];
@@ -48,11 +63,9 @@ export function GalleryMobileSlideModal({
     const dx = t.clientX - touchStart.current.x;
     const dy = t.clientY - touchStart.current.y;
     touchStart.current = null;
-    // 가로 우선, 세로 제스처도 같은 넘김으로 허용 (네이티브 overflow 스와이프 회피)
     const horizontal = Math.abs(dx) >= Math.abs(dy);
     const dist = horizontal ? dx : dy;
     if (Math.abs(dist) < SWIPE_PX) return;
-    // 왼쪽/위 스와이프 → 다음, 오른쪽/아래 → 이전
     go(dist < 0 ? 1 : -1);
   }
 
@@ -63,7 +76,9 @@ export function GalleryMobileSlideModal({
       <DialogContent
         showCloseButton
         className={cn(
+          // 모바일: 마퀴 카드와 동일(≤20rem). PC: 크림 슬라이드 1.5×(~2칸)에 맞춤
           "fixed top-[50%] left-[50%] z-50 w-[min(100vw-1.5rem,20rem)] max-w-[min(100vw-1.5rem,20rem)]",
+          "md:w-[min(100vw-4rem,36rem)] md:max-w-[min(100vw-4rem,36rem)]",
           "translate-x-[-50%] translate-y-[-50%] gap-0 overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3 shadow-lg",
           "duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
@@ -83,7 +98,7 @@ export function GalleryMobileSlideModal({
             fill
             draggable={false}
             className="pointer-events-none object-cover"
-            sizes="min(100vw, 20rem)"
+            sizes="(max-width: 767px) min(100vw, 20rem), min(100vw, 36rem)"
             priority
           />
           {items.length > 1 ? (
@@ -92,7 +107,7 @@ export function GalleryMobileSlideModal({
                 type="button"
                 aria-label="이전 사진"
                 disabled={index <= 0}
-                className="absolute left-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30"
+                className="absolute left-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:h-10 md:w-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   go(-1);
@@ -104,7 +119,7 @@ export function GalleryMobileSlideModal({
                 type="button"
                 aria-label="다음 사진"
                 disabled={index >= items.length - 1}
-                className="absolute right-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30"
+                className="absolute right-1 top-1/2 z-[1] flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:h-10 md:w-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   go(1);
