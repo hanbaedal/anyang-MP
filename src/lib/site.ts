@@ -80,10 +80,12 @@ export function naverDirectionsUrl(start?: MapStart) {
   return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
 }
 
-export function kakaoDirectionsUrl(_start?: MapStart) {
-  // 공식 도착 URL. ?sName&sX&eName 은 위치 허용 시 도착 칸이 비므로 쓰지 않음.
-  // /link/to/이름,위도,경도 → 도착=안양공원묘원, 출발은 카카오가 현재위치.
-  return `https://map.kakao.com/link/to/${encodeURIComponent(DEST_NAME)},${SITE.lat},${SITE.lng}`;
+export function kakaoDirectionsUrl(start?: MapStart) {
+  const destName = encodeURIComponent(DEST_NAME);
+  if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
+  // eName만 있으면 도착 칸이 빔. 출발·도착 모두 이름+좌표.
+  const sName = encodeURIComponent("현재위치");
+  return `https://map.kakao.com/?sName=${sName}&sX=${start.lng}&sY=${start.lat}&eName=${destName}&eX=${SITE.lng}&eY=${SITE.lat}`;
 }
 
 export function googleMapsQuery() {
