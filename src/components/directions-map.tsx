@@ -6,9 +6,13 @@ import {
   DEST_NAME,
   googleMapsEmbedUrl,
   googleMapsViewUrl,
+  kakaoAndroidMapRouteIntent,
+  kakaoAndroidNaviIntent,
   kakaoDirectionsUrl,
   kakaoMapAppRouteUrl,
   kakaoNaviUrl,
+  naverAndroidNaviIntent,
+  naverAndroidRouteIntent,
   naverDirectionsUrl,
   naverMapAppRouteUrl,
   naverNaviUrl,
@@ -16,7 +20,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
 
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
+}
+
+function isMobile() {
+  return /Android|iPhone|iPad|iPod|Mobile|SamsungBrowser/i.test(navigator.userAgent);
+}
+
 function launchAppScheme(href: string) {
+  if (href.startsWith("intent:")) {
+    window.location.href = href;
+    return;
+  }
   const link = document.createElement("a");
   link.href = href;
   document.body.appendChild(link);
@@ -35,28 +51,55 @@ function readStart(): Promise<{ lat: number; lng: number } | null> {
   });
 }
 
+/** 앱이 열리면 페이지가 숨겨짐. 그때는 웹 길찾기 미리보기를 열지 않음. */
+function watchAppHandoff(ms: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (handedOff: boolean) => {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onHide);
+      resolve(handedOff);
+    };
+    const onVis = () => {
+      if (document.visibilityState === "hidden") finish(true);
+    };
+    const onHide = () => finish(true);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+    window.setTimeout(() => finish(false), ms);
+  });
+}
+
 export function DirectionsMap({ compact = false }: { compact?: boolean }) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
-    const start = await readStart();
-    setBusy(null);
-    const point = start ?? undefined;
-    if (kind === "naver") {
-      launchAppScheme(naverNaviUrl(point));
-      window.setTimeout(() => launchAppScheme(naverMapAppRouteUrl(point)), 350);
-      window.setTimeout(() => {
-        window.open(naverDirectionsUrl(point), "_blank", "noopener,noreferrer");
-      }, 700);
-      return;
+    const startPromise = readStart();
+    try {
+      if (isMobile()) {
+        const schemes =
+          kind === "naver"
+            ? isAndroid()
+              ? [naverAndroidNaviIntent(), naverAndroidRouteIntent()]
+              : [naverNaviUrl(), naverMapAppRouteUrl()]
+            : isAndroid()
+              ? [kakaoAndroidNaviIntent(), kakaoAndroidMapRouteIntent()]
+              : [kakaoNaviUrl(), kakaoMapAppRouteUrl()];
+        for (const href of schemes) {
+          launchAppScheme(href);
+          if (await watchAppHandoff(900)) return;
+        }
+      }
+      const start = (await startPromise) ?? undefined;
+      const web = kind === "naver" ? naverDirectionsUrl(start) : kakaoDirectionsUrl(start);
+      window.open(web, "_blank", "noopener,noreferrer");
+    } finally {
+      setBusy(null);
     }
-    launchAppScheme(kakaoNaviUrl(point));
-    window.setTimeout(() => launchAppScheme(kakaoMapAppRouteUrl(point)), 350);
-    window.setTimeout(() => {
-      window.open(kakaoDirectionsUrl(point), "_blank", "noopener,noreferrer");
-    }, 700);
   }
 
   return (

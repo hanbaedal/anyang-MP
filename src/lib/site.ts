@@ -84,42 +84,71 @@ export function naverDirectionsUrl(start?: MapStart) {
   return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
 }
 
-/** 네이버 지도 앱 길안내(턴바이턴). */
-export function naverNaviUrl(start?: MapStart) {
-  const app = `appname=${naverAppName()}`;
-  const dest = `dlat=${SITE.lat}&dlng=${SITE.lng}&dname=${encodeURIComponent(DEST_NAME)}`;
-  if (!start) return `nmap://navigation?${dest}&${app}`;
-  return `nmap://navigation?slat=${start.lat}&slng=${start.lng}&sname=${encodeURIComponent("현재위치")}&${dest}&${app}`;
+function naverDestQuery() {
+  return `dlat=${SITE.lat}&dlng=${SITE.lng}&dname=${encodeURIComponent(DEST_NAME)}`;
 }
 
-/** 네이버 지도 앱 길찾기(화면에 길안내 버튼). */
-export function naverMapAppRouteUrl(start?: MapStart) {
-  const app = `appname=${naverAppName()}`;
-  const dest = `dlat=${SITE.lat}&dlng=${SITE.lng}&dname=${encodeURIComponent(DEST_NAME)}`;
-  if (!start) return `nmap://route/car?${dest}&${app}`;
-  return `nmap://route/car?slat=${start.lat}&slng=${start.lng}&sname=${encodeURIComponent("현재위치")}&${dest}&${app}`;
+function naverAppQuery() {
+  return `appname=${naverAppName()}`;
 }
 
-/** 웹 폴백. 도착 이름 고정. 길안내는 앱 스킴이 담당. */
+/**
+ * 네이버 지도 앱 길안내(턴바이턴).
+ * 출발 좌표를 넣지 않음 — 앱이 현재위치를 쓰고 바로 내비게이션으로 감.
+ */
+export function naverNaviUrl(_start?: MapStart) {
+  void _start;
+  return `nmap://navigation?${naverDestQuery()}&${naverAppQuery()}`;
+}
+
+/** 네이버 지도 앱 자동차 길찾기. 경로 화면에 길안내 버튼이 있음. */
+export function naverMapAppRouteUrl(_start?: MapStart) {
+  void _start;
+  return `nmap://route/car?${naverDestQuery()}&${naverAppQuery()}`;
+}
+
+/** Android Chrome용 네이버 길안내. package 없음 — 앱 없으면 페이지에 남아 다음 단계로. */
+export function naverAndroidNaviIntent() {
+  return `intent://navigation?${naverDestQuery()}&${naverAppQuery()}#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+}
+
+/** Android Chrome용 네이버 길찾기(길안내 버튼). */
+export function naverAndroidRouteIntent() {
+  return `intent://route/car?${naverDestQuery()}&${naverAppQuery()}#Intent;scheme=nmap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+}
+
+/**
+ * 카카오 웹 폴백.
+ * 출발이 있으면 자동차 길찾기(경로+길안내 CTA). 없으면 도착만 — 모바일은 출발=현재위치.
+ */
 export function kakaoDirectionsUrl(start?: MapStart) {
   const destName = encodeURIComponent(DEST_NAME);
-  void start;
-  return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
+  if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
+  const fromName = encodeURIComponent("현재위치");
+  return `https://map.kakao.com/link/by/car/${fromName},${start.lat},${start.lng}/${destName},${SITE.lat},${SITE.lng}`;
 }
 
-/** 카카오내비 길안내. 출발 없으면 앱이 현재위치 사용. */
-export function kakaoNaviUrl(start?: MapStart) {
-  const destination = encodeURIComponent(JSON.stringify({ name: DEST_NAME, x: String(SITE.lng), y: String(SITE.lat) }));
-  const base = `kakaonavi://navigate?coord_type=wgs84&destination=${destination}`;
-  if (!start) return base;
-  const from = encodeURIComponent(JSON.stringify({ name: "현재위치", x: String(start.lng), y: String(start.lat) }));
-  return `${base}&start=${from}`;
+/**
+ * 카카오내비 길안내. 출발은 넣지 않음(앱이 현재위치만 안내).
+ * name/x/y 쿼리 — destination JSON은 앱이 무시하거나 오류를 냄.
+ */
+export function kakaoNaviUrl(_start?: MapStart) {
+  void _start;
+  return `kakaonavi://navigate?name=${encodeURIComponent(DEST_NAME)}&x=${SITE.lng}&y=${SITE.lat}&coord_type=wgs84`;
 }
 
-/** 카카오맵 앱 길찾기(화면에 길안내 버튼). */
-export function kakaoMapAppRouteUrl(start?: MapStart) {
-  if (!start) return `kakaomap://route?ep=${SITE.lat},${SITE.lng}&by=car`;
-  return `kakaomap://route?sp=${start.lat},${start.lng}&ep=${SITE.lat},${SITE.lng}&by=car`;
+/** 카카오맵 앱 자동차 경로. 화면에 길안내 버튼. 출발 생략=현재위치. */
+export function kakaoMapAppRouteUrl(_start?: MapStart) {
+  void _start;
+  return `kakaomap://route?ep=${SITE.lat},${SITE.lng}&by=CAR`;
+}
+
+export function kakaoAndroidNaviIntent() {
+  return `intent://navigate?name=${encodeURIComponent(DEST_NAME)}&x=${SITE.lng}&y=${SITE.lat}&coord_type=wgs84#Intent;scheme=kakaonavi;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+}
+
+export function kakaoAndroidMapRouteIntent() {
+  return `intent://route?ep=${SITE.lat},${SITE.lng}&by=CAR#Intent;scheme=kakaomap;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
 }
 
 export function googleMapsQuery() {
