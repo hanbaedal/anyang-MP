@@ -11,7 +11,7 @@ export default async function HomePage() {
   return (
     <>
       <SiteAnnouncements />
-      <section className="relative h-full min-h-full overflow-hidden bg-primary text-primary-foreground">
+      <section className="relative h-[calc(100dvh-3rem)] min-h-[calc(100dvh-3rem)] w-full overflow-hidden bg-primary text-primary-foreground">
       <div className="absolute inset-0">
         <HomeHeroMedia
           videoSrc={heroMedia.videoSrc}

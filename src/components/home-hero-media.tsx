@@ -140,7 +140,10 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
       <video
         key={videoSrc}
         ref={videoRef}
-        className={cn("absolute inset-0 h-full w-full object-cover", videoReady || videoError ? "opacity-100" : "opacity-0")}
+        className={cn(
+          "absolute inset-0 h-full w-full object-cover object-[center_center]",
+          videoReady || videoError ? "opacity-100" : "opacity-0",
+        )}
         src={videoSrc}
         poster={posterSrc}
         muted={hasSeparateBgm || !soundOn}

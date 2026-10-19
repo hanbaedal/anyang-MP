@@ -83,9 +83,8 @@ export function naverDirectionsUrl(start?: MapStart) {
 export function kakaoDirectionsUrl(start?: MapStart) {
   const destName = encodeURIComponent(DEST_NAME);
   if (!start) return `https://map.kakao.com/link/to/${destName},${SITE.lat},${SITE.lng}`;
-  // eName만 있으면 도착 칸이 빔. 출발·도착 모두 이름+좌표.
-  const sName = encodeURIComponent("현재위치");
-  return `https://map.kakao.com/?sName=${sName}&sX=${start.lng}&sY=${start.lat}&eName=${destName}&eX=${SITE.lng}&eY=${SITE.lat}`;
+  // 웹 sX/sY는 WCONG. WGS84를 넣으면 길 없음. 공식 scheme은 위경도(lat,lng).
+  return `https://m.map.kakao.com/scheme/route?sp=${start.lat},${start.lng}&ep=${SITE.lat},${SITE.lng}&by=car`;
 }
 
 export function googleMapsQuery() {
@@ -218,6 +217,12 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
   }
   return menus;
 }
+
+export const INTRO_PAGES = [
+  { href: "/intro/greeting", i18n: "nav.greeting" },
+  { href: "/intro/features", i18n: "nav.features" },
+  { href: "/intro/directions", i18n: "nav.directions" },
+] as const;
 
 export const NAV: NavItem[] = [
   {

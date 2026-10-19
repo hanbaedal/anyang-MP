@@ -32,18 +32,18 @@ export function PageHero({
         className="object-cover object-[center_28%] opacity-40"
         sizes="100vw"
       />
-      <div className="relative mx-auto max-w-6xl px-4 py-4 md:py-16">
+      <div className="relative mx-auto max-w-6xl px-4 py-4 md:py-6">
         <p className="text-[10px] tracking-[0.16em] text-primary-foreground/75 uppercase md:text-xs md:tracking-[0.18em]">
           {kicker}
         </p>
-        <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-2 md:text-4xl">{title}</h1>
+        <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-1.5 md:text-2xl">{title}</h1>
         {lead ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-4 md:text-base md:leading-7">
+          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-sm md:leading-6">
             {lead}
           </p>
         ) : null}
         {children ? (
-          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-base md:leading-7">
+          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-1.5 md:text-sm md:leading-6">
             {children}
           </div>
         ) : null}
