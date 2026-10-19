@@ -10,6 +10,8 @@ import {
   kakaoMapAppRouteUrl,
   kakaoNaviUrl,
   naverDirectionsUrl,
+  naverMapAppRouteUrl,
+  naverNaviUrl,
 } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
@@ -41,11 +43,15 @@ export function DirectionsMap({ compact = false }: { compact?: boolean }) {
     setBusy(kind);
     const start = await readStart();
     setBusy(null);
+    const point = start ?? undefined;
     if (kind === "naver") {
-      window.open(naverDirectionsUrl(start ?? undefined), "_blank", "noopener,noreferrer");
+      launchAppScheme(naverNaviUrl(point));
+      window.setTimeout(() => launchAppScheme(naverMapAppRouteUrl(point)), 350);
+      window.setTimeout(() => {
+        window.open(naverDirectionsUrl(point), "_blank", "noopener,noreferrer");
+      }, 700);
       return;
     }
-    const point = start ?? undefined;
     launchAppScheme(kakaoNaviUrl(point));
     window.setTimeout(() => launchAppScheme(kakaoMapAppRouteUrl(point)), 350);
     window.setTimeout(() => {

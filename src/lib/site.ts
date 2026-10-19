@@ -72,12 +72,32 @@ export function destQuery() {
   return DEST_LABEL;
 }
 
+function naverAppName() {
+  return encodeURIComponent(siteUrl() || "anyang-mp");
+}
+
 export function naverDirectionsUrl(start?: MapStart) {
   // /p/directions/{출발}/{도착}/{경유}/car — 도착 칸만 DEST_NAME, 경유는 항상 '-'
   const dest = `${SITE.lng},${SITE.lat},${encodeURIComponent(DEST_NAME)}`;
   if (!start) return `https://map.naver.com/p/directions/-/${dest}/-/car`;
   const from = `${start.lng},${start.lat},${encodeURIComponent("현재위치")}`;
   return `https://map.naver.com/p/directions/${from}/${dest}/-/car`;
+}
+
+/** 네이버 지도 앱 길안내(턴바이턴). */
+export function naverNaviUrl(start?: MapStart) {
+  const app = `appname=${naverAppName()}`;
+  const dest = `dlat=${SITE.lat}&dlng=${SITE.lng}&dname=${encodeURIComponent(DEST_NAME)}`;
+  if (!start) return `nmap://navigation?${dest}&${app}`;
+  return `nmap://navigation?slat=${start.lat}&slng=${start.lng}&sname=${encodeURIComponent("현재위치")}&${dest}&${app}`;
+}
+
+/** 네이버 지도 앱 길찾기(화면에 길안내 버튼). */
+export function naverMapAppRouteUrl(start?: MapStart) {
+  const app = `appname=${naverAppName()}`;
+  const dest = `dlat=${SITE.lat}&dlng=${SITE.lng}&dname=${encodeURIComponent(DEST_NAME)}`;
+  if (!start) return `nmap://route/car?${dest}&${app}`;
+  return `nmap://route/car?slat=${start.lat}&slng=${start.lng}&sname=${encodeURIComponent("현재위치")}&${dest}&${app}`;
 }
 
 /** 웹 폴백. 도착 이름 고정. 길안내는 앱 스킴이 담당. */
