@@ -93,7 +93,13 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     form.set("tags", tags.join(","));
     try {
       const res = await fetch("/api/manage/gallery", { method: "POST", body: form });
-      const json = (await res.json()) as { ok?: boolean; error?: string };
+      let json: { ok?: boolean; error?: string } = {};
+      try {
+        json = (await res.json()) as { ok?: boolean; error?: string };
+      } catch {
+        setMessage("서버 응답을 읽지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
       if (!res.ok || !json.ok) {
         setMessage(json.error || "업로드에 실패했습니다.");
         return;
@@ -104,6 +110,8 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       setMessage("올렸습니다. 공개 갤러리와 홈페이지 관리(팝업·분양 사진)에서 바로 고를 수 있습니다.");
       await refresh();
+    } catch {
+      setMessage("네트워크 오류로 올리지 못했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
     } finally {
       setBusy(false);
     }

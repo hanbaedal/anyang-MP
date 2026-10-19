@@ -18,17 +18,25 @@ function parseTags(raw: unknown): GalleryTag[] {
 export async function POST(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
-  const form = await request.formData();
-  const file = form.get("file");
-  const alt = String(form.get("alt") ?? "");
-  const tags = parseTags(form.get("tags"));
-  if (!(file instanceof File)) {
-    return NextResponse.json({ ok: false, error: "사진 파일을 선택해 주세요." }, { status: 400 });
+  try {
+    const form = await request.formData();
+    const file = form.get("file");
+    const alt = String(form.get("alt") ?? "");
+    const tags = parseTags(form.get("tags"));
+    if (!(file instanceof File)) {
+      return NextResponse.json({ ok: false, error: "사진 파일을 선택해 주세요." }, { status: 400 });
+    }
+    const saved = await saveManageUpload(file);
+    if (!saved.ok) return NextResponse.json(saved, { status: 400 });
+    const photo = await addGalleryPhoto({ src: saved.src, alt, tags });
+    return NextResponse.json({ ok: true, photo });
+  } catch (error) {
+    console.error("[manage/gallery] POST failed", error);
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : "갤러리 저장에 실패했습니다." },
+      { status: 500 },
+    );
   }
-  const saved = await saveManageUpload(file);
-  if (!saved.ok) return NextResponse.json(saved, { status: 400 });
-  const photo = await addGalleryPhoto({ src: saved.src, alt, tags });
-  return NextResponse.json({ ok: true, photo });
 }
 
 export async function PATCH(request: Request) {
