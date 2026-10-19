@@ -89,7 +89,10 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   key={`${item.src}-${index}`}
                   type="button"
                   className="gallery-marquee-card"
-                  onClick={() => setOpen(item.src)}
+                  onClick={() => {
+                    const idx = itemsFiltered.findIndex((entry) => entry.src === item.src);
+                    if (idx >= 0) setListIndex(idx);
+                  }}
                   onMouseEnter={() => openPreview(item.src)}
                   aria-label={item.alt}
                 >
@@ -155,9 +158,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
       </ul>
 
       {itemsFiltered.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
-      {current ? (
-        <ImageLightboxDialog open={Boolean(open)} onOpenChange={(next) => !next && setOpen(null)} src={current.src} alt={current.alt} />
-      ) : null}
       {listIndex !== null ? (
         <GallerySlideModal
           open={listIndex !== null}
