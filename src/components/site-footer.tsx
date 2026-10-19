@@ -8,23 +8,26 @@ export async function SiteFooter() {
   const locale = await readLocale();
   const pathname = (await headers()).get("x-pathname") ?? "/";
   const uiLocale = isGuestLocalePath(pathname) ? locale : "ko";
+  const phone = (
+    <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
+      {SITE.phone}
+    </a>
+  );
   return (
-    <footer className="shrink-0 border-t border-primary-foreground/20 bg-primary text-xs leading-snug text-primary-foreground md:text-sm md:leading-5">
-      <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 text-center sm:px-5 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:px-5 lg:py-2 lg:text-left">
-        <div className="min-w-0">
-          <p className="font-serif text-sm md:text-base">{t(uiLocale, "site.legalName")}</p>
-          <p className="text-primary-foreground/85">
+    <footer className="border-t border-primary-foreground/20 bg-primary text-xs leading-snug text-primary-foreground md:text-sm md:leading-5">
+      <div className="flex items-center justify-between gap-2 px-3 py-1 sm:px-5 md:gap-4 md:py-2 lg:px-5">
+        <div className="min-w-0 text-left">
+          <p className="font-serif text-sm leading-tight md:text-base">{t(uiLocale, "site.legalName")}</p>
+          <p className="mt-0.5 text-[11px] text-primary-foreground/85 md:hidden">{phone}</p>
+          <p className="mt-0.5 hidden text-primary-foreground/85 md:block">
             {t(uiLocale, "site.address")}
             {" · "}
-            {t(uiLocale, "phone")}{" "}
-            <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
-              {SITE.phone}
-            </a>
+            {t(uiLocale, "phone")} {phone}
             {" · "}
             {SITE.postalCode}
           </p>
         </div>
-        <div className="flex shrink-0 justify-center lg:justify-end">
+        <div className="flex shrink-0 justify-end">
           <SocialActions compact />
         </div>
       </div>
