@@ -1,12 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import type { HomeHeroSet, HomeHeroSettings } from "./home-hero-types";
-import { HOME_HERO_MAX_SETS, HOME_HERO_UNPUBLISHED } from "./home-hero-types";
+import {
+  HOME_HERO_MAX_SETS,
+  HOME_HERO_TRIMMED_INTRO,
+  HOME_HERO_UNPUBLISHED,
+  resolvePlayableHomeHeroSrc,
+} from "./home-hero-types";
 import { getDb, hasMongo } from "./mongo";
 import { deleteUploadObject } from "./upload-store";
 
 export type { HomeHeroSet, HomeHeroSettings } from "./home-hero-types";
-export { HOME_HERO_MAX_SETS, HOME_HERO_UNPUBLISHED } from "./home-hero-types";
+export {
+  HOME_HERO_MAX_SETS,
+  HOME_HERO_TRIMMED_INTRO,
+  HOME_HERO_UNPUBLISHED,
+  resolvePlayableHomeHeroSrc,
+} from "./home-hero-types";
 
 const localFile = dataFile("home-hero.local.json");
 const SETTINGS_KEY = "home_hero";
@@ -24,6 +34,9 @@ function builtinMedia() {
 export function isUploadedHomeHeroSet(set: Pick<HomeHeroSet, "id" | "videoSrc">): boolean {
   if (BUILTIN_SET_IDS.has(set.id)) return false;
   const src = set.videoSrc;
+  if (src === HOME_HERO_TRIMMED_INTRO || src.includes("1792833732020-5bf8df7029ab")) {
+    return true;
+  }
   return src.startsWith("/uploads/home-hero/") || src.startsWith("/api/uploads/home-hero/");
 }
 
@@ -73,7 +86,7 @@ function applyActive(settings: Omit<HomeHeroSettings, "videoSrc" | "audioSrc"> &
     activeSetId: published.id,
     posterSrc,
     updatedAt,
-    videoSrc: published.videoSrc,
+    videoSrc: resolvePlayableHomeHeroSrc(published.videoSrc),
     audioSrc: published.audioSrc || "",
   };
 }

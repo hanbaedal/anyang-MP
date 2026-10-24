@@ -12,6 +12,19 @@ export const HOME_HERO_AUDIO_MAX_LABEL = "12MB";
 /** 공개 세트 없음(비공개) — 홈은 기본 배포 미디어 사용 */
 export const HOME_HERO_UNPUBLISHED = "";
 
+/** 끝 자막 제거 인트로(97.5s) — GridFS 교체 불가 시 정적 재생 */
+export const HOME_HERO_TRIMMED_INTRO = "/static/home-hero-intro.mp4";
+
+const LEGACY_TRIM_UPLOAD_MARKERS = ["1792833732020-5bf8df7029ab"] as const;
+
+/** 구 업로드 키 → 트림 static (모바일 캐시·GridFS 삭제 복구) */
+export function resolvePlayableHomeHeroSrc(src: string) {
+  if (LEGACY_TRIM_UPLOAD_MARKERS.some((m) => src.includes(m))) {
+    return HOME_HERO_TRIMMED_INTRO;
+  }
+  return src;
+}
+
 /** 영상(+선택 음악) 한 세트 */
 export type HomeHeroSet = {
   id: string;

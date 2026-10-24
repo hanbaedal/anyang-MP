@@ -7,6 +7,14 @@ import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
 const SOUND_SESSION_KEY = "anyang-home-hero-bgm";
+/** 업로드 히어로 교체 후 모바일 immutable 캐시 무효화용 (값만 올리면 됨) */
+const HOME_HERO_UPLOAD_CACHE_BUST = "t975";
+
+function withHeroCacheBust(src: string) {
+  if (!src.includes("/uploads/home-hero/") && !src.includes("/api/uploads/home-hero/")) return src;
+  const sep = src.includes("?") ? "&" : "?";
+  return `${src}${sep}v=${HOME_HERO_UPLOAD_CACHE_BUST}`;
+}
 
 type Props = {
   videoSrc: string;
@@ -15,6 +23,7 @@ type Props = {
 };
 
 export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
+  const playSrc = withHeroCacheBust(videoSrc);
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -80,13 +89,13 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
     setSoundOn(false);
     setShowSoundPrompt(true);
     void startVideoMuted();
-  }, [reduceMotion, videoSrc, audioSrc, startVideoMuted]);
+  }, [reduceMotion, playSrc, audioSrc, startVideoMuted]);
 
   useEffect(() => {
     if (reduceMotion || sessionStorage.getItem(SOUND_SESSION_KEY) !== "1") return;
     setShowSoundPrompt(false);
     void enableSound();
-  }, [reduceMotion, videoSrc, audioSrc, enableSound]);
+  }, [reduceMotion, playSrc, audioSrc, enableSound]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -104,7 +113,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
     // 별도 음악 없음 → 영상 트랙 소리 on/off
     video.muted = !soundOn;
     if (soundOn && video.paused) void video.play().catch(() => setSoundOn(false));
-  }, [hasSeparateBgm, soundOn, audioSrc, videoSrc]);
+  }, [hasSeparateBgm, soundOn, audioSrc, playSrc]);
 
   useEffect(() => {
     return () => {
@@ -138,13 +147,13 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
         />
       ) : null}
       <video
-        key={videoSrc}
+        key={playSrc}
         ref={videoRef}
         className={cn(
           "absolute inset-0 h-full w-full object-cover object-[center_32%]",
           videoReady || videoError ? "opacity-100" : "opacity-0",
         )}
-        src={videoSrc}
+        src={playSrc}
         poster={posterSrc}
         muted={hasSeparateBgm || !soundOn}
         autoPlay

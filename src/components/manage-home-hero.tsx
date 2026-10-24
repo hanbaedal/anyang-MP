@@ -11,6 +11,7 @@ import {
   type HomeHeroSet,
   type HomeHeroSettings,
 } from "@/lib/home-hero-types";
+import { resolvePlayableHomeHeroSrc } from "@/lib/home-hero-types";
 import { cn } from "@/lib/utils";
 
 function formatBytes(n: number) {
@@ -459,8 +460,8 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">영상 · {selected.videoLabel}</p>
               <video
-                key={selected.videoSrc}
-                src={selected.videoSrc}
+                key={resolvePlayableHomeHeroSrc(selected.videoSrc)}
+                src={resolvePlayableHomeHeroSrc(selected.videoSrc)}
                 className="aspect-video w-full rounded-lg bg-muted object-cover"
                 controls
                 muted
@@ -522,7 +523,7 @@ function SetCard({
     >
       <div className="relative aspect-video bg-muted">
         <video
-          src={set.videoSrc}
+          src={resolvePlayableHomeHeroSrc(set.videoSrc)}
           className="h-full w-full object-cover"
           muted
           playsInline
