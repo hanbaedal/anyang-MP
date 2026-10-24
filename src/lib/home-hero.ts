@@ -15,10 +15,10 @@ function builtinSet(now: string): HomeHeroSet {
   return {
     id: "builtin-set",
     label: "기본",
-    videoSrc: "/videos/home-hero.mp4",
-    audioSrc: "/audio/home-bgm.mp3",
+    videoSrc: "/static/23838-337674789.mp4",
+    audioSrc: "",
     videoLabel: "기본 배포 영상",
-    audioLabel: "기본 배포 음악",
+    audioLabel: "",
     createdAt: now,
   };
 }
@@ -38,7 +38,7 @@ export function defaultHomeHeroSettings(): HomeHeroSettings {
 
 export function isSafeHomeMediaPath(src: string) {
   if (!src.startsWith("/") || src.includes("..")) return false;
-  return /^\/(videos|audio|uploads|api\/uploads|images)\//.test(src);
+  return /^\/(static|videos|audio|uploads|api\/uploads|images)\//.test(src);
 }
 
 function applyActive(settings: Omit<HomeHeroSettings, "videoSrc" | "audioSrc"> & Partial<Pick<HomeHeroSettings, "videoSrc" | "audioSrc">>): HomeHeroSettings {
