@@ -17,11 +17,13 @@ export default async function SitemapPage() {
   const menus = sitemapMenus(session?.role);
 
   return (
-    <div className="flex h-full min-h-0 flex-col px-3 py-3 sm:px-4 sm:py-4">
+    /* 높이·overflow는 #content 스크롤 영역에 맡김 — h-full+내부 overflow-y는
+       로그인 메뉴가 늘어난 모바일에서 본문 스크롤이 막히는 원인이 됨 */
+    <div className="px-3 py-3 pb-6 sm:px-4 sm:py-4">
       <h1 className="sr-only">{t(locale, "nav.sitemap")}</h1>
       <ul
         className={cn(
-          "mx-auto grid w-full max-w-[1600px] min-h-0 flex-1 auto-rows-min content-start gap-2 overflow-y-auto overscroll-y-contain sm:gap-2.5",
+          "mx-auto grid w-full max-w-[1600px] auto-rows-min content-start gap-2 sm:gap-2.5",
           /* 폭만 줄임: PC에서 한 줄에 더 많은 카드, 글자 크기는 유지 */
           "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6",
         )}
