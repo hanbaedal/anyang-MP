@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { FLAGS, type Locale, LOCALE_LABEL } from "@/lib/i18n";
 import { useLocale, useT } from "@/components/locale-provider";
 
+/** 헤더 언어 전환 — 보이는 UI는 국기 이미지만 (한글/영어/중문·KOR/ENG/CHN 라벨 없음) */
 const FLAG_SRC: Record<"KR" | "US" | "CN", string> = {
   KR: "/flags/kr.svg",
   US: "/flags/us.svg",
@@ -13,13 +14,13 @@ const FLAG_SRC: Record<"KR" | "US" | "CN", string> = {
 
 function FlagImage({ code }: { code: "KR" | "US" | "CN" }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- 정적 SVG 국기 자산(PC·모바일 동일)
+    // eslint-disable-next-line @next/next/no-img-element -- 정적 SVG 국기 (PC·모바일)
     <img
       src={FLAG_SRC[code]}
       alt=""
-      width={24}
-      height={16}
-      className="h-3 w-[1.125rem] rounded-[2px] object-cover ring-1 ring-black/10 lg:h-4 lg:w-6"
+      width={28}
+      height={19}
+      className="h-3.5 w-[1.35rem] rounded-[2px] object-cover ring-1 ring-black/15 lg:h-5 lg:w-[1.875rem]"
       aria-hidden
       draggable={false}
     />
@@ -43,25 +44,26 @@ export function FlagSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-0" role="group" aria-label={t("lang")} aria-busy={pending}>
+    <div className="flex items-center gap-0.5" role="group" aria-label={t("lang")} aria-busy={pending}>
       {FLAGS.map(({ locale, code }) => {
         const selected = current === locale;
+        const name = LOCALE_LABEL[locale];
         return (
           <button
             key={locale}
             type="button"
             disabled={pending}
             onClick={() => choose(locale)}
-            aria-label={LOCALE_LABEL[locale]}
+            aria-label={name}
             aria-pressed={selected}
-            title={LOCALE_LABEL[locale]}
+            title={name}
             className={cn(
-              "inline-flex size-6 items-center justify-center rounded-md hover:bg-accent lg:size-9",
+              "inline-flex size-7 items-center justify-center rounded-md hover:bg-accent lg:size-9",
               selected && "ring-2 ring-primary lg:ring-offset-1",
             )}
           >
             <FlagImage code={code} />
-            <span className="sr-only">{LOCALE_LABEL[locale]}</span>
+            <span className="sr-only">{name}</span>
           </button>
         );
       })}
