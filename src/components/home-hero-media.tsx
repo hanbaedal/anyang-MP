@@ -8,10 +8,14 @@ import { cn } from "@/lib/utils";
 
 const SOUND_SESSION_KEY = "anyang-home-hero-bgm";
 /** 업로드 히어로 교체 후 모바일 immutable 캐시 무효화용 (값만 올리면 됨) */
-const HOME_HERO_UPLOAD_CACHE_BUST = "t975";
+const HOME_HERO_UPLOAD_CACHE_BUST = "t1046";
 
 function withHeroCacheBust(src: string) {
-  if (!src.includes("/uploads/home-hero/") && !src.includes("/api/uploads/home-hero/")) return src;
+  const needsBust =
+    src.includes("/uploads/home-hero/") ||
+    src.includes("/api/uploads/home-hero/") ||
+    src.includes("/static/home-hero-intro");
+  if (!needsBust) return src;
   const sep = src.includes("?") ? "&" : "?";
   return `${src}${sep}v=${HOME_HERO_UPLOAD_CACHE_BUST}`;
 }
