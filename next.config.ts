@@ -29,6 +29,15 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: cdnPatterns(),
   },
+  async headers() {
+    // 정적 히어로 MP4 — 캐시버스트(?v=)와 함께 장기 캐시 안전
+    return [
+      {
+        source: "/static/:path*.mp4",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
+      },
+    ];
+  },
   async rewrites() {
     return [{ source: "/uploads/:path*", destination: "/api/uploads/:path*" }];
   },

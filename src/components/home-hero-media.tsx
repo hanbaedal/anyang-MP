@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const SOUND_SESSION_KEY = "anyang-home-hero-bgm";
 /** 업로드 히어로 교체 후 모바일 immutable 캐시 무효화용 (값만 올리면 됨) */
-const HOME_HERO_UPLOAD_CACHE_BUST = "t990";
+const HOME_HERO_UPLOAD_CACHE_BUST = "t1080br";
 
 function withHeroCacheBust(src: string) {
   const needsBust =
@@ -140,33 +140,34 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
 
   return (
     <>
-      {videoError ? (
-        <Photo
-          src={posterSrc}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full rounded-none"
-          sizes="100vw"
-          priority
+      {/* 포스터 먼저: 영상 준비 전·오류 시에도 즉시 보임 (opacity-0로 가리지 않음) */}
+      <Photo
+        src={posterSrc}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full rounded-none"
+        sizes="100vw"
+        priority
+      />
+      {!videoError ? (
+        <video
+          key={playSrc}
+          ref={videoRef}
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover object-[center_32%] transition-opacity duration-500",
+            videoReady ? "opacity-100" : "opacity-0",
+          )}
+          src={playSrc}
+          poster={posterSrc}
+          muted={hasSeparateBgm || !soundOn}
+          autoPlay
+          playsInline
+          loop
+          preload="metadata"
+          onLoadedData={() => setVideoReady(true)}
+          onError={() => setVideoError(true)}
         />
       ) : null}
-      <video
-        key={playSrc}
-        ref={videoRef}
-        className={cn(
-          "absolute inset-0 h-full w-full object-cover object-[center_32%]",
-          videoReady || videoError ? "opacity-100" : "opacity-0",
-        )}
-        src={playSrc}
-        poster={posterSrc}
-        muted={hasSeparateBgm || !soundOn}
-        autoPlay
-        playsInline
-        loop
-        preload="auto"
-        onLoadedData={() => setVideoReady(true)}
-        onError={() => setVideoError(true)}
-      />
       {hasSeparateBgm ? <audio key={audioSrc} ref={audioRef} src={audioSrc} loop preload="metadata" /> : null}
       {showSoundPrompt && videoReady && !videoError ? (
         <div className="pointer-events-none absolute inset-x-0 top-[42%] z-[20] flex -translate-y-1/2 justify-center px-4">
