@@ -11,28 +11,32 @@ export { HOME_HERO_MAX_SETS, HOME_HERO_UNPUBLISHED } from "./home-hero-types";
 const localFile = dataFile("home-hero.local.json");
 const SETTINGS_KEY = "home_hero";
 
-function builtinSet(now: string): HomeHeroSet {
-  return {
-    id: "builtin-set",
-    label: "기본",
-    videoSrc: "/static/23838-337674789.mp4",
-    audioSrc: "",
-    videoLabel: "기본 배포 영상",
-    audioLabel: "",
-    createdAt: now,
-  };
+/** 홈 폴백 기본 영상 (관리 목록·4세트 카운트에 넣지 않음) */
+export const HOME_HERO_BUILTIN_VIDEO = "/static/23838-337674789.mp4";
+
+const BUILTIN_SET_IDS = new Set(["builtin-set", "legacy-set"]);
+
+function builtinMedia() {
+  return { videoSrc: HOME_HERO_BUILTIN_VIDEO, audioSrc: "" };
+}
+
+/** 직원이 올린 업로드만 등록 세트로 인정 (배포 기본·레거시 경로 제외) */
+export function isUploadedHomeHeroSet(set: Pick<HomeHeroSet, "id" | "videoSrc">): boolean {
+  if (BUILTIN_SET_IDS.has(set.id)) return false;
+  const src = set.videoSrc;
+  return src.startsWith("/uploads/home-hero/") || src.startsWith("/api/uploads/home-hero/");
 }
 
 export function defaultHomeHeroSettings(): HomeHeroSettings {
   const now = new Date().toISOString();
-  const set = builtinSet(now);
+  const media = builtinMedia();
   return {
-    sets: [set],
-    activeSetId: set.id,
+    sets: [],
+    activeSetId: HOME_HERO_UNPUBLISHED,
     posterSrc: "/images/hero.jpg",
     updatedAt: now,
-    videoSrc: set.videoSrc,
-    audioSrc: set.audioSrc,
+    videoSrc: media.videoSrc,
+    audioSrc: media.audioSrc,
   };
 }
 
@@ -42,31 +46,35 @@ export function isSafeHomeMediaPath(src: string) {
 }
 
 function applyActive(settings: Omit<HomeHeroSettings, "videoSrc" | "audioSrc"> & Partial<Pick<HomeHeroSettings, "videoSrc" | "audioSrc">>): HomeHeroSettings {
-  const sets = settings.sets.slice(0, HOME_HERO_MAX_SETS);
+  // 업로드 세트만 보관·카운트 (기본/레거시 「현재」 등 제외)
+  const sets = settings.sets.filter(isUploadedHomeHeroSet).slice(0, HOME_HERO_MAX_SETS);
   const posterSrc = isSafeHomeMediaPath(settings.posterSrc) ? settings.posterSrc : "/images/hero.jpg";
   const updatedAt = settings.updatedAt || new Date().toISOString();
-  const builtin = builtinSet(updatedAt);
+  const media = builtinMedia();
 
-  // 등록 세트 없음·전부 비공개 → 홈은 기본 배포 미디어 (관리 목록에 builtin을 다시 넣지 않음)
-  if (!sets.length || settings.activeSetId === HOME_HERO_UNPUBLISHED) {
+  const published =
+    settings.activeSetId && settings.activeSetId !== HOME_HERO_UNPUBLISHED
+      ? sets.find((s) => s.id === settings.activeSetId)
+      : undefined;
+
+  if (!published) {
     return {
       sets,
       activeSetId: HOME_HERO_UNPUBLISHED,
       posterSrc,
       updatedAt,
-      videoSrc: builtin.videoSrc,
-      audioSrc: builtin.audioSrc,
+      videoSrc: media.videoSrc,
+      audioSrc: media.audioSrc,
     };
   }
 
-  const active = sets.find((s) => s.id === settings.activeSetId) || sets[0]!;
   return {
     sets,
-    activeSetId: active.id,
+    activeSetId: published.id,
     posterSrc,
     updatedAt,
-    videoSrc: active.videoSrc,
-    audioSrc: active.audioSrc || "",
+    videoSrc: published.videoSrc,
+    audioSrc: published.audioSrc || "",
   };
 }
 
@@ -97,15 +105,18 @@ function normalizeSet(raw: unknown): HomeHeroSet | null {
   };
 }
 
-/** 구형(단일 슬롯·videos/audios) 문서를 세트 목록으로 변환 */
+/** 구형(단일 슬롯·videos/audios) 문서를 세트 목록으로 변환 — 업로드만 남김 */
 function migrateLegacyDoc(doc: Record<string, unknown>): HomeHeroSet[] {
   const fromSets = Array.isArray(doc.sets)
     ? (doc.sets.map(normalizeSet).filter(Boolean) as HomeHeroSet[])
     : [];
-  if (fromSets.length) return fromSets.slice(0, HOME_HERO_MAX_SETS);
+  if (fromSets.length) {
+    return fromSets.filter(isUploadedHomeHeroSet).slice(0, HOME_HERO_MAX_SETS);
+  }
 
   const videoSrc = String(doc.videoSrc ?? "");
-  if (isSafeHomeMediaPath(videoSrc)) {
+  // 예전 단일 슬롯이 업로드가 아니면 「현재」레거시 세트로 만들지 않음
+  if (isSafeHomeMediaPath(videoSrc) && isUploadedHomeHeroSet({ id: "legacy-set", videoSrc })) {
     const rawAudio = doc.audioSrc;
     const audioSrc =
       rawAudio === "" || rawAudio === null || rawAudio === undefined
@@ -119,8 +130,8 @@ function migrateLegacyDoc(doc: Record<string, unknown>): HomeHeroSet[] {
     const audioMeta = audios[0] && typeof audios[0] === "object" ? (audios[0] as Record<string, unknown>) : null;
     return [
       {
-        id: String(videoMeta?.id || "legacy-set"),
-        label: String(videoMeta?.label ?? "").trim() || "현재",
+        id: String(videoMeta?.id || randomUUID()),
+        label: String(videoMeta?.label ?? "").trim() || "세트",
         videoSrc,
         audioSrc,
         videoLabel: String(videoMeta?.label ?? "").trim() || "영상",
@@ -140,9 +151,8 @@ function fromDoc(doc: Record<string, unknown>): HomeHeroSettings {
   const base = defaultHomeHeroSettings();
   const sets = migrateLegacyDoc(doc);
   const rawActive = doc.activeSetId;
-  // 빈 문자열 = 의도적 비공개. 문서에 키가 없으면 첫 세트(또는 비공개).
   const activeSetId =
-    rawActive === HOME_HERO_UNPUBLISHED || rawActive === "none"
+    rawActive === HOME_HERO_UNPUBLISHED || rawActive === "none" || rawActive === "builtin-set" || rawActive === "legacy-set"
       ? HOME_HERO_UNPUBLISHED
       : rawActive === undefined || rawActive === null
         ? sets[0]?.id ?? HOME_HERO_UNPUBLISHED
@@ -208,22 +218,47 @@ export async function getHomeHeroSettings(): Promise<HomeHeroSettings> {
 
 /**
  * 관리 저장·공개·삭제용. Mongo에 붙을 때까지 기다리고, 실패하면 throw한다.
- * 타임아웃 기본값으로 기존 세트를 지우는 일을 막는다.
+ * 읽은 뒤 builtin/레거시 행이 있으면 업로드만 남겨 즉시 저장(프로덕션 정리).
  */
 export async function getHomeHeroSettingsForWrite(): Promise<HomeHeroSettings> {
   if (hasMongo()) {
     try {
-      const fromMongo = await readHomeHeroFromMongo();
-      if (fromMongo) return fromMongo;
-      // 문서가 아직 없으면 기본 세트로 시작(첫 저장)
-      return defaultHomeHeroSettings();
+      const db = await getDb();
+      if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
+      const row = await db.collection("site_settings").findOne({ key: SETTINGS_KEY });
+      if (!row) return defaultHomeHeroSettings();
+
+      const raw = row as Record<string, unknown>;
+      const cleaned = fromDoc(raw);
+      const rawSets = Array.isArray(raw.sets) ? raw.sets : [];
+      const hadNonUpload = rawSets.some((s) => {
+        const n = normalizeSet(s);
+        return n ? !isUploadedHomeHeroSet(n) : false;
+      });
+      const activeWasBuiltin =
+        raw.activeSetId === "builtin-set" ||
+        raw.activeSetId === "legacy-set" ||
+        (typeof raw.activeSetId === "string" &&
+          raw.activeSetId !== HOME_HERO_UNPUBLISHED &&
+          !cleaned.sets.some((s) => s.id === raw.activeSetId) &&
+          cleaned.activeSetId === HOME_HERO_UNPUBLISHED);
+
+      if (hadNonUpload || activeWasBuiltin || rawSets.length !== cleaned.sets.length) {
+        return saveHomeHeroSettings(cleaned);
+      }
+      return cleaned;
     } catch (error) {
       console.error("[home-hero] mongo write-read failed", error);
       throw new Error("데이터베이스에서 설정을 읽지 못했습니다. 잠시 후 다시 시도해 주세요.");
     }
   }
   const local = await readLocal();
-  return local ? fromDoc(local as unknown as Record<string, unknown>) : defaultHomeHeroSettings();
+  if (!local) return defaultHomeHeroSettings();
+  const cleaned = fromDoc(local as unknown as Record<string, unknown>);
+  if ((local.sets?.length ?? 0) !== cleaned.sets.length) {
+    return saveHomeHeroSettings(cleaned);
+  }
+  return cleaned;
 }
 
 export async function saveHomeHeroSettings(input: HomeHeroSettings): Promise<HomeHeroSettings> {
@@ -232,6 +267,7 @@ export async function saveHomeHeroSettings(input: HomeHeroSettings): Promise<Hom
     sets: input.sets
       .map(normalizeSet)
       .filter((s): s is HomeHeroSet => Boolean(s))
+      .filter(isUploadedHomeHeroSet)
       .slice(0, HOME_HERO_MAX_SETS),
     updatedAt: new Date().toISOString(),
   });
@@ -266,7 +302,7 @@ export async function addHomeHeroSet(
   settings: HomeHeroSettings,
   next: { videoSrc: string; audioSrc: string; label?: string; videoLabel?: string; audioLabel?: string },
 ): Promise<HomeHeroSettings> {
-  if (!next.videoSrc || !isSafeHomeMediaPath(next.videoSrc)) {
+  if (!next.videoSrc || !isUploadedHomeHeroSet({ id: "x", videoSrc: next.videoSrc })) {
     throw new Error("영상을 등록한 뒤 저장해 주세요.");
   }
   if (next.audioSrc && !isSafeHomeMediaPath(next.audioSrc)) {
@@ -288,8 +324,9 @@ export async function addHomeHeroSet(
   };
 
   const sets = [...settings.sets, set];
-  // 첫 사용자 세트면 공개 대상을 새 세트로
-  const activeSetId = settings.sets.length === 0 || settings.activeSetId === "builtin-set" ? set.id : settings.activeSetId;
+  // 첫 업로드 세트면 공개
+  const activeSetId =
+    settings.sets.length === 0 || settings.activeSetId === HOME_HERO_UNPUBLISHED ? set.id : settings.activeSetId;
 
   return saveHomeHeroSettings({
     ...settings,
@@ -305,7 +342,7 @@ export async function replaceHomeHeroSet(
 ): Promise<HomeHeroSettings> {
   const idx = settings.sets.findIndex((s) => s.id === setId);
   if (idx < 0) throw new Error("선택한 세트를 찾을 수 없습니다.");
-  if (!next.videoSrc || !isSafeHomeMediaPath(next.videoSrc)) {
+  if (!next.videoSrc || !isUploadedHomeHeroSet({ id: "x", videoSrc: next.videoSrc })) {
     throw new Error("영상을 등록한 뒤 저장해 주세요.");
   }
   if (next.audioSrc && !isSafeHomeMediaPath(next.audioSrc)) {
@@ -335,7 +372,7 @@ export async function publishHomeHeroSet(settings: HomeHeroSettings, setId: stri
   return saveHomeHeroSettings({ ...settings, activeSetId: setId });
 }
 
-/** 홈 공개 해제 — 홈은 기본 배포 영상·음악으로 돌아감 */
+/** 홈 공개 해제 — 홈은 기본 배포 영상으로 돌아감 */
 export async function unpublishHomeHeroSet(settings: HomeHeroSettings): Promise<HomeHeroSettings> {
   return saveHomeHeroSettings({ ...settings, activeSetId: HOME_HERO_UNPUBLISHED });
 }
@@ -348,7 +385,6 @@ export async function deleteHomeHeroSet(settings: HomeHeroSettings, setId: strin
   try {
     await removeSetFilesIfUnused(target, sets);
   } catch (error) {
-    // 파일 정리 실패해도 메타 삭제는 진행 (삭제 UX가 막히지 않게)
     console.error("[home-hero] set file cleanup failed", error);
   }
   const activeSetId = settings.activeSetId === setId ? HOME_HERO_UNPUBLISHED : settings.activeSetId;
