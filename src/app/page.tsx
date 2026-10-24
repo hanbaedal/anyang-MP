@@ -26,19 +26,11 @@ export default async function HomePage() {
             <div className="w-full min-w-0 md:w-auto">
               <p className="text-sm tracking-wide text-primary-foreground/85">{t(locale, "home.kicker")}</p>
               <h1 className="mt-2 font-serif leading-tight text-primary-foreground">
-                <span className="block break-keep text-3xl md:whitespace-nowrap md:text-[2.15rem] lg:text-[2.35rem]">
-                  {locale === "ko" ? (
-                    <>
-                      접근성이 뛰어난
-                      <span className="hidden md:inline"> </span>
-                      <br className="md:hidden" />
-                      명당자리
-                    </>
-                  ) : (
-                    t(locale, "home.hero1")
-                  )}
+                {/* 모바일: 한 줄 유지(작은 글씨). md+: 기존 PC 크기 */}
+                <span className="block whitespace-nowrap text-[1.125rem] tracking-tight sm:text-xl md:text-[2.15rem] lg:text-[2.35rem]">
+                  {locale === "ko" ? "접근성이 뛰어난 명당자리" : t(locale, "home.hero1")}
                 </span>
-                <span className="mt-1 block break-keep text-3xl md:text-4xl lg:text-[2.75rem]">
+                <span className="mt-1 block break-keep text-2xl md:text-4xl lg:text-[2.75rem]">
                   {t(locale, "home.hero2")}
                 </span>
               </h1>
