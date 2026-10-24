@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { HOME_HERO_MAX_SETS, type HomeHeroSet, type HomeHeroSettings } from "@/lib/home-hero-types";
+import {
+  HOME_HERO_AUDIO_MAX_BYTES,
+  HOME_HERO_AUDIO_MAX_LABEL,
+  HOME_HERO_MAX_SETS,
+  HOME_HERO_VIDEO_MAX_BYTES,
+  HOME_HERO_VIDEO_MAX_LABEL,
+  type HomeHeroSet,
+  type HomeHeroSettings,
+} from "@/lib/home-hero-types";
 import { cn } from "@/lib/utils";
 
 function formatBytes(n: number) {
@@ -51,7 +59,7 @@ async function parseSettingsResponse(res: Response): Promise<{
       status: res.status,
       error:
         res.status === 413 || res.status === 502 || res.status === 504
-          ? `업로드가 끊겼습니다 (HTTP ${res.status}). 영상 25MB 이하·안정된 네트워크에서 다시 시도해 주세요.`
+          ? `업로드가 끊겼습니다 (HTTP ${res.status}). 영상 ${HOME_HERO_VIDEO_MAX_LABEL} 이하·안정된 네트워크에서 다시 시도해 주세요.`
           : `응답을 읽지 못했습니다 (HTTP ${res.status}). 잠시 후 다시 시도해 주세요.`,
     };
   }
@@ -113,6 +121,38 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
     setPendingLabel("");
   }
 
+  function onPickVideo(file: File | null) {
+    if (!file) {
+      setPendingVideo(null);
+      return;
+    }
+    if (file.size > HOME_HERO_VIDEO_MAX_BYTES) {
+      setPendingVideo(null);
+      setStatus("error");
+      setMessage(`영상은 ${HOME_HERO_VIDEO_MAX_LABEL} 이하만 올릴 수 있습니다. (선택: ${formatBytes(file.size)})`);
+      return;
+    }
+    setPendingVideo(file);
+    setMessage("");
+    setStatus("idle");
+  }
+
+  function onPickAudio(file: File | null) {
+    if (!file) {
+      setPendingAudio(null);
+      return;
+    }
+    if (file.size > HOME_HERO_AUDIO_MAX_BYTES) {
+      setPendingAudio(null);
+      setStatus("error");
+      setMessage(`음악은 ${HOME_HERO_AUDIO_MAX_LABEL} 이하만 올릴 수 있습니다. (선택: ${formatBytes(file.size)})`);
+      return;
+    }
+    setPendingAudio(file);
+    setMessage("");
+    setStatus("idle");
+  }
+
   async function uploadSet(action: "add" | "replace") {
     if (!canSave || !pendingVideo) return;
     if (action === "replace" && !selected) {
@@ -123,6 +163,16 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
     if (action === "add" && atCap) {
       setStatus("error");
       setMessage(`세트는 최대 ${HOME_HERO_MAX_SETS}개입니다. 하나를 삭제하거나 「선택 세트 교체」를 사용해 주세요.`);
+      return;
+    }
+    if (pendingVideo.size > HOME_HERO_VIDEO_MAX_BYTES) {
+      setStatus("error");
+      setMessage(`영상은 ${HOME_HERO_VIDEO_MAX_LABEL} 이하만 올릴 수 있습니다.`);
+      return;
+    }
+    if (pendingAudio && pendingAudio.size > HOME_HERO_AUDIO_MAX_BYTES) {
+      setStatus("error");
+      setMessage(`음악은 ${HOME_HERO_AUDIO_MAX_LABEL} 이하만 올릴 수 있습니다.`);
       return;
     }
 
@@ -159,11 +209,13 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
       );
     } catch {
       setStatus("error");
-      setMessage("연결이 끊겼습니다. 파일 용량(영상 25MB 이하)과 네트워크를 확인한 뒤 다시 시도해 주세요.");
+      setMessage(
+        `연결이 끊겼습니다. 파일 용량(영상 ${HOME_HERO_VIDEO_MAX_LABEL} 이하)과 네트워크를 확인한 뒤 다시 시도해 주세요.`,
+      );
     }
   }
 
-  async function putAction(body: Record<string, string>) {
+  async function putAction(body: Record<string, string>, okMessage: string) {
     setStatus("busy");
     setMessage("");
     try {
@@ -179,21 +231,33 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
         return;
       }
       setSettings(parsed.settings);
+      if (body.action === "delete") {
+        const nextId = parsed.settings.activeSetId || parsed.settings.sets[0]?.id || "";
+        setSelectedId(nextId);
+      }
       setStatus("ok");
-      if (body.action === "publish") setMessage("홈에 이 세트를 공개했습니다.");
-      else if (body.action === "delete") setMessage("세트를 삭제했습니다.");
-      else setMessage("반영했습니다.");
+      setMessage(okMessage);
     } catch {
       setStatus("error");
       setMessage("연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.");
     }
   }
 
+  async function togglePublic(nextPublic: boolean) {
+    if (!selected) return;
+    if (nextPublic) {
+      await putAction({ action: "publish", setId: selected.id }, "홈에 이 세트를 공개했습니다. (다른 세트는 비공개)");
+    } else {
+      await putAction({ action: "unpublish" }, "홈 공개를 해제했습니다. 홈은 기본 배포 영상·음악을 씁니다.");
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-3 py-6 sm:px-4">
       <p className="text-xs leading-relaxed text-muted-foreground">
-        영상·음악은 최대 {HOME_HERO_MAX_SETS}세트까지 보관합니다. 위에서 등록한 뒤, 아래 카드에서 골라 미리보고 「이
-        세트 공개」로 홈에 반영하세요. 음악이 없으면 홈에서 영상 소리를 켭니다.
+        영상·음악은 최대 {HOME_HERO_MAX_SETS}세트까지 보관합니다. 위에서 등록한 뒤, 아래 카드를 고르고{" "}
+        <strong className="font-medium text-foreground">공개</strong> 스위치로 홈에 올립니다. 한 번에 하나만
+        공개되며, 끄면 홈은 기본 배포 미디어로 돌아갑니다. 음악이 없으면 홈에서 영상 소리를 켭니다.
       </p>
 
       <section className="space-y-3 rounded-lg border-2 border-primary/25 bg-card p-3 sm:p-4">
@@ -228,9 +292,7 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
               className="sr-only"
               disabled={busy}
               onChange={(e) => {
-                const file = e.target.files?.[0] ?? null;
-                setPendingVideo(file);
-                setMessage("");
+                onPickVideo(e.target.files?.[0] ?? null);
                 e.target.value = "";
               }}
             />
@@ -245,9 +307,7 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
               className="sr-only"
               disabled={busy}
               onChange={(e) => {
-                const file = e.target.files?.[0] ?? null;
-                setPendingAudio(file);
-                setMessage("");
+                onPickAudio(e.target.files?.[0] ?? null);
                 e.target.value = "";
               }}
             />
@@ -271,7 +331,7 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
           </Button>
         </div>
         <p className="text-[11px] text-muted-foreground">
-          영상 필수(25MB 이하) · 음악 선택(12MB 이하)
+          영상 필수({HOME_HERO_VIDEO_MAX_LABEL} 이하) · 음악 선택({HOME_HERO_AUDIO_MAX_LABEL} 이하)
           {atCap ? ` · 세트가 가득 찼습니다. 교체하거나 삭제 후 추가하세요.` : null}
         </p>
 
@@ -318,45 +378,77 @@ export function ManageHomeHero({ initial }: { initial: HomeHeroSettings }) {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium">등록된 세트</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {settings.sets.map((set) => (
-            <SetCard
-              key={set.id}
-              set={set}
-              active={set.id === settings.activeSetId}
-              selected={set.id === selectedId}
-              disabled={busy}
-              onSelect={() => {
-                setSelectedId(set.id);
-                setMessage("");
-              }}
-            />
-          ))}
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-medium">등록된 세트</h2>
+          {!settings.activeSetId ? (
+            <p className="text-[11px] text-muted-foreground">홈 공개 없음 · 기본 배포 미디어</p>
+          ) : null}
         </div>
+        {settings.sets.length === 0 ? (
+          <p className="rounded-md border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
+            등록된 세트가 없습니다. 위에서 영상을 추가하세요. 홈은 기본 배포 영상·음악을 사용합니다.
+          </p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {settings.sets.map((set) => (
+              <SetCard
+                key={set.id}
+                set={set}
+                active={set.id === settings.activeSetId}
+                selected={set.id === selectedId}
+                disabled={busy}
+                onSelect={() => {
+                  setSelectedId(set.id);
+                  setMessage("");
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {selected ? (
         <section className="space-y-3 rounded-lg border bg-card p-3 sm:p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-medium">선택 미리보기 · {selected.label}</h2>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                disabled={busy || selectedIsActive}
-                onClick={() => void putAction({ action: "publish", setId: selected.id })}
-              >
-                {selectedIsActive ? "공개 중" : "이 세트 공개"}
-              </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{selectedIsActive ? "공개" : "비공개"}</span>
+                <span className="relative inline-flex h-6 w-11 shrink-0 items-center">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    className="peer sr-only"
+                    checked={selectedIsActive}
+                    disabled={busy}
+                    onChange={(e) => void togglePublic(e.target.checked)}
+                    aria-label={selectedIsActive ? "홈 공개 해제" : "홈에 공개"}
+                  />
+                  <span
+                    className={cn(
+                      "absolute inset-0 rounded-full border transition-colors",
+                      selectedIsActive ? "border-primary bg-primary" : "border-input bg-muted",
+                      busy && "opacity-60",
+                    )}
+                    aria-hidden
+                  />
+                  <span
+                    className={cn(
+                      "absolute left-0.5 size-5 rounded-full bg-background shadow transition-transform",
+                      selectedIsActive && "translate-x-5",
+                    )}
+                    aria-hidden
+                  />
+                </span>
+              </label>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                disabled={busy || settings.sets.length <= 1}
+                disabled={busy}
                 onClick={() => {
                   if (!window.confirm(`「${selected.label}」 세트를 삭제할까요?`)) return;
-                  void putAction({ action: "delete", setId: selected.id });
+                  void putAction({ action: "delete", setId: selected.id }, "세트를 삭제했습니다.");
                 }}
               >
                 삭제
@@ -441,7 +533,11 @@ function SetCard({
           <span className="absolute left-2 top-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
             공개 중
           </span>
-        ) : null}
+        ) : (
+          <span className="absolute left-2 top-2 rounded bg-background/90 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-border">
+            비공개
+          </span>
+        )}
       </div>
       <div className="space-y-0.5 px-3 py-2">
         <p className="truncate text-sm font-medium">{set.label}</p>

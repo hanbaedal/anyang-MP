@@ -5,35 +5,24 @@ import { cn } from "@/lib/utils";
 import { FLAGS, type Locale, LOCALE_LABEL } from "@/lib/i18n";
 import { useLocale, useT } from "@/components/locale-provider";
 
-function FlagSvg({ code }: { code: "KR" | "US" | "CN" }) {
-  if (code === "KR") {
-    return (
-      <svg viewBox="0 0 24 16" className="h-3 w-[1.125rem] rounded-[2px] ring-1 ring-black/10 lg:h-4 lg:w-6" aria-hidden>
-        <rect width="24" height="16" fill="#fff" />
-        <circle cx="12" cy="6.4" r="3.3" fill="#CD2E3A" />
-        <circle cx="12" cy="9.6" r="3.3" fill="#0047A0" />
-      </svg>
-    );
-  }
-  if (code === "US") {
-    return (
-      <svg viewBox="0 0 24 16" className="h-3 w-[1.125rem] rounded-[2px] ring-1 ring-black/10 lg:h-4 lg:w-6" aria-hidden>
-        <rect width="24" height="16" fill="#BF0A30" />
-        <rect y="1.2" width="24" height="1.2" fill="#fff" />
-        <rect y="3.6" width="24" height="1.2" fill="#fff" />
-        <rect y="6" width="24" height="1.2" fill="#fff" />
-        <rect y="8.4" width="24" height="1.2" fill="#fff" />
-        <rect y="10.8" width="24" height="1.2" fill="#fff" />
-        <rect y="13.2" width="24" height="1.2" fill="#fff" />
-        <rect width="10" height="8.6" fill="#002868" />
-      </svg>
-    );
-  }
+const FLAG_SRC: Record<"KR" | "US" | "CN", string> = {
+  KR: "/flags/kr.svg",
+  US: "/flags/us.svg",
+  CN: "/flags/cn.svg",
+};
+
+function FlagImage({ code }: { code: "KR" | "US" | "CN" }) {
   return (
-    <svg viewBox="0 0 24 16" className="h-3 w-[1.125rem] rounded-[2px] ring-1 ring-black/10 lg:h-4 lg:w-6" aria-hidden>
-      <rect width="24" height="16" fill="#DE2910" />
-      <polygon fill="#FFDE00" points="4.2,2.2 5,4.6 7.6,4.6 5.5,6.1 6.3,8.5 4.2,7 2.1,8.5 2.9,6.1 0.8,4.6 3.4,4.6" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element -- 정적 SVG 국기 자산(PC·모바일 동일)
+    <img
+      src={FLAG_SRC[code]}
+      alt=""
+      width={24}
+      height={16}
+      className="h-3 w-[1.125rem] rounded-[2px] object-cover ring-1 ring-black/10 lg:h-4 lg:w-6"
+      aria-hidden
+      draggable={false}
+    />
   );
 }
 
@@ -71,7 +60,7 @@ export function FlagSwitcher() {
               selected && "ring-2 ring-primary lg:ring-offset-1",
             )}
           >
-            <FlagSvg code={code} />
+            <FlagImage code={code} />
             <span className="sr-only">{LOCALE_LABEL[locale]}</span>
           </button>
         );

@@ -8,7 +8,9 @@ import {
   renameHomeHeroSet,
   replaceHomeHeroSet,
   saveHomeHeroSettings,
+  unpublishHomeHeroSet,
 } from "@/lib/home-hero";
+import { HOME_HERO_AUDIO_MAX_LABEL, HOME_HERO_VIDEO_MAX_LABEL } from "@/lib/home-hero-types";
 import { saveHomeHeroUpload } from "@/lib/manage-media-upload";
 import { requireStaffApi } from "@/lib/manage-guard";
 
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: "업로드가 끊겼거나 파일이 너무 큽니다. 영상 25MB·음악 12MB 이하로 다시 시도해 주세요.",
+        error: `업로드가 끊겼거나 파일이 너무 큽니다. 영상 ${HOME_HERO_VIDEO_MAX_LABEL}·음악 ${HOME_HERO_AUDIO_MAX_LABEL} 이하로 다시 시도해 주세요.`,
       },
       { status: 413 },
     );
@@ -151,8 +153,8 @@ export async function POST(request: Request) {
 }
 
 /**
- * 공개·삭제·이름 변경·포스터
- * body.action: publish | delete | rename | poster
+ * 공개·비공개·삭제·이름 변경·포스터
+ * body.action: publish | unpublish | delete | rename | poster
  */
 export async function PUT(request: Request) {
   const guard = await requireStaffApi();
@@ -188,6 +190,10 @@ export async function PUT(request: Request) {
         return NextResponse.json({ ok: false, error: "세트를 선택해 주세요." }, { status: 400 });
       }
       const settings = await publishHomeHeroSet(current, body.setId);
+      return NextResponse.json({ ok: true, settings });
+    }
+    if (action === "unpublish") {
+      const settings = await unpublishHomeHeroSet(current);
       return NextResponse.json({ ok: true, settings });
     }
     if (action === "delete") {

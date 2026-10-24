@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import type { HomeHeroSet, HomeHeroSettings } from "./home-hero-types";
-import { HOME_HERO_MAX_SETS } from "./home-hero-types";
+import { HOME_HERO_MAX_SETS, HOME_HERO_UNPUBLISHED } from "./home-hero-types";
 import { getDb, hasMongo } from "./mongo";
 import { deleteUploadObject } from "./upload-store";
 
 export type { HomeHeroSet, HomeHeroSettings } from "./home-hero-types";
-export { HOME_HERO_MAX_SETS } from "./home-hero-types";
+export { HOME_HERO_MAX_SETS, HOME_HERO_UNPUBLISHED } from "./home-hero-types";
 
 const localFile = dataFile("home-hero.local.json");
 const SETTINGS_KEY = "home_hero";
@@ -43,16 +43,28 @@ export function isSafeHomeMediaPath(src: string) {
 
 function applyActive(settings: Omit<HomeHeroSettings, "videoSrc" | "audioSrc"> & Partial<Pick<HomeHeroSettings, "videoSrc" | "audioSrc">>): HomeHeroSettings {
   const sets = settings.sets.slice(0, HOME_HERO_MAX_SETS);
-  if (!sets.length) {
-    const base = defaultHomeHeroSettings();
-    return { ...base, posterSrc: settings.posterSrc || base.posterSrc, updatedAt: settings.updatedAt || base.updatedAt };
+  const posterSrc = isSafeHomeMediaPath(settings.posterSrc) ? settings.posterSrc : "/images/hero.jpg";
+  const updatedAt = settings.updatedAt || new Date().toISOString();
+  const builtin = builtinSet(updatedAt);
+
+  // 등록 세트 없음·전부 비공개 → 홈은 기본 배포 미디어 (관리 목록에 builtin을 다시 넣지 않음)
+  if (!sets.length || settings.activeSetId === HOME_HERO_UNPUBLISHED) {
+    return {
+      sets,
+      activeSetId: HOME_HERO_UNPUBLISHED,
+      posterSrc,
+      updatedAt,
+      videoSrc: builtin.videoSrc,
+      audioSrc: builtin.audioSrc,
+    };
   }
+
   const active = sets.find((s) => s.id === settings.activeSetId) || sets[0]!;
   return {
     sets,
     activeSetId: active.id,
-    posterSrc: isSafeHomeMediaPath(settings.posterSrc) ? settings.posterSrc : "/images/hero.jpg",
-    updatedAt: settings.updatedAt,
+    posterSrc,
+    updatedAt,
     videoSrc: active.videoSrc,
     audioSrc: active.audioSrc || "",
   };
@@ -127,9 +139,16 @@ function migrateLegacyDoc(doc: Record<string, unknown>): HomeHeroSet[] {
 function fromDoc(doc: Record<string, unknown>): HomeHeroSettings {
   const base = defaultHomeHeroSettings();
   const sets = migrateLegacyDoc(doc);
-  const activeSetId = String(doc.activeSetId ?? sets[0]?.id ?? base.activeSetId);
+  const rawActive = doc.activeSetId;
+  // 빈 문자열 = 의도적 비공개. 문서에 키가 없으면 첫 세트(또는 비공개).
+  const activeSetId =
+    rawActive === HOME_HERO_UNPUBLISHED || rawActive === "none"
+      ? HOME_HERO_UNPUBLISHED
+      : rawActive === undefined || rawActive === null
+        ? sets[0]?.id ?? HOME_HERO_UNPUBLISHED
+        : String(rawActive);
   return applyActive({
-    sets: sets.length ? sets : base.sets,
+    sets,
     activeSetId,
     posterSrc: String(doc.posterSrc ?? base.posterSrc),
     updatedAt:
@@ -316,16 +335,23 @@ export async function publishHomeHeroSet(settings: HomeHeroSettings, setId: stri
   return saveHomeHeroSettings({ ...settings, activeSetId: setId });
 }
 
+/** 홈 공개 해제 — 홈은 기본 배포 영상·음악으로 돌아감 */
+export async function unpublishHomeHeroSet(settings: HomeHeroSettings): Promise<HomeHeroSettings> {
+  return saveHomeHeroSettings({ ...settings, activeSetId: HOME_HERO_UNPUBLISHED });
+}
+
 export async function deleteHomeHeroSet(settings: HomeHeroSettings, setId: string): Promise<HomeHeroSettings> {
   const target = settings.sets.find((s) => s.id === setId);
   if (!target) throw new Error("선택한 세트를 찾을 수 없습니다.");
-  if (settings.sets.length <= 1) {
-    throw new Error("마지막 세트는 삭제할 수 없습니다. 새 세트를 추가한 뒤 바꿔 주세요.");
-  }
 
   const sets = settings.sets.filter((s) => s.id !== setId);
-  await removeSetFilesIfUnused(target, sets);
-  const activeSetId = settings.activeSetId === setId ? sets[0]!.id : settings.activeSetId;
+  try {
+    await removeSetFilesIfUnused(target, sets);
+  } catch (error) {
+    // 파일 정리 실패해도 메타 삭제는 진행 (삭제 UX가 막히지 않게)
+    console.error("[home-hero] set file cleanup failed", error);
+  }
+  const activeSetId = settings.activeSetId === setId ? HOME_HERO_UNPUBLISHED : settings.activeSetId;
   return saveHomeHeroSettings({ ...settings, sets, activeSetId });
 }
 

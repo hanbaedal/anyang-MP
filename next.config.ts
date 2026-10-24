@@ -21,9 +21,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   agentRules: false,
   experimental: {
-    // 홈 히어로 영상(25MB) 등 관리 업로드
-    serverActions: { bodySizeLimit: "30mb" },
-    proxyClientMaxBodySize: "30mb",
+    // 홈 히어로 영상(50MB) 등 관리 업로드 — 여유 포함
+    serverActions: { bodySizeLimit: "60mb" },
+    proxyClientMaxBodySize: "60mb",
   },
   images: {
     formats: ["image/avif", "image/webp"],

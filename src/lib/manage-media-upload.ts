@@ -1,11 +1,14 @@
 import { randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  HOME_HERO_AUDIO_MAX_BYTES,
+  HOME_HERO_AUDIO_MAX_LABEL,
+  HOME_HERO_VIDEO_MAX_BYTES,
+  HOME_HERO_VIDEO_MAX_LABEL,
+} from "./home-hero-types";
 import { hasMongo } from "./mongo";
 import { putUploadObject } from "./upload-store";
-
-const VIDEO_MAX = 25 * 1024 * 1024;
-const AUDIO_MAX = 12 * 1024 * 1024;
 
 export async function saveHomeHeroUpload(
   file: File,
@@ -14,8 +17,8 @@ export async function saveHomeHeroUpload(
   if (!(file instanceof File) || file.size < 1) {
     return { ok: false, error: "파일을 선택해 주세요." };
   }
-  const max = kind === "video" ? VIDEO_MAX : AUDIO_MAX;
-  const maxLabel = kind === "video" ? "25MB" : "12MB";
+  const max = kind === "video" ? HOME_HERO_VIDEO_MAX_BYTES : HOME_HERO_AUDIO_MAX_BYTES;
+  const maxLabel = kind === "video" ? HOME_HERO_VIDEO_MAX_LABEL : HOME_HERO_AUDIO_MAX_LABEL;
   if (file.size > max) {
     return { ok: false, error: `${kind === "video" ? "동영상" : "음악"}은 ${maxLabel} 이하만 올릴 수 있습니다.` };
   }
