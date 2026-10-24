@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const SOUND_SESSION_KEY = "anyang-home-hero-bgm";
 /** 업로드 히어로 교체 후 모바일 immutable 캐시 무효화용 (값만 올리면 됨) */
-const HOME_HERO_UPLOAD_CACHE_BUST = "t1046";
+const HOME_HERO_UPLOAD_CACHE_BUST = "t990";
 
 function withHeroCacheBust(src: string) {
   const needsBust =
