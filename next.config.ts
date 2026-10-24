@@ -30,10 +30,14 @@ const nextConfig: NextConfig = {
     remotePatterns: cdnPatterns(),
   },
   async headers() {
-    // 정적 히어로 MP4 — 캐시버스트(?v=)와 함께 장기 캐시 안전
+    // 정적 히어로 MP4·나레이션 — 캐시버스트(?v=)와 함께 장기 캐시 안전
     return [
       {
         source: "/static/:path*.mp4",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
+      },
+      {
+        source: "/audio/home-hero/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
       },
     ];

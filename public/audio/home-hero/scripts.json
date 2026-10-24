@@ -1,0 +1,24 @@
+{
+  "sourceVideo": "/static/home-hero-intro.mp4",
+  "durationSec": 99,
+  "speechApproxStartSec": 85,
+  "transcription": {
+    "engine": "openai-whisper small",
+    "note": "0–85s is BGM/music only (Whisper hallucinated on chunks); spoken Korean is ~85–99s."
+  },
+  "scripts": {
+    "ko": "시간이 흘러도 변하지 않는 사랑, 세월이 지나도 잊히지 않는 소중한 기억과 그리움이 사랑으로 머무는 곳, 안양공원묘원입니다.",
+    "en": "A love that does not change as time flows. A place where treasured memories and longing remain as love, even as the years pass — Anyang Memorial Park.",
+    "zh": "时光流转，爱意不改。岁月悠悠，珍贵的记忆与思念仍以爱停留的地方——安养公园墓园。"
+  },
+  "tts": {
+    "ko": "extracted from source video (not synthesized)",
+    "en": "edge-tts en-US-AvaNeural",
+    "zh": "edge-tts zh-CN-XiaoxiaoNeural"
+  },
+  "files": {
+    "ko": "/audio/home-hero/ko.m4a",
+    "en": "/audio/home-hero/en.m4a",
+    "zh": "/audio/home-hero/zh.m4a"
+  }
+}

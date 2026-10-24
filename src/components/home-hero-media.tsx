@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { Photo } from "@/components/page-hero";
-import { useT } from "@/components/locale-provider";
+import { useLocale, useT } from "@/components/locale-provider";
+import { homeHeroNarrationSrc } from "@/lib/home-hero-narration";
 import { cn } from "@/lib/utils";
 
 const SOUND_SESSION_KEY = "anyang-home-hero-bgm";
 /** 업로드 히어로 교체 후 모바일 immutable 캐시 무효화용 (값만 올리면 됨) */
 const HOME_HERO_UPLOAD_CACHE_BUST = "t1080br";
+const NARRATION_CACHE_BUST = "n1";
 
 function withHeroCacheBust(src: string) {
   const needsBust =
@@ -20,6 +22,11 @@ function withHeroCacheBust(src: string) {
   return `${src}${sep}v=${HOME_HERO_UPLOAD_CACHE_BUST}`;
 }
 
+function withNarrationBust(src: string) {
+  const sep = src.includes("?") ? "&" : "?";
+  return `${src}${sep}v=${NARRATION_CACHE_BUST}`;
+}
+
 type Props = {
   videoSrc: string;
   audioSrc: string;
@@ -28,16 +35,40 @@ type Props = {
 
 export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
   const playSrc = withHeroCacheBust(videoSrc);
+  const locale = useLocale();
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  /** 별도 음악 파일이 있으면 BGM 트랙, 없으면 영상에 들어 있는 소리 사용 */
-  const hasSeparateBgm = Boolean(audioSrc);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [showSoundPrompt, setShowSoundPrompt] = useState(true);
+  /** 외부 트랙 로드 실패 시 KO는 영상 내장 오디오로 폴백 */
+  const [externalFailed, setExternalFailed] = useState(false);
+
+  const isStaticIntro = playSrc.includes("/static/home-hero-intro");
+  const adminTrack = audioSrc.trim();
+  const localeTrack = isStaticIntro && !adminTrack ? homeHeroNarrationSrc(locale) : "";
+  const externalSrc = adminTrack
+    ? withHeroCacheBust(adminTrack)
+    : localeTrack && !externalFailed
+      ? withNarrationBust(localeTrack)
+      : "";
+  const useExternal = Boolean(externalSrc);
+
+  const syncAudioToVideo = useCallback(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video || !audio || !useExternal) return;
+    if (Math.abs(audio.currentTime - video.currentTime) > 0.35) {
+      try {
+        audio.currentTime = video.currentTime;
+      } catch {
+        /* ignore seek until metadata ready */
+      }
+    }
+  }, [useExternal]);
 
   const startVideoMuted = useCallback(async () => {
     const video = videoRef.current;
@@ -60,10 +91,11 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
         video.muted = true;
         await video.play();
       }
-      if (hasSeparateBgm) {
+      if (useExternal) {
         const audio = audioRef.current;
         if (!audio) return;
         video.muted = true;
+        syncAudioToVideo();
         await audio.play();
       } else {
         video.muted = false;
@@ -76,7 +108,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
       setShowSoundPrompt(true);
       setSoundOn(false);
     }
-  }, [hasSeparateBgm]);
+  }, [useExternal, syncAudioToVideo]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -87,37 +119,78 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
   }, []);
 
   useEffect(() => {
+    setExternalFailed(false);
+  }, [locale, localeTrack, adminTrack]);
+
+  useEffect(() => {
     if (reduceMotion) return;
     setVideoReady(false);
     setVideoError(false);
     setSoundOn(false);
     setShowSoundPrompt(true);
     void startVideoMuted();
-  }, [reduceMotion, playSrc, audioSrc, startVideoMuted]);
+  }, [reduceMotion, playSrc, externalSrc, startVideoMuted]);
 
   useEffect(() => {
     if (reduceMotion || sessionStorage.getItem(SOUND_SESSION_KEY) !== "1") return;
     setShowSoundPrompt(false);
     void enableSound();
-  }, [reduceMotion, playSrc, audioSrc, enableSound]);
+  }, [reduceMotion, playSrc, externalSrc, enableSound]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (hasSeparateBgm) {
+    if (useExternal) {
       video.muted = true;
       const audio = audioRef.current;
       if (!audio) return;
-      if (soundOn) void audio.play().catch(() => setSoundOn(false));
-      else audio.pause();
+      if (soundOn) {
+        syncAudioToVideo();
+        void audio.play().catch(() => setSoundOn(false));
+      } else {
+        audio.pause();
+      }
       return;
     }
 
-    // 별도 음악 없음 → 영상 트랙 소리 on/off
     video.muted = !soundOn;
     if (soundOn && video.paused) void video.play().catch(() => setSoundOn(false));
-  }, [hasSeparateBgm, soundOn, audioSrc, playSrc]);
+  }, [useExternal, soundOn, externalSrc, playSrc, syncAudioToVideo]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video || !useExternal || !audio) return;
+
+    const onPlay = () => {
+      if (!soundOn) return;
+      syncAudioToVideo();
+      void audio.play().catch(() => setSoundOn(false));
+    };
+    const onPause = () => audio.pause();
+    const onSeeking = () => syncAudioToVideo();
+    const onTimeUpdate = () => {
+      if (soundOn) syncAudioToVideo();
+    };
+    const onEnded = () => {
+      /* video loops via attribute; keep audio aligned on next play */
+      syncAudioToVideo();
+    };
+
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("seeking", onSeeking);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("ended", onEnded);
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("seeking", onSeeking);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("ended", onEnded);
+    };
+  }, [useExternal, soundOn, externalSrc, syncAudioToVideo]);
 
   useEffect(() => {
     return () => {
@@ -140,7 +213,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
 
   return (
     <>
-      {/* 포스터 먼저: 영상 준비 전·오류 시에도 즉시 보임 (opacity-0로 가리지 않음) */}
+      {/* 포스터 먼저: 영상 준비 전·오류 시에도 즉시 보임 */}
       <Photo
         src={posterSrc}
         alt=""
@@ -159,7 +232,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
           )}
           src={playSrc}
           poster={posterSrc}
-          muted={hasSeparateBgm || !soundOn}
+          muted={useExternal || !soundOn}
           autoPlay
           playsInline
           loop
@@ -168,7 +241,19 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
           onError={() => setVideoError(true)}
         />
       ) : null}
-      {hasSeparateBgm ? <audio key={audioSrc} ref={audioRef} src={audioSrc} loop preload="metadata" /> : null}
+      {useExternal ? (
+        <audio
+          key={externalSrc}
+          ref={audioRef}
+          src={externalSrc}
+          loop
+          preload="metadata"
+          onError={() => {
+            // KO 추출본 실패 시에만 영상 트랙으로 폴백
+            if (!adminTrack && locale === "ko") setExternalFailed(true);
+          }}
+        />
+      ) : null}
       {showSoundPrompt && videoReady && !videoError ? (
         <div className="pointer-events-none absolute inset-x-0 top-[42%] z-[20] flex -translate-y-1/2 justify-center px-4">
           <button
