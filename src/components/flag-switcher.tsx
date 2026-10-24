@@ -20,7 +20,7 @@ function FlagImage({ code }: { code: "KR" | "US" | "CN" }) {
       alt=""
       width={28}
       height={19}
-      className="h-3.5 w-[1.35rem] rounded-[2px] object-cover ring-1 ring-black/15 lg:h-5 lg:w-[1.875rem]"
+      className="h-3.5 w-[1.35rem] shrink-0 rounded-[2px] bg-white object-cover outline outline-1 outline-black/25 lg:h-5 lg:w-[1.875rem]"
       aria-hidden
       draggable={false}
     />
