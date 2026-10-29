@@ -344,6 +344,11 @@ export const NAV: NavItem[] = [
   },
 ];
 
+/** 헤더 GNB·모바일 아코디언용 — 사이트맵은 유틸 링크로 두고 1차에서 제외 */
+export function publicGnbItems(): NavItem[] {
+  return NAV.filter((item) => item.href !== "/sitemap");
+}
+
 /** 모바일 가로 스와이프 — 공개 하위(없으면 상위, 사이트맵 제외). 리모델링·분양가·문의는 내비에서만 제외 */
 export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) => {
   if (item.href === "/sitemap") return [];
