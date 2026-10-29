@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CircleUserRound, Menu, X } from "lucide-react";
+import { CircleUserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { FlagSwitcher } from "@/components/flag-switcher";
@@ -13,6 +13,9 @@ import { LoginModal } from "@/components/login-modal";
 import { useT } from "@/components/locale-provider";
 import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import type { Role } from "@/lib/auth-types";
+
+const chromeLink =
+  "whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] text-primary underline-offset-4 hover:bg-accent hover:underline sm:px-2 sm:text-sm";
 
 export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role | null }) {
   const t = useT();
@@ -26,9 +29,9 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
       <div className="flex h-full min-w-0 items-center gap-1 px-1 sm:gap-2 sm:px-3">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button size="icon-xs" variant="outline" className="lg:hidden" aria-label={chrome("menu")}>
-              <Menu />
-            </Button>
+            <button type="button" className={chromeLink} aria-label={chrome("explorer")}>
+              {chrome("nav.explorer")}
+            </button>
           </SheetTrigger>
           <SheetContent
             side="left"
@@ -65,10 +68,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
         </Link>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-          <Link
-            href="/sitemap"
-            className="whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] text-primary underline-offset-4 hover:bg-accent hover:underline sm:px-2 sm:text-sm"
-          >
+          <Link href="/sitemap" className={chromeLink}>
             {chrome("nav.sitemap")}
           </Link>
           {guestPath ? <FlagSwitcher /> : null}
