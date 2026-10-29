@@ -15,9 +15,11 @@ export default async function ManageCmsPage({ params }: { params: Promise<{ slug
   const lead =
     slug === "funeral"
       ? "절차 카드·안내 문구를 수정하고, 아래에서 공공서류 PDF를 등록합니다. Enter=줄바꿈·빈 줄=문단, 한글 저장 시 영어·중국어 자동 번역."
-      : ["burial", "lawn", "columbarium", "remodeling"].includes(slug)
-        ? "갤러리와 같이 사진을 올리고, 3열 격자에서 제목·설명을 수정합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-        : "한글 제목·본문·항목을 저장하면 Enter는 줄바꿈, 빈 줄은 문단으로 공개됩니다. 영어·중국어는 자동 번역됩니다. 분양가 원을 비우면 ‘확인 필요’로 보입니다.";
+      : slug === "greeting"
+        ? "제목·본문과 본문 좌측 이미지를 등록합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
+        : ["burial", "lawn", "columbarium", "remodeling"].includes(slug)
+          ? "갤러리와 같이 사진을 올리고, 3열 격자에서 제목·설명을 수정합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
+          : "한글 제목·본문·항목을 저장하면 Enter는 줄바꿈, 빈 줄은 문단으로 공개됩니다. 영어·중국어는 자동 번역됩니다. 분양가 원을 비우면 ‘확인 필요’로 보입니다.";
 
   return (
     <>

@@ -38,6 +38,8 @@ export type CmsPage = {
   body: string;
   items: CmsItem[];
   updatedAt: string;
+  /** 인사말 본문 좌측 이미지. 미등록 시 공개에서 숨김. */
+  bodyImage?: string;
   /** 손님용 영어·중국어 본문. 한글은 위 필드. */
   i18n?: Partial<Record<"en" | "zh", CmsLocaleFields>>;
 };

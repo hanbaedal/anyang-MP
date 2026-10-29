@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
-  let body: { slug?: string; title?: string; lead?: string; body?: string; items?: CmsItem[] };
+  let body: { slug?: string; title?: string; lead?: string; body?: string; bodyImage?: string; items?: CmsItem[] };
   try {
     const raw = await request.text();
     if (!raw.trim()) {
@@ -33,6 +33,7 @@ export async function PUT(request: Request) {
       title: body.title ?? "",
       lead: body.lead ?? "",
       body: body.body ?? "",
+      bodyImage: body.bodyImage ?? "",
       items: Array.isArray(body.items) ? body.items : [],
     });
     return NextResponse.json({ ok: true, page });

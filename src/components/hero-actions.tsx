@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Phone } from "lucide-react";
+import { MapPin, Phone, Trees } from "lucide-react";
 import { useT } from "@/components/locale-provider";
 import { SITE, socialHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -118,7 +118,7 @@ export function SocialActions({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function HeroCallActions() {
+export function HeroCallActions({ onParkView }: { onParkView?: () => void }) {
   const t = useT();
   return (
     <nav aria-label={t("home.call")} className="flex flex-wrap justify-center gap-2 sm:gap-3 md:justify-end">
@@ -136,6 +136,16 @@ export function HeroCallActions() {
         <MapPin className="size-4" aria-hidden />
         {t("directions")}
       </Link>
+      {onParkView ? (
+        <button
+          type="button"
+          onClick={onParkView}
+          className="inline-flex items-center gap-2 rounded-2xl border border-white/40 bg-white/10 px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-white hover:text-primary sm:px-5"
+        >
+          <Trees className="size-4" aria-hidden />
+          {t("home.parkView")}
+        </button>
+      ) : null}
     </nav>
   );
 }

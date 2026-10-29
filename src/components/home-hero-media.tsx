@@ -31,9 +31,11 @@ type Props = {
   videoSrc: string;
   audioSrc: string;
   posterSrc: string;
+  /** 공원전경 모달 등 — 배경 재생 일시정지(음소거는 유지) */
+  paused?: boolean;
 };
 
-export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
+export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc, paused = false }: Props) {
   const playSrc = withHeroCacheBust(videoSrc);
   const locale = useLocale();
   const t = useT();
@@ -198,6 +200,26 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc }: Props) {
       audioRef.current?.pause();
     };
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video) return;
+    if (paused) {
+      video.pause();
+      audio?.pause();
+      return;
+    }
+    if (reduceMotion) return;
+    video.muted = true;
+    void video.play().catch(() => undefined);
+    if (soundOn && useExternal && audio) {
+      syncAudioToVideo();
+      void audio.play().catch(() => setSoundOn(false));
+    } else if (soundOn && !useExternal) {
+      video.muted = false;
+    }
+  }, [paused, reduceMotion, soundOn, useExternal, syncAudioToVideo]);
 
   if (reduceMotion) {
     return (

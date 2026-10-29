@@ -231,12 +231,12 @@ export type SitemapMenu = {
 export function sitemapMenus(role?: Role | null): SitemapMenu[] {
   const menus: SitemapMenu[] = [];
   for (const item of NAV) {
-    if (!item.children?.length) continue;
+    if (item.href === "/sitemap") continue;
     menus.push({
       href: item.href,
       i18n: item.i18n,
       tone: item.tone,
-      children: item.children,
+      children: item.children ?? [],
     });
   }
   if (isStaffRole(role)) {
@@ -305,8 +305,6 @@ export const NAV: NavItem[] = [
       { href: "/lots/burial", label: "매장묘", i18n: "nav.burial" },
       { href: "/lots/lawn", label: "평장묘", i18n: "nav.lawn" },
       { href: "/lots/columbarium", label: "봉안묘", i18n: "nav.columbarium" },
-      { href: "/lots/remodeling", label: "리모델링", i18n: "nav.remodel" },
-      { href: "/lots/prices", label: "분양가·잔여", i18n: "nav.prices" },
     ],
   },
   {
@@ -328,7 +326,7 @@ export const NAV: NavItem[] = [
     i18n: "nav.gallery",
     tone: "gallery",
     image: "/images/gallery-mound.jpg",
-    children: [{ href: "/gallery", label: "공원 갤러리", i18n: "gallery.title" }],
+    // 공개 서브메뉴 숨김 — 상위 클릭으로 /gallery 직행 (라우트·관리 유지)
   },
   {
     href: "/support/notices",
@@ -336,10 +334,7 @@ export const NAV: NavItem[] = [
     i18n: "nav.support",
     tone: "support",
     image: "/images/gallery-4.jpg",
-    children: [
-      { href: "/support/notices", label: "공지사항", i18n: "nav.notices" },
-      { href: "/support/inquiry", label: "문의·상담", i18n: "nav.inquiry" },
-    ],
+    children: [{ href: "/support/notices", label: "공지사항", i18n: "nav.notices" }],
   },
   {
     href: "/sitemap",
@@ -349,10 +344,14 @@ export const NAV: NavItem[] = [
   },
 ];
 
-/** 모바일 가로 스와이프 순서 — 공개 1차 메뉴(사이트맵 제외) 하위 페이지 */
-export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) =>
-  (item.children ?? []).map((child) => ({ href: child.href, i18n: child.i18n })),
-);
+/** 모바일 가로 스와이프 — 공개 하위(없으면 상위, 사이트맵 제외). 리모델링·분양가·문의는 내비에서만 제외 */
+export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) => {
+  if (item.href === "/sitemap") return [];
+  if (item.children?.length) {
+    return item.children.map((child) => ({ href: child.href, i18n: child.i18n }));
+  }
+  return [{ href: item.href, i18n: item.i18n }];
+});
 
 export const SALE_STEPS = [
   { n: "1", titleKey: "step.1.title", textKey: "step.1.text" },

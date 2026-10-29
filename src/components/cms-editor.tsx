@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CmsPhotoItems } from "@/components/cms-photo-items";
+import { ManageImagePicker } from "@/components/manage-image-picker";
 import { CMS_TEXT_ITEM_SLUGS, type CmsItem, type CmsPage, type CmsSlug } from "@/lib/cms-types";
 
 const field =
@@ -22,12 +23,13 @@ function emptyItem(slug: CmsSlug): CmsItem {
 
 export function CmsEditor({ initial }: { initial: CmsPage }) {
   const [page, setPage] = useState(initial);
-  const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error" | "busy">("idle");
   const [message, setMessage] = useState("");
   const pageRef = useRef(page);
   const showItems = !BODY_ONLY_SLUGS.includes(page.slug);
   const photoGrid = PHOTO_SLUGS.includes(page.slug);
   const showPrices = page.slug === "prices";
+  const showBodyImage = page.slug === "greeting";
 
   useEffect(() => {
     pageRef.current = page;
@@ -46,6 +48,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
         title: snapshot.title,
         lead: snapshot.lead,
         body: snapshot.body,
+        bodyImage: snapshot.bodyImage ?? "",
         items: snapshot.items ?? [],
       }),
     });
@@ -73,6 +76,28 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
     [putPage],
   );
 
+  async function uploadBodyImage(file: File) {
+    setStatus("busy");
+    setMessage("");
+    const form = new FormData();
+    form.set("file", file);
+    try {
+      const res = await fetch("/api/manage/upload-image", { method: "POST", body: form });
+      const json = (await res.json()) as { ok?: boolean; src?: string; error?: string };
+      if (json.src) {
+        setPage((prev) => ({ ...prev, bodyImage: json.src }));
+        setMessage("본문 좌측 사진을 올렸습니다. 「페이지 저장」을 눌러야 공개에 반영됩니다.");
+        setStatus("idle");
+      } else {
+        setStatus("error");
+        setMessage(json.error || "업로드 실패");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("네트워크 오류입니다.");
+    }
+  }
+
   async function onSave(event: React.FormEvent) {
     event.preventDefault();
     setStatus("saving");
@@ -86,6 +111,8 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
       setMessage("네트워크 오류입니다.");
     }
   }
+
+  const busy = status === "saving" || status === "busy";
 
   return (
     <form onSubmit={onSave} className="mx-auto max-w-6xl space-y-5 px-4 py-10">
@@ -103,6 +130,45 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
         <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
         <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
       </label>
+      {showBodyImage ? (
+        <div className="space-y-2 rounded-xl border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-medium">본문 좌측 이미지</h2>
+              <p className="text-xs text-muted-foreground">공개 인사말 본문 왼쪽에 표시됩니다. 없으면 텍스트만 보입니다.</p>
+            </div>
+            {page.bodyImage ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => {
+                  setPage((prev) => {
+                    const next = { ...prev };
+                    delete next.bodyImage;
+                    return next;
+                  });
+                  setMessage("이미지를 제거했습니다. 「페이지 저장」을 눌러 반영하세요.");
+                }}
+              >
+                이미지 제거
+              </Button>
+            ) : null}
+          </div>
+          <ManageImagePicker
+            src={page.bodyImage ?? ""}
+            disabled={busy}
+            enableLibrary
+            label="이미지 업로드"
+            onFile={uploadBodyImage}
+            onPickSrc={(src) => {
+              setPage((prev) => ({ ...prev, bodyImage: src }));
+              setMessage("갤러리 사진을 골랐습니다. 「페이지 저장」을 눌러야 공개에 반영됩니다.");
+            }}
+          />
+        </div>
+      ) : null}
       {showItems && photoGrid ? (
         <CmsPhotoItems
           slug={page.slug}
@@ -169,7 +235,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
           </ul>
         </div>
       ) : null}
-      <Button type="submit" disabled={status === "saving"}>
+      <Button type="submit" disabled={busy}>
         {status === "saving" ? "저장 중…" : "페이지 저장 (제목·본문·항목)"}
       </Button>
       {message ? <p className={status === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>{message}</p> : null}

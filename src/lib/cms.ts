@@ -172,6 +172,7 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
 }
 
 function fromDoc(doc: Record<string, unknown>): CmsPage {
+  const bodyImage = String(doc.bodyImage ?? "").trim();
   return {
     slug: doc.slug as CmsSlug,
     title: String(doc.title ?? ""),
@@ -179,6 +180,7 @@ function fromDoc(doc: Record<string, unknown>): CmsPage {
     body: String(doc.body ?? ""),
     items: Array.isArray(doc.items) ? (doc.items as CmsItem[]) : [],
     updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt ?? ""),
+    ...(bodyImage ? { bodyImage } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   };
 }
@@ -273,6 +275,7 @@ export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage
 }
 
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
+  const bodyImage = String(input.bodyImage ?? "").trim();
   const page: CmsPage = {
     slug: input.slug,
     title: input.title.trim(),
@@ -287,13 +290,19 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
       remaining: item.remaining,
     })),
     updatedAt: new Date().toISOString(),
+    ...(bodyImage ? { bodyImage } : {}),
   };
   page.i18n = await fillCmsI18n(page, true);
 
   if (hasMongo()) {
     const db = await getDb();
     if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
-    await db.collection("cms").updateOne({ slug: page.slug }, { $set: { ...page, updatedAt: new Date(page.updatedAt) } }, { upsert: true });
+    const { bodyImage: _omit, ...rest } = page;
+    void _omit;
+    const update = page.bodyImage
+      ? { $set: { ...page, updatedAt: new Date(page.updatedAt) } }
+      : { $set: { ...rest, updatedAt: new Date(page.updatedAt) }, $unset: { bodyImage: "" } };
+    await db.collection("cms").updateOne({ slug: page.slug }, update, { upsert: true });
     return page;
   }
 
