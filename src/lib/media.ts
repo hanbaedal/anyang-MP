@@ -58,7 +58,7 @@ export function isUploadMediaPath(path: string) {
   return normalized.startsWith("/uploads/") || normalized.startsWith("/api/uploads/");
 }
 
-/** Small thumbnail for 둘러보기 grids. Originals stay at the same folder for lightbox. */
+/** Small thumbnail for 갤러리 grids. Originals stay at the same folder for lightbox. */
 export function thumbUrl(path: string) {
   if (!path) return path;
   if (/^https?:\/\//i.test(path)) return path;

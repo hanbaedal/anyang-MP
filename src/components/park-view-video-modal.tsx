@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/components/locale-provider";
+import { uploadOriginalUrl } from "@/lib/media";
+import type { ViewSlide } from "@/components/home-view-slides";
 
 const HOME_HERO_UPLOAD_CACHE_BUST = "t1080br";
+const SLIDE_MS = 7000;
 
 function withHeroCacheBust(src: string) {
   const needsBust =
@@ -22,16 +25,31 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   videoSrc: string;
   posterSrc?: string;
+  photos?: ViewSlide[];
 };
 
-/** 「공원전경」— 히어로와 같은 videoSrc 전체화면 모달. 종료 시 자동 닫기. */
-export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc }: Props) {
+/** 「공원전경」— 갤러리 전경 슬라이드. 사진이 없으면 히어로 영상으로 폴백. */
+export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc, photos = [] }: Props) {
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const playSrc = withHeroCacheBust(videoSrc);
+  const useSlides = photos.length > 0;
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setIndex(0);
+      return;
+    }
+    if (!useSlides || photos.length < 2) return;
+    const timer = window.setInterval(() => {
+      setIndex((prev) => (prev + 1) % photos.length);
+    }, SLIDE_MS);
+    return () => window.clearInterval(timer);
+  }, [open, useSlides, photos.length]);
+
+  useEffect(() => {
+    if (!open || useSlides) return;
     const video = videoRef.current;
     if (!video) return;
     video.currentTime = 0;
@@ -40,7 +58,7 @@ export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc }: 
       video.muted = true;
       void video.play().catch(() => undefined);
     });
-  }, [open, playSrc]);
+  }, [open, playSrc, useSlides]);
 
   useEffect(() => {
     if (open) return;
@@ -53,6 +71,13 @@ export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc }: 
       /* ignore */
     }
   }, [open]);
+
+  function go(delta: number) {
+    if (photos.length < 2) return;
+    setIndex((prev) => (prev + delta + photos.length) % photos.length);
+  }
+
+  const current = photos[index];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,7 +96,42 @@ export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc }: 
         >
           <X className="size-5" aria-hidden />
         </button>
-        {open ? (
+        {open && useSlides && current ? (
+          <div className="relative h-full w-full bg-black">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={current.src}
+              src={uploadOriginalUrl(current.src)}
+              alt={current.alt}
+              className="h-full w-full object-contain bg-black"
+            />
+            {photos.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="이전 사진"
+                  className="absolute left-3 top-1/2 z-[1] hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/35 hover:bg-black/70 md:flex"
+                  onClick={() => go(-1)}
+                >
+                  <ChevronLeft className="size-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="다음 사진"
+                  className="absolute right-3 top-1/2 z-[1] hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/35 hover:bg-black/70 md:flex"
+                  onClick={() => go(1)}
+                >
+                  <ChevronRight className="size-5" />
+                </button>
+                <p className="absolute bottom-4 left-0 right-0 text-center text-sm text-white/85">
+                  {current.alt ? `${current.alt} · ` : ""}
+                  {index + 1} / {photos.length}
+                </p>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+        {open && !useSlides ? (
           <video
             ref={videoRef}
             key={playSrc}

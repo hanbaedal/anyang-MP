@@ -34,7 +34,7 @@ function isDesktop() {
   return typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
 }
 
-/** 모바일만: 공개 메뉴(공원소개~고객센터) 가로 스와이프로 이전·다음. 데스크톱 무반응. */
+/** 모바일만: 공개 메뉴(공원소개~갤러리) 가로 스와이프로 이전·다음. 데스크톱 무반응. */
 export function NavSwipe({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();

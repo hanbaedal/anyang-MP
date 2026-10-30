@@ -93,30 +93,39 @@ export function PublicNavSheet() {
 
               return (
                 <li key={item.i18n} className="border-b border-[color:var(--chrome-border)]">
-                  <button
-                    type="button"
+                  <div
                     className={cn(
-                      "flex min-h-12 w-full items-center justify-between gap-3 px-4 text-left text-[15px] font-medium",
+                      "flex min-h-12 w-full items-stretch",
                       (isOpen || parentActive) && "bg-primary/10",
                     )}
-                    aria-expanded={isOpen}
-                    onClick={() =>
-                      setExpanded((prev) => ({ ...prev, [item.i18n]: !isOpen }))
-                    }
                   >
-                    <span>{chrome(item.i18n)}</span>
-                    {isOpen ? (
-                      <Minus className="size-4 shrink-0 opacity-80" aria-hidden />
-                    ) : (
-                      <Plus className="size-4 shrink-0 opacity-80" aria-hidden />
-                    )}
-                  </button>
+                    <Link
+                      href={item.href}
+                      className="flex min-w-0 flex-1 items-center px-4 text-left text-[15px] font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      {chrome(item.i18n)}
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex w-12 shrink-0 items-center justify-center border-l border-[color:var(--chrome-border)]"
+                      aria-expanded={isOpen}
+                      aria-label={chrome(item.i18n)}
+                      onClick={() => setExpanded((prev) => ({ ...prev, [item.i18n]: !isOpen }))}
+                    >
+                      {isOpen ? (
+                        <Minus className="size-4 shrink-0 opacity-80" aria-hidden />
+                      ) : (
+                        <Plus className="size-4 shrink-0 opacity-80" aria-hidden />
+                      )}
+                    </button>
+                  </div>
                   {isOpen ? (
                     <ul className="border-t border-[color:var(--chrome-border)] bg-primary text-primary-foreground">
                       {children.map((child) => {
                         const active = isNavActive(pathname, child.href);
                         return (
-                          <li key={child.href} className="border-b border-white/15 last:border-b-0">
+                          <li key={child.href} className="border-b border-white/25 last:border-b-0">
                             <Link
                               href={child.href}
                               className={cn(

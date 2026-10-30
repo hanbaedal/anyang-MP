@@ -63,38 +63,27 @@ export function PublicGnb({ className }: { className?: string }) {
           return (
             <li
               key={item.i18n}
-              className="relative flex h-full"
+              className={cn(
+                "relative flex h-full",
+                "after:absolute after:top-1/2 after:right-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--chrome-border)] last:after:hidden",
+              )}
               onMouseEnter={() => hasChildren && setOpenKey(item.i18n)}
               onMouseLeave={() => hasChildren && setOpenKey(null)}
             >
-              {hasChildren ? (
-                <button
-                  type="button"
-                  className={cn(
-                    "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[13px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-sm",
-                    "text-[color:var(--chrome-foreground)] hover:bg-primary/15",
-                    (open || parentActive) && "bg-primary/20",
-                  )}
-                  aria-expanded={open}
-                  aria-controls={panelId}
-                  aria-haspopup="menu"
-                  onClick={() => setOpenKey(open ? null : item.i18n)}
-                  onFocus={() => setOpenKey(item.i18n)}
-                >
-                  {chrome(item.i18n)}
-                </button>
-              ) : (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[13px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-sm",
-                    "text-[color:var(--chrome-foreground)] hover:bg-primary/15",
-                    parentActive && "bg-primary/20",
-                  )}
-                >
-                  {chrome(item.i18n)}
-                </Link>
-              )}
+              <Link
+                href={item.href}
+                className={cn(
+                  "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[13px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-sm",
+                  "text-[color:var(--chrome-foreground)] hover:bg-primary/15",
+                  (open || parentActive) && "bg-primary/20",
+                )}
+                aria-expanded={hasChildren ? open : undefined}
+                aria-controls={hasChildren ? panelId : undefined}
+                aria-haspopup={hasChildren ? "menu" : undefined}
+                onFocus={() => hasChildren && setOpenKey(item.i18n)}
+              >
+                {chrome(item.i18n)}
+              </Link>
 
               {hasChildren ? (
                 <ul
@@ -110,7 +99,7 @@ export function PublicGnb({ className }: { className?: string }) {
                   {children.map((child) => {
                     const active = isNavActive(pathname, child.href);
                     return (
-                      <li key={child.href} role="none" className="border-b border-white/15 last:border-b-0">
+                      <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
                         <Link
                           role="menuitem"
                           href={child.href}

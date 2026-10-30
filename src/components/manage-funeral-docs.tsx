@@ -91,7 +91,7 @@ export function ManageFuneralDocs({ initial }: { initial: FuneralDocFile[] }) {
         setMessage(json.error || "업로드에 실패했습니다.");
         return;
       }
-      setMessage("저장했습니다. 공개 장례·안치의 매장·화장 서류 목록에 바로 반영됩니다.");
+      setMessage("저장했습니다. 공개 이용절차의 매장·화장 서류 목록에 바로 반영됩니다.");
       await refresh();
     } finally {
       setBusyId(null);

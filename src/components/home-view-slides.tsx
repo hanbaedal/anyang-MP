@@ -1,22 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { thumbUrl } from "@/lib/media";
+import { useCallback, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useT } from "@/components/locale-provider";
+import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 export type ViewSlide = { src: string; alt: string };
 
 const INTERVAL_MS = 7000;
 
+const navBtn =
+  "pointer-events-auto absolute top-1/2 z-[6] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 backdrop-blur-sm hover:bg-black/60 sm:size-12";
+
 /**
- * 인트로 「전경」태그 사진 좌우 슬라이드.
- * 배경 음소거 영상 위에 옅게 올려 공존. 비어 있으면 렌더하지 않음(영상만).
- * 모바일은 썸네일만·인접 1장만 예열해 이중 대용량 로드를 피함.
+ * 갤러리 「전경」 사진을 홈 배경으로 좌우 슬라이드.
+ * 자동(약 7초)과 이전·다음 버튼을 함께 쓴다.
  */
 export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]; paused?: boolean }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [armed, setArmed] = useState(false);
+  const [resumeKey, setResumeKey] = useState(0);
+
+  const go = useCallback(
+    (delta: number) => {
+      if (photos.length < 2) return;
+      setIndex((prev) => (prev + delta + photos.length) % photos.length);
+      setResumeKey((n) => n + 1);
+    },
+    [photos.length],
+  );
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -26,81 +40,97 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // 첫 페인트 이후·유휴 시점에만 슬라이드 레이어 가동 (모바일 대역폭)
   useEffect(() => {
-    if (!photos.length) return;
-    let cancelled = false;
-    const arm = () => {
-      if (!cancelled) setArmed(true);
-    };
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(arm, { timeout: 1800 });
-      return () => {
-        cancelled = true;
-        window.cancelIdleCallback(id);
-      };
-    }
-    const timer = window.setTimeout(arm, 600);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [photos.length]);
-
-  useEffect(() => {
-    if (!armed || reduceMotion || paused || photos.length < 2) return;
+    if (reduceMotion || paused || photos.length < 2) return;
     const timer = window.setInterval(() => {
       setIndex((prev) => (prev + 1) % photos.length);
     }, INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [armed, reduceMotion, paused, photos.length]);
+  }, [reduceMotion, paused, photos.length, resumeKey]);
 
-  // 인접 썸네일만 예열
   useEffect(() => {
-    if (!armed || !photos.length) return;
-    for (const i of [index, index + 1]) {
-      const photo = photos[i % photos.length];
+    if (!photos.length) return;
+    for (const i of [index + 1, index - 1]) {
+      const photo = photos[(i + photos.length) % photos.length];
       if (!photo) continue;
       const img = new window.Image();
-      img.src = thumbUrl(photo.src);
+      img.src = uploadOriginalUrl(photo.src);
     }
-  }, [armed, index, photos]);
+  }, [index, photos]);
 
-  if (!photos.length || !armed) return null;
+  useEffect(() => {
+    if (paused || photos.length < 2) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        go(1);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [paused, photos.length, go]);
+
+  if (!photos.length) return null;
 
   const showIndex = reduceMotion ? 0 : index;
+  const showNav = photos.length > 1 && !paused;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden" aria-hidden>
-      <div
-        className="flex h-full w-full transition-transform duration-700 ease-out"
-        style={{
-          width: `${photos.length * 100}%`,
-          transform: `translateX(-${(showIndex * 100) / photos.length}%)`,
-        }}
-      >
-        {photos.map((photo, i) => {
-          const active = i === showIndex;
-          const near = Math.abs(i - showIndex) <= 1 || (showIndex === 0 && i === photos.length - 1);
-          return (
-            <div key={`${photo.src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / photos.length}%` }}>
-              {near ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={thumbUrl(photo.src)}
-                  alt=""
-                  className={cn(
-                    "h-full w-full object-cover object-[center_32%] opacity-[0.28] md:opacity-[0.34]",
-                    active ? "opacity-[0.28] md:opacity-[0.34]" : "opacity-20",
-                  )}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  decoding="async"
-                />
-              ) : null}
-            </div>
-          );
-        })}
+    <div className="absolute inset-0 z-[5]">
+      <div className="absolute inset-0 overflow-hidden bg-primary" aria-hidden>
+        <div
+          className="flex h-full transition-transform duration-700 ease-out motion-reduce:transition-none"
+          style={{
+            width: `${photos.length * 100}%`,
+            transform: `translateX(-${(showIndex * 100) / photos.length}%)`,
+          }}
+        >
+          {photos.map((photo, i) => {
+            const near =
+              i === showIndex ||
+              i === (showIndex + 1) % photos.length ||
+              i === (showIndex - 1 + photos.length) % photos.length;
+            return (
+              <div key={`${photo.src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / photos.length}%` }}>
+                {near ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={uploadOriginalUrl(photo.src)}
+                    alt=""
+                    className={cn("h-full w-full object-cover object-[center_32%]")}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+      {showNav ? (
+        <>
+          <button
+            type="button"
+            className={cn(navBtn, "left-2 sm:left-4")}
+            aria-label={t("home.slidePrev")}
+            onClick={() => go(-1)}
+          >
+            <ChevronLeft className="size-6 sm:size-7" aria-hidden />
+          </button>
+          <button
+            type="button"
+            className={cn(navBtn, "right-2 sm:right-4")}
+            aria-label={t("home.slideNext")}
+            onClick={() => go(1)}
+          >
+            <ChevronRight className="size-6 sm:size-7" aria-hidden />
+          </button>
+        </>
+      ) : null}
     </div>
   );
 }

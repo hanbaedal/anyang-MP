@@ -171,11 +171,22 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
   };
 }
 
+const CMS_TITLE_ALIASES: Partial<Record<CmsSlug, string[]>> = {
+  services: ["서비스", "Services", "服务"],
+  funeral: ["장례·안치", "장례 절차", "Funeral", "Funeral and interment", "葬礼", "葬礼与安葬", "葬礼·安置"],
+};
+
+function currentCmsTitle(slug: CmsSlug, title: string) {
+  if (CMS_TITLE_ALIASES[slug]?.includes(title)) return defaultCmsPage(slug).title;
+  return title;
+}
+
 function fromDoc(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
+  const slug = doc.slug as CmsSlug;
   return {
-    slug: doc.slug as CmsSlug,
-    title: String(doc.title ?? ""),
+    slug,
+    title: currentCmsTitle(slug, String(doc.title ?? "")),
     lead: String(doc.lead ?? ""),
     body: String(doc.body ?? ""),
     items: Array.isArray(doc.items) ? (doc.items as CmsItem[]) : [],
@@ -202,7 +213,9 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
     }
   }
   const all = await readLocal();
-  return all.find((item) => item.slug === slug) ?? null;
+  const found = all.find((item) => item.slug === slug);
+  if (!found) return null;
+  return { ...found, title: currentCmsTitle(found.slug, found.title) };
 }
 
 export async function getCmsPageOrDefault(slug: CmsSlug): Promise<CmsPage> {

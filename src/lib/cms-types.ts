@@ -9,8 +9,8 @@ export const CMS_SLUGS = [
   { slug: "prices", label: "분양가·잔여", i18n: "nav.prices" },
   { slug: "procedure", label: "분양 절차", i18n: "nav.procedure" },
   { slug: "fees", label: "관리비", i18n: "nav.fees" },
-  { slug: "services", label: "서비스", i18n: "nav.services" },
-  { slug: "funeral", label: "장례·안치", i18n: "nav.funeral" },
+  { slug: "services", label: "이용안내", i18n: "nav.services" },
+  { slug: "funeral", label: "이용절차", i18n: "nav.funeral" },
 ] as const;
 
 export type CmsSlug = (typeof CMS_SLUGS)[number]["slug"];

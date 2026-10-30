@@ -11,7 +11,7 @@ function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
 
 /**
  * 홈페이지 관리 서브메뉴.
- * 공개 NAV 순서: 메인 전용 → 공원소개 → 분양안내 → 이용안내 → 둘러보기 → 고객센터.
+ * 공개 NAV 순서: 메인 전용 → 공원소개(공지사항 포함) → 분양안내 → 이용안내 → 갤러리.
  */
 export function manageNavItems(): ManageNavItem[] {
   return [

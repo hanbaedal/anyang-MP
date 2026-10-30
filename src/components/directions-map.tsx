@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   DEST_NAME,
-  googleMapsEmbedUrl,
   googleMapsViewUrl,
   kakaoAndroidMapRouteIntent,
   kakaoAndroidNaviIntent,
@@ -17,8 +17,15 @@ import {
   naverNaviUrl,
 } from "@/lib/site";
 import { Button } from "@/components/ui/button";
+import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
+
+const MAP_OVERVIEW = "/images/directions-map.jpg";
+const MAP_DETAIL = "/images/directions-map-route-v2.png";
+/** 첨부 광역 지도(1024×570)에서 빨간 핀 중심 */
+const PIN_LEFT = "56.05%";
+const PIN_TOP = "53.68%";
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -75,6 +82,7 @@ function watchAppHandoff(ms: number): Promise<boolean> {
 export function DirectionsMap({ compact = false, fill = false }: { compact?: boolean; fill?: boolean }) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
@@ -118,22 +126,37 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           </a>
         </Button>
       </div>
-      <figure className={cn(fill ? "flex min-h-[14rem] flex-1 flex-col md:min-h-0" : undefined)}>
-        <iframe
-          title={`${DEST_NAME} ${t("directions")}`}
-          src={googleMapsEmbedUrl()}
-          className={
-            compact
-              ? "h-56 w-full rounded-xl border"
-              : fill
-                ? "h-full min-h-[14rem] w-full flex-1 rounded-xl border md:min-h-0"
-                : "h-80 w-full rounded-xl border md:h-96"
-          }
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          allowFullScreen
+      <figure
+        className={cn(
+          "relative overflow-hidden rounded-xl border bg-muted",
+          fill ? "min-h-0 w-full" : undefined,
+        )}
+      >
+        <Image
+          src={MAP_OVERVIEW}
+          alt={`${DEST_NAME} ${t("directions")}`}
+          width={1024}
+          height={570}
+          className={cn("h-auto w-full", compact && "max-h-56 object-cover object-center")}
+          sizes="(max-width: 768px) 100vw, 72rem"
+          priority
         />
+        <button
+          type="button"
+          className="absolute z-[1] size-12 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
+          style={{ left: PIN_LEFT, top: PIN_TOP }}
+          aria-label={t("map.pin")}
+          onClick={() => setDetailOpen(true)}
+        >
+          <span className="absolute inset-1 animate-ping rounded-full bg-red-500/40" aria-hidden />
+        </button>
       </figure>
+      <ImageLightboxDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        src={MAP_DETAIL}
+        alt={t("map.detailAlt")}
+      />
     </div>
   );
 }

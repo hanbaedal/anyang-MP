@@ -99,27 +99,38 @@ export function NavTree({
           const hasChildren = Boolean(item.children?.length);
           const expanded = open[item.i18n] ?? groupOpen(pathname, item.href, item.children);
           const currentLeaf = !hasChildren && isNavActive(pathname, item.href);
+          const parentExact = pathname === item.href;
 
           return (
             <li key={item.i18n} className={toneGroup(item.tone)}>
               {hasChildren ? (
-                <button
-                  type="button"
-                  aria-expanded={expanded}
-                  onClick={() => setOpen((prev) => ({ ...prev, [item.i18n]: !expanded }))}
-                  className={cn(row, groupOpen(pathname, item.href, item.children) && "text-primary")}
-                >
-                  <ChevronRight
-                    className={cn("size-3 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-90")}
-                    aria-hidden
-                  />
-                  {expanded ? (
-                    <FolderOpen className="size-3 shrink-0 text-primary" aria-hidden />
-                  ) : (
-                    <Folder className="size-3 shrink-0 text-primary/80" aria-hidden />
-                  )}
-                  <span className={cn("font-medium", !fit && "truncate")}>{t(item.i18n)}</span>
-                </button>
+                <div className={cn(row, (groupOpen(pathname, item.href, item.children) || parentExact) && "text-primary", parentExact && currentRow)}>
+                  <button
+                    type="button"
+                    aria-expanded={expanded}
+                    aria-label={t(item.i18n)}
+                    onClick={() => setOpen((prev) => ({ ...prev, [item.i18n]: !expanded }))}
+                    className="flex size-6 shrink-0 items-center justify-center"
+                  >
+                    <ChevronRight
+                      className={cn("size-3 text-muted-foreground transition-transform", expanded && "rotate-90")}
+                      aria-hidden
+                    />
+                  </button>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    aria-current={parentExact ? "page" : undefined}
+                    className="flex min-w-0 flex-1 items-center gap-0.5"
+                  >
+                    {expanded ? (
+                      <FolderOpen className="size-3 shrink-0 text-primary" aria-hidden />
+                    ) : (
+                      <Folder className="size-3 shrink-0 text-primary/80" aria-hidden />
+                    )}
+                    <span className={cn("font-medium", !fit && "truncate")}>{t(item.i18n)}</span>
+                  </Link>
+                </div>
               ) : (
                 <Link
                   href={item.href}

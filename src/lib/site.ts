@@ -284,7 +284,7 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
 
 export const NAV: NavItem[] = [
   {
-    href: "/intro/greeting",
+    href: "/intro",
     label: "공원소개",
     i18n: "nav.intro",
     tone: "intro",
@@ -292,11 +292,12 @@ export const NAV: NavItem[] = [
     children: [
       { href: "/intro/greeting", label: "인사말", i18n: "nav.greeting" },
       { href: "/intro/features", label: "공원 특징", i18n: "nav.features" },
+      { href: "/support/notices", label: "공지사항", i18n: "nav.notices" },
       { href: "/intro/directions", label: "오시는 길", i18n: "nav.directions" },
     ],
   },
   {
-    href: "/lots/burial",
+    href: "/lots",
     label: "분양안내",
     i18n: "nav.lots",
     tone: "lots",
@@ -308,7 +309,7 @@ export const NAV: NavItem[] = [
     ],
   },
   {
-    href: "/guide/procedure",
+    href: "/guide",
     label: "이용안내",
     i18n: "nav.guide",
     tone: "guide",
@@ -316,25 +317,17 @@ export const NAV: NavItem[] = [
     children: [
       { href: "/guide/procedure", label: "분양 절차", i18n: "nav.procedure" },
       { href: "/guide/fees", label: "관리비", i18n: "nav.fees" },
-      { href: "/guide/services", label: "서비스", i18n: "nav.services" },
-      { href: "/guide/funeral", label: "장례·안치", i18n: "nav.funeral" },
+      { href: "/guide/services", label: "이용안내", i18n: "nav.services" },
+      { href: "/guide/funeral", label: "이용절차", i18n: "nav.funeral" },
     ],
   },
   {
     href: "/gallery",
-    label: "둘러보기",
+    label: "갤러리",
     i18n: "nav.gallery",
     tone: "gallery",
     image: "/images/gallery-mound.jpg",
     // 공개 서브메뉴 숨김 — 상위 클릭으로 /gallery 직행 (라우트·관리 유지)
-  },
-  {
-    href: "/support/notices",
-    label: "고객센터",
-    i18n: "nav.support",
-    tone: "support",
-    image: "/images/gallery-4.jpg",
-    children: [{ href: "/support/notices", label: "공지사항", i18n: "nav.notices" }],
   },
   {
     href: "/sitemap",
@@ -353,7 +346,7 @@ export function publicGnbItems(): NavItem[] {
 export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) => {
   if (item.href === "/sitemap") return [];
   if (item.children?.length) {
-    return item.children.map((child) => ({ href: child.href, i18n: child.i18n }));
+    return [{ href: item.href, i18n: item.i18n }, ...item.children.map((child) => ({ href: child.href, i18n: child.i18n }))];
   }
   return [{ href: item.href, i18n: item.i18n }];
 });

@@ -15,11 +15,12 @@ type Props = {
   viewPhotos: ViewSlide[];
 };
 
-/** 홈 인트로: 음소거 배경 영상 + 전경 슬라이드 + 공원전경 영상 모달 */
+/** 홈 인트로: 갤러리 전경 슬라이드(없으면 영상) + 공원전경 모달 */
 export function HomeIntro({ videoSrc, audioSrc, posterSrc, viewPhotos }: Props) {
   const locale = useLocale();
   const t = useT();
   const [viewOpen, setViewOpen] = useState(false);
+  const useSlides = viewPhotos.length > 0;
 
   return (
     <section className="relative min-h-full w-full flex-1 overflow-hidden bg-primary text-primary-foreground">
@@ -29,9 +30,9 @@ export function HomeIntro({ videoSrc, audioSrc, posterSrc, viewPhotos }: Props) 
           audioSrc={audioSrc}
           posterSrc={posterSrc}
           paused={viewOpen}
+          hideVideo={useSlides}
         />
         <HomeViewSlides photos={viewPhotos} paused={viewOpen} />
-        <div className="pointer-events-none absolute inset-0 z-[4] bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
       </div>
       <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pb-5 pt-0 sm:px-6 sm:pb-7 md:px-10 md:pb-8">
         <div className="pointer-events-auto flex flex-col items-center justify-end gap-4 text-center md:flex-row md:items-end md:justify-between md:gap-8 md:text-left">
@@ -68,6 +69,7 @@ export function HomeIntro({ videoSrc, audioSrc, posterSrc, viewPhotos }: Props) 
         onOpenChange={setViewOpen}
         videoSrc={videoSrc}
         posterSrc={posterSrc}
+        photos={viewPhotos}
       />
     </section>
   );
