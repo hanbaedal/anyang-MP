@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/components/locale-provider";
-import { uploadOriginalUrl } from "@/lib/media";
-import type { ViewSlide } from "@/components/home-view-slides";
 
 const HOME_HERO_UPLOAD_CACHE_BUST = "t1080br";
-const SLIDE_MS = 7000;
 
 function withHeroCacheBust(src: string) {
   const needsBust =
@@ -24,60 +21,62 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   videoSrc: string;
+  audioSrc?: string;
   posterSrc?: string;
-  photos?: ViewSlide[];
 };
 
-/** 「공원전경」— 갤러리 전경 슬라이드. 사진이 없으면 히어로 영상으로 폴백. */
-export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc, photos = [] }: Props) {
+/** 「공원전경」— 홈페이지관리에서 공개한 메인 영상(있으면 함께 올린 음악). */
+export function ParkViewVideoModal({ open, onOpenChange, videoSrc, audioSrc = "", posterSrc }: Props) {
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const playSrc = withHeroCacheBust(videoSrc);
-  const useSlides = photos.length > 0;
-  const [index, setIndex] = useState(0);
+  const musicSrc = audioSrc.trim() ? withHeroCacheBust(audioSrc.trim()) : "";
 
-  useEffect(() => {
-    if (!open) {
-      setIndex(0);
-      return;
-    }
-    if (!useSlides || photos.length < 2) return;
-    const timer = window.setInterval(() => {
-      setIndex((prev) => (prev + 1) % photos.length);
-    }, SLIDE_MS);
-    return () => window.clearInterval(timer);
-  }, [open, useSlides, photos.length]);
-
-  useEffect(() => {
-    if (!open || useSlides) return;
+  function startPlayback() {
     const video = videoRef.current;
     if (!video) return;
-    video.currentTime = 0;
+    const audio = audioRef.current;
+    if (musicSrc && audio) {
+      video.muted = true;
+      try {
+        audio.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+      void video.play().catch(() => undefined);
+      void audio.play().catch(() => undefined);
+      return;
+    }
     video.muted = false;
     void video.play().catch(() => {
       video.muted = true;
       void video.play().catch(() => undefined);
     });
-  }, [open, playSrc, useSlides]);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    startPlayback();
+  }, [open, playSrc, musicSrc]);
 
   useEffect(() => {
     if (open) return;
     const video = videoRef.current;
-    if (!video) return;
-    video.pause();
+    const audio = audioRef.current;
+    video?.pause();
+    audio?.pause();
     try {
-      video.currentTime = 0;
+      if (video) video.currentTime = 0;
+      if (audio) audio.currentTime = 0;
     } catch {
       /* ignore */
     }
   }, [open]);
 
-  function go(delta: number) {
-    if (photos.length < 2) return;
-    setIndex((prev) => (prev + delta + photos.length) % photos.length);
+  function close() {
+    onOpenChange(false);
   }
-
-  const current = photos[index];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -85,64 +84,34 @@ export function ParkViewVideoModal({ open, onOpenChange, videoSrc, posterSrc, ph
         showCloseButton={false}
         className="fixed inset-0 top-0 left-0 z-50 flex h-dvh max-h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 bg-black p-0 shadow-none sm:max-w-none data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100"
         aria-describedby={undefined}
-        onPointerDownOutside={() => onOpenChange(false)}
+        onPointerDownOutside={close}
       >
         <DialogTitle className="sr-only">{t("home.parkView")}</DialogTitle>
         <button
           type="button"
-          onClick={() => onOpenChange(false)}
+          onClick={close}
           className="absolute right-3 top-3 z-[60] inline-flex size-10 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/35 hover:bg-black/70"
           aria-label={t("close")}
         >
           <X className="size-5" aria-hidden />
         </button>
-        {open && useSlides && current ? (
-          <div className="relative h-full w-full bg-black">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={current.src}
-              src={uploadOriginalUrl(current.src)}
-              alt={current.alt}
+        {open ? (
+          <>
+            <video
+              ref={videoRef}
+              key={playSrc}
               className="h-full w-full object-contain bg-black"
+              src={playSrc}
+              poster={posterSrc}
+              autoPlay
+              playsInline
+              controls
+              preload="auto"
+              onLoadedData={startPlayback}
+              onEnded={close}
             />
-            {photos.length > 1 ? (
-              <>
-                <button
-                  type="button"
-                  aria-label="이전 사진"
-                  className="absolute left-3 top-1/2 z-[1] hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/35 hover:bg-black/70 md:flex"
-                  onClick={() => go(-1)}
-                >
-                  <ChevronLeft className="size-5" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="다음 사진"
-                  className="absolute right-3 top-1/2 z-[1] hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/35 hover:bg-black/70 md:flex"
-                  onClick={() => go(1)}
-                >
-                  <ChevronRight className="size-5" />
-                </button>
-                <p className="absolute bottom-4 left-0 right-0 text-center text-sm text-white/85">
-                  {current.alt ? `${current.alt} · ` : ""}
-                  {index + 1} / {photos.length}
-                </p>
-              </>
-            ) : null}
-          </div>
-        ) : null}
-        {open && !useSlides ? (
-          <video
-            ref={videoRef}
-            key={playSrc}
-            className="h-full w-full object-contain bg-black"
-            src={playSrc}
-            poster={posterSrc}
-            playsInline
-            controls
-            preload="metadata"
-            onEnded={() => onOpenChange(false)}
-          />
+            {musicSrc ? <audio ref={audioRef} src={musicSrc} preload="auto" /> : null}
+          </>
         ) : null}
       </DialogContent>
     </Dialog>

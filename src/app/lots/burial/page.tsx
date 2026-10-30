@@ -27,7 +27,7 @@ export default async function BurialPage() {
       />
       <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "burial.body")}</p>}</Prose>
-        <LotsPhotoGrid items={items} />
+        <LotsPhotoGrid items={items} layout="detail" />
       </div>
     </>
   );

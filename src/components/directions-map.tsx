@@ -112,7 +112,7 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
   }
 
   return (
-    <div className={cn(fill ? "flex min-h-0 flex-1 flex-col gap-3 md:gap-4" : "space-y-4")}>
+    <div className={cn(fill ? "flex min-h-0 flex-1 flex-col gap-2 md:gap-3" : "space-y-4")}>
       <div className="flex shrink-0 flex-wrap gap-2">
         <Button type="button" disabled={busy !== null} onClick={() => void openRoute("naver")}>
           {t("map.naver")}
@@ -126,24 +126,19 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           </a>
         </Button>
       </div>
-      <figure
-        className={cn(
-          "relative overflow-hidden rounded-xl border bg-muted",
-          fill ? "min-h-0 w-full" : undefined,
-        )}
-      >
+      <figure className="relative w-full overflow-hidden rounded-xl border bg-muted">
         <Image
           src={MAP_OVERVIEW}
           alt={`${DEST_NAME} ${t("directions")}`}
           width={1024}
           height={570}
           className={cn("h-auto w-full", compact && "max-h-56 object-cover object-center")}
-          sizes="(max-width: 768px) 100vw, 72rem"
+          sizes="100vw"
           priority
         />
         <button
           type="button"
-          className="absolute z-[1] size-12 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
+          className="absolute z-[1] size-12 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none md:size-14"
           style={{ left: PIN_LEFT, top: PIN_TOP }}
           aria-label={t("map.pin")}
           onClick={() => setDetailOpen(true)}

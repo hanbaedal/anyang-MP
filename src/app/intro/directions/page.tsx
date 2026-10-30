@@ -19,7 +19,7 @@ export default async function DirectionsPage() {
           전화번호 : 031-482-2949
         </a>
       </PageHero>
-      <div className="mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col px-4 py-4 md:py-5">
+      <div className="flex w-full flex-1 flex-col px-2 py-2 sm:px-3 md:px-4 md:py-3">
         <DirectionsMap fill />
       </div>
     </div>

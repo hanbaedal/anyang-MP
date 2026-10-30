@@ -15,7 +15,7 @@ type Props = {
   viewPhotos: ViewSlide[];
 };
 
-/** 홈 인트로: 갤러리 전경 슬라이드(없으면 영상) + 공원전경 모달 */
+/** 홈 인트로: 갤러리 전경 슬라이드(없으면 영상) + 공원전경은 공개 메인 영상 */
 export function HomeIntro({ videoSrc, audioSrc, posterSrc, viewPhotos }: Props) {
   const locale = useLocale();
   const t = useT();
@@ -68,8 +68,8 @@ export function HomeIntro({ videoSrc, audioSrc, posterSrc, viewPhotos }: Props) 
         open={viewOpen}
         onOpenChange={setViewOpen}
         videoSrc={videoSrc}
+        audioSrc={audioSrc}
         posterSrc={posterSrc}
-        photos={viewPhotos}
       />
     </section>
   );
