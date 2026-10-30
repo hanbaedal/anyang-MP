@@ -16,16 +16,19 @@ import {
   naverMapAppRouteUrl,
   naverNaviUrl,
 } from "@/lib/site";
+import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
-const MAP_OVERVIEW = "/images/directions-map.jpg";
+const MAP_OVERVIEW = "/images/directions-map-wide.jpg";
 const MAP_DETAIL = "/images/directions-map-route-v2.png";
-/** 첨부 광역 지도(1024×570)에서 빨간 핀 중심 */
-const PIN_LEFT = "56.05%";
-const PIN_TOP = "53.68%";
+const MAP_W = 1024;
+const MAP_H = 512;
+/** 광역 지도에서 안양공원묘원 위치 */
+const PIN_LEFT = "55.8%";
+const PIN_TOP = "55.2%";
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -126,26 +129,52 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           </a>
         </Button>
       </div>
-      <figure className="relative w-full overflow-hidden rounded-xl border bg-muted">
-        <Image
-          src={MAP_OVERVIEW}
-          alt={`${DEST_NAME} ${t("directions")}`}
-          width={1024}
-          height={570}
-          className={cn("h-auto w-full", compact && "max-h-56 object-cover object-center")}
-          sizes="100vw"
-          priority
-        />
-        <button
-          type="button"
-          className="absolute z-[1] size-12 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none md:size-14"
-          style={{ left: PIN_LEFT, top: PIN_TOP }}
-          aria-label={t("map.pin")}
-          onClick={() => setDetailOpen(true)}
+      <div
+        className={cn(
+          fill && "@container relative min-h-0 w-full flex-1",
+        )}
+      >
+        <figure
+          className={cn(
+            "relative overflow-hidden rounded-xl border bg-muted",
+            fill
+              ? "absolute left-1/2 top-1/2 max-h-full -translate-x-1/2 -translate-y-1/2"
+              : "w-full",
+            compact && !fill && "max-h-56",
+          )}
+          style={
+            fill
+              ? { width: `min(100%, calc(100cqh * ${MAP_W} / ${MAP_H}))`, aspectRatio: `${MAP_W} / ${MAP_H}` }
+              : undefined
+          }
         >
-          <span className="absolute inset-1 animate-ping rounded-full bg-red-500/40" aria-hidden />
-        </button>
-      </figure>
+          <Image
+            src={MAP_OVERVIEW}
+            alt={`${DEST_NAME} ${t("directions")}`}
+            fill={fill}
+            width={fill ? undefined : MAP_W}
+            height={fill ? undefined : MAP_H}
+            className={cn(
+              fill ? "object-contain" : "h-auto w-full",
+              compact && "object-cover object-center",
+            )}
+            sizes="100vw"
+            quality={100}
+            unoptimized
+            priority
+          />
+          <button
+            type="button"
+            className="absolute z-[1] flex -translate-x-1/2 -translate-y-[88%] flex-col items-center rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
+            style={{ left: PIN_LEFT, top: PIN_TOP }}
+            aria-label={t("map.pin")}
+            onClick={() => setDetailOpen(true)}
+          >
+            <span className="absolute bottom-1 size-8 animate-ping rounded-full bg-red-500/35" aria-hidden />
+            <MapPin className="relative size-10 fill-red-600 text-red-700 drop-shadow md:size-11" aria-hidden />
+          </button>
+        </figure>
+      </div>
       <ImageLightboxDialog
         open={detailOpen}
         onOpenChange={setDetailOpen}

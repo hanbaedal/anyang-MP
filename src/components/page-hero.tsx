@@ -12,6 +12,7 @@ export function PageHero({
   title,
   lead,
   image,
+  compact = false,
   children,
 }: {
   kicker: string;
@@ -19,11 +20,12 @@ export function PageHero({
   lead?: string;
   /** alt만 쓰입니다. 배경은 메뉴 공통 파노라마로 통일합니다. */
   image?: { src?: string; alt: string };
+  compact?: boolean;
   children?: ReactNode;
 }) {
   const alt = image?.alt || "안양공원묘원 테라스 묘역 전경";
   return (
-    <section className="relative overflow-hidden border-b bg-[#0a3d66] text-primary-foreground">
+    <section className="relative shrink-0 overflow-hidden border-b bg-[#0a3d66] text-primary-foreground">
       <Image
         src={mediaUrl(PAGE_HERO_IMAGE)}
         alt={alt}
@@ -32,7 +34,7 @@ export function PageHero({
         className="object-cover object-[center_28%] opacity-55"
         sizes="100vw"
       />
-      <div className="relative mx-auto max-w-6xl px-4 py-4 md:py-6">
+      <div className={cn("relative mx-auto max-w-6xl px-4", compact ? "py-2 md:py-2.5" : "py-4 md:py-6")}>
         <p className="text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]">
           {kicker}
         </p>
