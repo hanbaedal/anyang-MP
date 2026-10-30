@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { mediaUrl, thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 
 export function ExpandablePhoto({
@@ -24,7 +24,7 @@ export function ExpandablePhoto({
   const preloadOriginal = useCallback(() => {
     if (typeof window === "undefined") return;
     const img = new window.Image();
-    img.src = mediaUrl(src);
+    img.src = uploadOriginalUrl(src);
   }, [src]);
 
   return (
@@ -41,11 +41,13 @@ export function ExpandablePhoto({
         aria-label={alt ? `${alt} 원본 보기` : "사진 원본 보기"}
       >
         <Image
-          src={thumbUrl(src)}
+          src={uploadOriginalUrl(src)}
           alt={alt}
           fill
           className="object-cover"
           sizes={sizes}
+          quality={90}
+          unoptimized
           priority={priority}
           loading={priority ? undefined : "lazy"}
         />

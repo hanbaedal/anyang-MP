@@ -5,7 +5,7 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { useT } from "@/components/locale-provider";
 import { isAnnouncementActive, type SiteAnnouncement } from "@/lib/announcement-types";
-import { thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 /** 카드 폭 고정 — 화면을 가로로 채우지 않고 타일 크기 통일 */
@@ -23,11 +23,13 @@ function AnnouncementCard({ item, onDismiss }: { item: SiteAnnouncement; onDismi
     <div className="relative h-[148px] w-full shrink-0 bg-muted sm:h-[168px] md:h-[196px]">
       {item.imageSrc ? (
         <Image
-          src={thumbUrl(item.imageSrc)}
+          src={uploadOriginalUrl(item.imageSrc)}
           alt=""
           fill
           className="object-cover"
           sizes="(max-width:768px) 168px, 272px"
+          quality={90}
+          unoptimized
         />
       ) : null}
       <h3 className="absolute inset-x-0 top-0 z-[1] line-clamp-2 bg-gradient-to-b from-black/75 via-black/45 to-transparent px-8 pb-6 pt-2 text-center text-sm font-semibold leading-snug tracking-tight text-white md:text-[15px]">

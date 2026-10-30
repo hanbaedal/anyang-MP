@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { mediaUrl } from "@/lib/media";
+import { mediaUrl, uploadOriginalUrl } from "@/lib/media";
 
 /** 공개 메뉴 페이지 공통 제목(히어로) 배경 — 테라스 묘역 파노라마 */
 export const PAGE_HERO_IMAGE = "/images/menu-hero.jpg";
@@ -32,6 +32,7 @@ export function PageHero({
         fill
         priority
         className="object-cover object-[center_28%] opacity-55"
+        quality={90}
         sizes="100vw"
       />
       <div className={cn("relative mx-auto max-w-6xl px-4", compact ? "py-2 md:py-2.5" : "py-4 md:py-6")}>
@@ -99,7 +100,16 @@ export function Photo({
 }) {
   return (
     <div className={cn("relative overflow-hidden rounded-xl bg-muted", className)}>
-      <Image src={mediaUrl(src)} alt={alt} fill className="object-cover" sizes={sizes} priority={priority} />
+      <Image
+        src={uploadOriginalUrl(src)}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes={sizes}
+        quality={90}
+        unoptimized
+        priority={priority}
+      />
     </div>
   );
 }

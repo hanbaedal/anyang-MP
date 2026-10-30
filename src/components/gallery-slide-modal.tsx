@@ -3,16 +3,16 @@
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { thumbUrl, uploadOriginalUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const SWIPE_PX = 40;
 
 export type SlideModalItem = { src: string; alt: string };
 
-function preloadThumb(src: string) {
+function preloadOriginal(src: string) {
   const img = new window.Image();
-  img.src = thumbUrl(src);
+  img.src = uploadOriginalUrl(src);
 }
 
 /** 크림 슬라이드 카드 스케일 모달 + 좌우(또는 상하) 스와이프·화살표 넘김 */
@@ -23,6 +23,7 @@ export function GallerySlideModal({
   index,
   onIndexChange,
   imageFit = "cover",
+  fullPage = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,10 +32,11 @@ export function GallerySlideModal({
   onIndexChange: (index: number) => void;
   /** 분양 그리드는 contain(잘림 없음), 갤러리는 기본 cover */
   imageFit?: "cover" | "contain";
+  /** 갤러리: 모니터에 비례한 거의 풀페이지 */
+  fullPage?: boolean;
 }) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const [uri, setUri] = useState("");
-  const [phase, setPhase] = useState<"thumb" | "orig">("thumb");
   const current = items[index];
 
   function go(delta: number) {
@@ -45,25 +47,14 @@ export function GallerySlideModal({
 
   useEffect(() => {
     if (!current) return;
-    const src = current.src;
-    setPhase("thumb");
-    setUri(thumbUrl(src));
-    const orig = new window.Image();
-    orig.src = uploadOriginalUrl(src);
-    orig.onload = () => {
-      setPhase("orig");
-      setUri(uploadOriginalUrl(src));
-    };
-    return () => {
-      orig.onload = null;
-    };
+    setUri(uploadOriginalUrl(current.src));
   }, [current?.src]);
 
   // Prefetch neighbors so swipe isn't a gray flash
   useEffect(() => {
     if (!open || !items.length) return;
     for (const i of [index - 1, index + 1, index + 2]) {
-      if (i >= 0 && i < items.length) preloadThumb(items[i].src);
+      if (i >= 0 && i < items.length) preloadOriginal(items[i].src);
     }
   }, [open, index, items]);
 
@@ -105,20 +96,31 @@ export function GallerySlideModal({
 
   if (!current) return null;
 
+  const fit = fullPage ? "contain" : imageFit;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
         className={cn(
-          // 모바일: 마퀴 카드와 동일(≤20rem). PC: 크림 슬라이드 1.5×(~2칸)에 맞춤
-          "fixed top-[50%] left-[50%] z-50 w-[min(100vw-1.5rem,20rem)] max-w-[min(100vw-1.5rem,20rem)]",
-          "md:w-[min(100vw-4rem,36rem)] md:max-w-[min(100vw-4rem,36rem)]",
-          "translate-x-[-50%] translate-y-[-50%] gap-0 overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3 shadow-lg",
           "duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
-          "[&_[data-slot=dialog-close]]:right-2 [&_[data-slot=dialog-close]]:top-2 [&_[data-slot=dialog-close]]:z-10",
-          "[&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-[#fffcf7]/90 [&_[data-slot=dialog-close]]:p-1.5",
-          "[&_[data-slot=dialog-close]]:opacity-100 [&_[data-slot=dialog-close]]:shadow-sm",
+          "[&_[data-slot=dialog-close]]:z-10 [&_[data-slot=dialog-close]]:opacity-100",
+          fullPage
+            ? cn(
+                "fixed inset-0 z-50 !top-0 !left-0 flex h-[100dvh] w-screen max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden border-0 bg-black/92 p-0 shadow-none sm:max-w-none",
+                "[&_[data-slot=dialog-close]]:right-3 [&_[data-slot=dialog-close]]:top-3",
+                "[&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-white/15 [&_[data-slot=dialog-close]]:p-1.5",
+                "[&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:hover:bg-white/25",
+              )
+            : cn(
+                "fixed top-[50%] left-[50%] z-50 w-[min(100vw-1.5rem,20rem)] max-w-[min(100vw-1.5rem,20rem)]",
+                "md:w-[min(100vw-4rem,36rem)] md:max-w-[min(100vw-4rem,36rem)]",
+                "translate-x-[-50%] translate-y-[-50%] gap-0 overflow-hidden rounded-2xl border border-[#ead7b4] bg-[#f8eedd] p-3 shadow-lg",
+                "[&_[data-slot=dialog-close]]:right-2 [&_[data-slot=dialog-close]]:top-2",
+                "[&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:bg-[#fffcf7]/90 [&_[data-slot=dialog-close]]:p-1.5",
+                "[&_[data-slot=dialog-close]]:shadow-sm",
+              ),
         )}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
@@ -126,27 +128,23 @@ export function GallerySlideModal({
         <DialogTitle className="sr-only">{current.alt}</DialogTitle>
         <div
           className={cn(
-            "relative aspect-[4/3] w-full touch-none overflow-hidden rounded-xl select-none",
-            imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-[#ead7b4]/50",
+            "relative w-full touch-none overflow-hidden select-none",
+            fullPage
+              ? "min-h-0 flex-1"
+              : cn("aspect-[4/3] rounded-xl", imageFit === "contain" ? "bg-[#f3e6cf]" : "bg-[#ead7b4]/50"),
           )}
         >
           {/* Native img: avoid Next/Image opacity-0 + missed onLoad on cache hits */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={current.src}
-            src={uri || thumbUrl(current.src)}
+            src={uri || uploadOriginalUrl(current.src)}
             alt={current.alt}
             draggable={false}
             className={cn(
               "pointer-events-none absolute inset-0 h-full w-full object-center",
-              imageFit === "contain" ? "object-contain" : "object-cover",
+              fullPage ? "object-contain p-2 sm:p-4" : fit === "contain" ? "object-contain" : "object-cover",
             )}
-            onError={() => {
-              if (phase === "thumb") {
-                setPhase("orig");
-                setUri(uploadOriginalUrl(current.src));
-              }
-            }}
           />
           {items.length > 1 ? (
             <>
@@ -154,34 +152,57 @@ export function GallerySlideModal({
                 type="button"
                 aria-label="이전 사진"
                 disabled={index <= 0}
-                className="absolute left-1 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:flex"
+                className={cn(
+                  "absolute left-2 top-1/2 z-[1] flex size-10 -translate-y-1/2 items-center justify-center rounded-full shadow-md disabled:opacity-30 sm:left-3 sm:size-12",
+                  fullPage
+                    ? "bg-black/45 text-white ring-1 ring-white/35 hover:bg-black/60"
+                    : "hidden bg-[#fffcf7]/90 text-foreground md:flex",
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   go(-1);
                 }}
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="size-6 sm:size-7" />
               </button>
               <button
                 type="button"
                 aria-label="다음 사진"
                 disabled={index >= items.length - 1}
-                className="absolute right-1 top-1/2 z-[1] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffcf7]/90 text-foreground shadow-sm disabled:opacity-30 md:flex"
+                className={cn(
+                  "absolute right-2 top-1/2 z-[1] flex size-10 -translate-y-1/2 items-center justify-center rounded-full shadow-md disabled:opacity-30 sm:right-3 sm:size-12",
+                  fullPage
+                    ? "bg-black/45 text-white ring-1 ring-white/35 hover:bg-black/60"
+                    : "hidden bg-[#fffcf7]/90 text-foreground md:flex",
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   go(1);
                 }}
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="size-6 sm:size-7" />
               </button>
             </>
           ) : null}
         </div>
         {current.alt ? (
-          <p className="mt-2 truncate px-1 text-center text-sm text-foreground/80">{current.alt}</p>
+          <p
+            className={cn(
+              "truncate px-12 text-center text-sm",
+              fullPage ? "pointer-events-none absolute inset-x-0 bottom-10 z-[1] text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]" : "mt-2 px-1 text-foreground/80",
+            )}
+          >
+            {current.alt}
+          </p>
         ) : null}
         {items.length > 1 ? (
-          <p className="mt-0.5 text-center text-xs text-muted-foreground" aria-live="polite">
+          <p
+            className={cn(
+              "text-center text-xs",
+              fullPage ? "pointer-events-none absolute inset-x-0 bottom-4 z-[1] text-white/70" : "mt-0.5 text-muted-foreground",
+            )}
+            aria-live="polite"
+          >
             {index + 1} / {items.length}
           </p>
         ) : null}

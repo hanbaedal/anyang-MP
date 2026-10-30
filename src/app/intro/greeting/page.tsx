@@ -5,7 +5,7 @@ import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { isUploadMediaPath, mediaUrl, thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 
 export async function generateMetadata() {
   const locale = await readLocale();
@@ -16,7 +16,7 @@ export default async function GreetingPage() {
   const locale = await readLocale();
   const cms = await getCmsPageLocalized("greeting", locale);
   const bodyImage = cms.bodyImage?.trim() || "";
-  const imageSrc = bodyImage ? (isUploadMediaPath(bodyImage) ? thumbUrl(bodyImage) : mediaUrl(bodyImage)) : "";
+  const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
 
   return (
     <>
@@ -37,7 +37,7 @@ export default async function GreetingPage() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 90vw, 22rem"
-                  unoptimized={isUploadMediaPath(bodyImage)}
+                  unoptimized
                 />
               </div>
             ) : null}

@@ -8,7 +8,7 @@ import { PastelBox } from "@/components/pastel-box";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { isUploadMediaPath, mediaUrl, thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { listNoticesLocalized } from "@/lib/notices";
 import { FEATURES, SITE, pastelCardClass } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export default async function IntroHubPage() {
     listNoticesLocalized(locale),
   ]);
   const bodyImage = greeting.bodyImage?.trim() || "";
-  const imageSrc = bodyImage ? (isUploadMediaPath(bodyImage) ? thumbUrl(bodyImage) : mediaUrl(bodyImage)) : "";
+  const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
   const featureItems = featuresCms.items?.length
     ? featuresCms.items
     : FEATURES.map((feature) => ({
@@ -68,7 +68,7 @@ export default async function IntroHubPage() {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 90vw, 22rem"
-                    unoptimized={isUploadMediaPath(bodyImage)}
+                    unoptimized
                   />
                 </div>
               ) : null}

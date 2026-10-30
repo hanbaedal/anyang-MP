@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { Paragraphs } from "@/components/paragraphs";
-import { mediaUrl, thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 export type LotsPhotoItem = {
@@ -39,7 +39,7 @@ export function LotsPhotoGrid({ items, layout = "grid" }: { items: LotsPhotoItem
   function preload(src: string) {
     if (typeof window === "undefined") return;
     const img = new window.Image();
-    img.src = mediaUrl(src);
+    img.src = uploadOriginalUrl(src);
   }
 
   function photo(item: LotsPhotoItem, i: number) {
@@ -68,7 +68,7 @@ export function LotsPhotoGrid({ items, layout = "grid" }: { items: LotsPhotoItem
         aria-label={item.title ? `${item.title} 크게 보기` : "사진 크게 보기"}
       >
         <Image
-          src={thumbUrl(item.image)}
+          src={uploadOriginalUrl(item.image)}
           alt={item.title}
           fill
           className="object-contain object-center"
@@ -77,6 +77,8 @@ export function LotsPhotoGrid({ items, layout = "grid" }: { items: LotsPhotoItem
               ? "(max-width: 767px) 100vw, 70vw"
               : "(max-width: 639px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw"
           }
+          quality={90}
+          unoptimized
           priority={i < 5}
           loading={i < 5 ? undefined : "lazy"}
         />

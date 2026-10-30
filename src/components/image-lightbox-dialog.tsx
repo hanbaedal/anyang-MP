@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { mediaUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const shellClassName =
@@ -38,10 +38,11 @@ export function ImageLightboxDialog({
           ) : null}
           <Image
             key={src}
-            src={mediaUrl(src)}
+            src={uploadOriginalUrl(src)}
             alt={alt}
             fill
             quality={90}
+            unoptimized
             priority
             sizes="100vw"
             onLoad={() => setLoaded(true)}

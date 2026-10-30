@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { GALLERY, type GalleryItem } from "@/lib/content";
-import { isUploadMediaPath, thumbUrl, uploadOriginalUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 import { DecadePager } from "@/components/decade-pager";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
@@ -14,46 +14,33 @@ import { cn } from "@/lib/utils";
 const PAGE_SIZE = 3;
 const SLIDE_MS = 7000;
 
-function preloadThumb(src: string) {
+function preloadOriginal(src: string) {
   const img = new window.Image();
-  img.src = thumbUrl(src);
+  img.src = uploadOriginalUrl(src);
 }
 
-/** Thumb with original fallback; reports hard failure so parent can drop the slot. */
-function FallbackThumb({
+/** 원본 표시. 실패하면 부모에서 슬롯을 뺀다. */
+function OriginalPhoto({
   src,
   className,
   loading,
-  onOk,
   onFail,
 }: {
   src: string;
   className?: string;
   loading?: "eager" | "lazy";
-  onOk?: (src: string) => void;
   onFail: (src: string) => void;
 }) {
-  const [uri, setUri] = useState(() => thumbUrl(src));
-  const [phase, setPhase] = useState<"thumb" | "orig">("thumb");
-
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={uri}
+      src={uploadOriginalUrl(src)}
       alt=""
       className={className}
       loading={loading}
       decoding="async"
       draggable={false}
-      onLoad={() => onOk?.(src)}
-      onError={() => {
-        if (phase === "thumb") {
-          setPhase("orig");
-          setUri(uploadOriginalUrl(src));
-          return;
-        }
-        onFail(src);
-      }}
+      onError={() => onFail(src)}
     />
   );
 }
@@ -127,7 +114,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
     if (!visibleItems.length) return;
     for (const i of [safeIndex + 1, safeIndex - 1]) {
       const photo = visibleItems[(i + visibleItems.length) % visibleItems.length];
-      if (photo) preloadThumb(photo.src);
+      if (photo) preloadOriginal(photo.src);
     }
   }, [safeIndex, visibleItems]);
 
@@ -145,12 +132,13 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 onClick={() => setOpen(item.src)}
               >
                 <Image
-                  src={thumbUrl(item.src)}
+                  src={uploadOriginalUrl(item.src)}
                   alt={item.alt}
                   fill
                   className="object-cover"
                   sizes="33vw"
-                  unoptimized={isUploadMediaPath(thumbUrl(item.src))}
+                  quality={90}
+                  unoptimized
                 />
               </button>
               <p className="mt-2 text-sm text-muted-foreground">{item.alt}</p>
@@ -191,19 +179,12 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                     style={{ width: `${100 / visibleItems.length}%` }}
                   >
                     {near ? (
-                      <button
-                        type="button"
-                        className="absolute inset-0"
-                        onClick={() => setListIndex(i)}
-                        aria-label={item.alt}
-                      >
-                        <FallbackThumb
-                          src={item.src}
-                          className="h-full w-full object-cover"
-                          loading={i === safeIndex ? "eager" : "lazy"}
-                          onFail={onFail}
-                        />
-                      </button>
+                      <OriginalPhoto
+                        src={item.src}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading={i === safeIndex ? "eager" : "lazy"}
+                        onFail={onFail}
+                      />
                     ) : null}
                   </div>
                 );
@@ -251,7 +232,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 }}
               >
                 <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
-                  <FallbackThumb
+                  <OriginalPhoto
                     src={item.src}
                     className="absolute inset-0 h-full w-full object-cover"
                     loading="lazy"
@@ -282,6 +263,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
       {listIndex !== null && visibleItems.length > 0 ? (
         <GallerySlideModal
           open
+          fullPage
           onOpenChange={(next) => {
             if (!next) setListIndex(null);
           }}
