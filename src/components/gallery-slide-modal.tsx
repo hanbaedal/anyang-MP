@@ -45,8 +45,18 @@ export function GallerySlideModal({
 
   useEffect(() => {
     if (!current) return;
+    const src = current.src;
     setPhase("thumb");
-    setUri(thumbUrl(current.src));
+    setUri(thumbUrl(src));
+    const orig = new window.Image();
+    orig.src = uploadOriginalUrl(src);
+    orig.onload = () => {
+      setPhase("orig");
+      setUri(uploadOriginalUrl(src));
+    };
+    return () => {
+      orig.onload = null;
+    };
   }, [current?.src]);
 
   // Prefetch neighbors so swipe isn't a gray flash

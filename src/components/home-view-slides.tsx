@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/components/locale-provider";
-import { uploadOriginalUrl } from "@/lib/media";
+import { thumbUrl, uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 export type ViewSlide = { src: string; alt: string };
@@ -54,7 +54,7 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
       const photo = photos[(i + photos.length) % photos.length];
       if (!photo) continue;
       const img = new window.Image();
-      img.src = uploadOriginalUrl(photo.src);
+      img.src = thumbUrl(photo.src);
     }
   }, [index, photos]);
 
@@ -98,11 +98,16 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
                 {near ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={uploadOriginalUrl(photo.src)}
+                    src={thumbUrl(photo.src)}
                     alt=""
                     className={cn("h-full w-full object-cover object-[center_32%]")}
                     loading={i === 0 ? "eager" : "lazy"}
                     decoding="async"
+                    onError={(event) => {
+                      const el = event.currentTarget;
+                      const orig = uploadOriginalUrl(photo.src);
+                      if (el.src !== orig) el.src = orig;
+                    }}
                   />
                 ) : null}
               </div>

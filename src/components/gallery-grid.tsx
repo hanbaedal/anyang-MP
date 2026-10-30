@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { GALLERY, type GalleryItem } from "@/lib/content";
-import { isUploadMediaPath, mediaUrl, thumbUrl, uploadOriginalUrl } from "@/lib/media";
+import { isUploadMediaPath, thumbUrl, uploadOriginalUrl } from "@/lib/media";
 import { DecadePager } from "@/components/decade-pager";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils";
 const PAGE_SIZE = 3;
 const SLIDE_MS = 7000;
 
-function openPreview(src: string) {
+function preloadThumb(src: string) {
   const img = new window.Image();
-  img.src = mediaUrl(src);
+  img.src = thumbUrl(src);
 }
 
 /** Thumb with original fallback; reports hard failure so parent can drop the slot. */
@@ -127,9 +127,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
     if (!visibleItems.length) return;
     for (const i of [safeIndex + 1, safeIndex - 1]) {
       const photo = visibleItems[(i + visibleItems.length) % visibleItems.length];
-      if (!photo) continue;
-      const img = new window.Image();
-      img.src = uploadOriginalUrl(photo.src);
+      if (photo) preloadThumb(photo.src);
     }
   }, [safeIndex, visibleItems]);
 
@@ -145,7 +143,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                 type="button"
                 className="relative block aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted"
                 onClick={() => setOpen(item.src)}
-                onMouseEnter={() => openPreview(item.src)}
               >
                 <Image
                   src={thumbUrl(item.src)}
@@ -198,16 +195,13 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                         type="button"
                         className="absolute inset-0"
                         onClick={() => setListIndex(i)}
-                        onMouseEnter={() => openPreview(item.src)}
                         aria-label={item.alt}
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={uploadOriginalUrl(item.src)}
-                          alt=""
+                        <FallbackThumb
+                          src={item.src}
                           className="h-full w-full object-cover"
-                          loading={i === 0 ? "eager" : "lazy"}
-                          decoding="async"
+                          loading={i === safeIndex ? "eager" : "lazy"}
+                          onFail={onFail}
                         />
                       </button>
                     ) : null}
@@ -255,7 +249,6 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   setSlideIndex(index);
                   setListIndex(index);
                 }}
-                onMouseEnter={() => openPreview(item.src)}
               >
                 <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
                   <FallbackThumb
