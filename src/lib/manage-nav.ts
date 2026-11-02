@@ -10,8 +10,9 @@ function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
 }
 
 /**
- * 홈페이지 관리 서브메뉴.
- * 공개 NAV 순서: 메인 전용 → 공원소개(공지사항 포함) → 분양안내 → 이용안내 → 갤러리.
+ * 홈페이지 관리 서브메뉴 (AMP-70).
+ * 공개 GNB에 있는 페이지만. 리모델링·분양가는 숨김.
+ * 중복 표기 피하려고 일부는 manage.* 키 사용.
  */
 export function manageNavItems(): ManageNavItem[] {
   return [
@@ -23,14 +24,12 @@ export function manageNavItems(): ManageNavItem[] {
     cmsPage("burial"),
     cmsPage("lawn"),
     cmsPage("columbarium"),
-    cmsPage("remodeling"),
-    cmsPage("prices"),
     cmsPage("procedure"),
     cmsPage("fees"),
-    cmsPage("services"),
+    { href: "/manage/pages/services", i18n: "manage.servicesPage" },
     cmsPage("funeral"),
-    { href: "/manage/gallery", i18n: "manage.gallery" },
-    { href: "/manage/notices", i18n: "manage.notices" },
+    { href: "/manage/gallery", i18n: "manage.galleryAdmin" },
+    { href: "/manage/notices", i18n: "manage.noticesPage" },
     { href: "/manage/inquiries", i18n: "manage.inquiries" },
   ];
 }

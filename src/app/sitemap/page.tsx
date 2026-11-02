@@ -14,7 +14,7 @@ export async function generateMetadata() {
 export default async function SitemapPage() {
   const locale = await readLocale();
   const session = await readSession();
-  const menus = sitemapMenus(session?.role);
+  const menus = sitemapMenus(session?.role, session?.username);
 
   return (
     /* 높이·overflow는 #content 스크롤 영역에 맡김 — h-full+내부 overflow-y는

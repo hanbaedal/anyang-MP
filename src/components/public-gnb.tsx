@@ -11,11 +11,19 @@ import { isNavActive } from "@/components/nav-tree";
 import type { Role } from "@/lib/auth-types";
 
 /** PC 헤더 가로 GNB + 좁은 세로 드롭다운 (시안형 패턴, 안양 브랜드 토큰) */
-export function PublicGnb({ className, role }: { className?: string; role?: Role | null }) {
+export function PublicGnb({
+  className,
+  role,
+  username,
+}: {
+  className?: string;
+  role?: Role | null;
+  username?: string | null;
+}) {
   const t = useT();
   const pathname = usePathname();
   const chrome = isGuestLocalePath(pathname) ? t : tKo;
-  const items = publicGnbItemsForRole(role);
+  const items = publicGnbItemsForRole(role, username);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const baseId = useId();

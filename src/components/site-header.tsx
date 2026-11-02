@@ -12,7 +12,15 @@ import { useT } from "@/components/locale-provider";
 import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import type { Role } from "@/lib/auth-types";
 
-export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role | null }) {
+export function SiteHeader({
+  signedIn,
+  role,
+  username,
+}: {
+  signedIn: boolean;
+  role?: Role | null;
+  username?: string | null;
+}) {
   const t = useT();
   const pathname = usePathname();
   const guestPath = isGuestLocalePath(pathname);
@@ -21,7 +29,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
   return (
     <header className="relative z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur lg:h-14">
       <div className="flex h-full min-w-0 items-center gap-1 px-1 sm:gap-2 sm:px-3">
-        <PublicNavSheet role={role} />
+        <PublicNavSheet role={role} username={username} />
 
         <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Image
@@ -38,7 +46,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
           </p>
         </Link>
 
-        <PublicGnb role={role} />
+        <PublicGnb role={role} username={username} />
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <Link

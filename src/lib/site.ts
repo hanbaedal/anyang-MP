@@ -1,5 +1,5 @@
 import type { Role } from "./auth-types";
-import { isCmsStaff, isStaffRole, isStatusStaff } from "./auth-types";
+import { canAccessExecOverview, canAccessHomepageManage, canAccessWorkProgram } from "./auth-types";
 import { EXEC_NAV } from "./exec-nav";
 import { manageNavItems, MANAGE_HOME } from "./manage-nav";
 import { SUPERVISOR_HOME, SUPERVISOR_NAV } from "./supervisor-nav";
@@ -228,7 +228,7 @@ export type SitemapMenu = {
   children: NavChild[];
 };
 
-export function sitemapMenus(role?: Role | null): SitemapMenu[] {
+export function sitemapMenus(role?: Role | null, username?: string | null): SitemapMenu[] {
   const menus: SitemapMenu[] = [];
   for (const item of NAV) {
     if (item.href === "/sitemap") continue;
@@ -239,7 +239,20 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
       children: item.children ?? [],
     });
   }
-  if (isStaffRole(role)) {
+  // AMP-70: 홈페이지관리 → 업무프로그램 → 경영관리 순 (헤더와 동일)
+  if (canAccessHomepageManage(role)) {
+    menus.push({
+      href: MANAGE_HOME,
+      i18n: "manage.homepage",
+      tone: "support",
+      children: manageNavItems().map((item) => ({
+        href: item.href,
+        label: item.i18n,
+        i18n: item.i18n,
+      })),
+    });
+  }
+  if (canAccessWorkProgram(role, username)) {
     menus.push({
       href: WORK_NAV[0].href,
       i18n: "work.program",
@@ -247,7 +260,7 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
       children: WORK_NAV.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
     });
   }
-  if (isStatusStaff(role)) {
+  if (canAccessExecOverview(role)) {
     menus.push({
       href: EXEC_NAV[0].href,
       i18n: "work.overview",
@@ -261,18 +274,6 @@ export function sitemapMenus(role?: Role | null): SitemapMenu[] {
       i18n: "nav.supervisor",
       tone: "more",
       children: SUPERVISOR_NAV.map((item) => ({
-        href: item.href,
-        label: item.i18n,
-        i18n: item.i18n,
-      })),
-    });
-  }
-  if (isCmsStaff(role)) {
-    menus.push({
-      href: MANAGE_HOME,
-      i18n: "manage.homepage",
-      tone: "support",
-      children: manageNavItems().map((item) => ({
         href: item.href,
         label: item.i18n,
         i18n: item.i18n,
@@ -343,16 +344,16 @@ export function publicGnbItems(): NavItem[] {
 }
 
 /**
- * AMP-67/68: 로그인 역할별 GNB 확장 (갤러리 오른쪽).
- * - CMS 스태프(anyang001 admin 등): 홈페이지 관리
- * - 스태프(anyang005 등): 업무프로그램
- * - CEO·감독(isStatusStaff): 경영관리
+ * AMP-70: 로그인 역할별 GNB (갤러리 오른쪽).
+ * - anyang001 admin: 홈페이지관리만
+ * - anyang005 admin: 홈페이지관리 + 업무프로그램 (WORK_PROGRAM_ADMINS)
+ * - ceo: 홈페이지관리 + 업무프로그램 + 경영관리
  */
-export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
+export function publicGnbItemsForRole(role?: Role | null, username?: string | null): NavItem[] {
   const items = [...publicGnbItems()];
   const extras: NavItem[] = [];
 
-  if (isCmsStaff(role)) {
+  if (canAccessHomepageManage(role)) {
     extras.push({
       href: MANAGE_HOME,
       label: "홈페이지 관리",
@@ -366,7 +367,7 @@ export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
     });
   }
 
-  if (isStaffRole(role)) {
+  if (canAccessWorkProgram(role, username)) {
     extras.push({
       href: WORK_NAV[0].href,
       label: "업무프로그램",
@@ -380,7 +381,7 @@ export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
     });
   }
 
-  if (isStatusStaff(role)) {
+  if (canAccessExecOverview(role)) {
     extras.push({
       href: EXEC_NAV[0].href,
       label: "경영관리",

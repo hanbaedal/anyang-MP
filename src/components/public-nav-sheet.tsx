@@ -17,11 +17,11 @@ const triggerClass =
   "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:hidden";
 
 /** 모바일 햄버거 → 공개 NAV 아코디언 오버레이 (폴더 트리 크롬 없음) */
-export function PublicNavSheet({ role }: { role?: Role | null }) {
+export function PublicNavSheet({ role, username }: { role?: Role | null; username?: string | null }) {
   const t = useT();
   const pathname = usePathname();
   const chrome = isGuestLocalePath(pathname) ? t : tKo;
-  const items = publicGnbItemsForRole(role);
+  const items = publicGnbItemsForRole(role, username);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -33,7 +33,7 @@ export function PublicNavSheet({ role }: { role?: Role | null }) {
     if (!open) return;
     setExpanded((prev) => {
       const next = { ...prev };
-      for (const item of publicGnbItemsForRole(role)) {
+      for (const item of publicGnbItemsForRole(role, username)) {
         if (
           item.children?.some((child) => isNavActive(pathname, child.href)) ||
           isNavActive(pathname, item.href)
@@ -43,7 +43,7 @@ export function PublicNavSheet({ role }: { role?: Role | null }) {
       }
       return next;
     });
-  }, [open, pathname, role]);
+  }, [open, pathname, role, username]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
