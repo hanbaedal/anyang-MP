@@ -69,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {t(locale, "skip")}
           </a>
           <SiteHeader signedIn={Boolean(session)} role={session?.role ?? null} />
-          {/* AMP-65: 좌측 탐색기(SiteSidebar) 제거 — 본문 전폭. 스태프 탐색기는 헤더 시트만. */}
+          {/* AMP-65/66: 좌측·헤더 탐색기 제거(게스트와 동일). 관리 메뉴는 GNB 홈페이지관리(AMP-67). */}
           <div
             id="content"
             className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"

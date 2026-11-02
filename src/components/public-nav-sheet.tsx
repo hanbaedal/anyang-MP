@@ -6,21 +6,22 @@ import { usePathname } from "next/navigation";
 import { Menu, Minus, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { publicGnbItems } from "@/lib/site";
+import { publicGnbItemsForRole } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useT } from "@/components/locale-provider";
 import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import { isNavActive } from "@/components/nav-tree";
+import type { Role } from "@/lib/auth-types";
 
 const triggerClass =
   "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:hidden";
 
 /** 모바일 햄버거 → 공개 NAV 아코디언 오버레이 (폴더 트리 크롬 없음) */
-export function PublicNavSheet() {
+export function PublicNavSheet({ role }: { role?: Role | null }) {
   const t = useT();
   const pathname = usePathname();
   const chrome = isGuestLocalePath(pathname) ? t : tKo;
-  const items = publicGnbItems();
+  const items = publicGnbItemsForRole(role);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -32,7 +33,7 @@ export function PublicNavSheet() {
     if (!open) return;
     setExpanded((prev) => {
       const next = { ...prev };
-      for (const item of publicGnbItems()) {
+      for (const item of publicGnbItemsForRole(role)) {
         if (
           item.children?.some((child) => isNavActive(pathname, child.href)) ||
           isNavActive(pathname, item.href)
@@ -42,7 +43,7 @@ export function PublicNavSheet() {
       }
       return next;
     });
-  }, [open, pathname]);
+  }, [open, pathname, role]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

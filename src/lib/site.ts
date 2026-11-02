@@ -342,6 +342,26 @@ export function publicGnbItems(): NavItem[] {
   return NAV.filter((item) => item.href !== "/sitemap");
 }
 
+/** AMP-67: 로그인 CMS 스태프(관리자·CEO·감독) — 갤러리 오른쪽에 홈페이지 관리 */
+export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
+  const items = publicGnbItems();
+  if (!isCmsStaff(role)) return items;
+  const manageItem: NavItem = {
+    href: MANAGE_HOME,
+    label: "홈페이지 관리",
+    i18n: "manage.homepage",
+    tone: "support",
+    children: manageNavItems().map((item) => ({
+      href: item.href,
+      label: item.i18n,
+      i18n: item.i18n,
+    })),
+  };
+  const galleryIdx = items.findIndex((item) => item.href === "/gallery");
+  if (galleryIdx < 0) return [...items, manageItem];
+  return [...items.slice(0, galleryIdx + 1), manageItem, ...items.slice(galleryIdx + 1)];
+}
+
 /** 모바일 가로 스와이프 — 공개 하위(없으면 상위, 사이트맵 제외). 리모델링·분양가·문의는 내비에서만 제외 */
 export const PUBLIC_SWIPE_PAGES = NAV.flatMap((item) => {
   if (item.href === "/sitemap") return [];

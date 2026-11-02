@@ -3,18 +3,19 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { publicGnbItems } from "@/lib/site";
+import { publicGnbItemsForRole } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useT } from "@/components/locale-provider";
 import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import { isNavActive } from "@/components/nav-tree";
+import type { Role } from "@/lib/auth-types";
 
 /** PC 헤더 가로 GNB + 좁은 세로 드롭다운 (시안형 패턴, 안양 브랜드 토큰) */
-export function PublicGnb({ className }: { className?: string }) {
+export function PublicGnb({ className, role }: { className?: string; role?: Role | null }) {
   const t = useT();
   const pathname = usePathname();
   const chrome = isGuestLocalePath(pathname) ? t : tKo;
-  const items = publicGnbItems();
+  const items = publicGnbItemsForRole(role);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const baseId = useId();
