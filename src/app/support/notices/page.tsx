@@ -37,6 +37,9 @@ export default async function NoticesPage() {
           ) : (
             <span className="sr-only">{t(locale, "notices.listImageEmpty")}</span>
           )}
+          {/* AMP-61: soft cream mist — photo stays; CSS overlay only */}
+          <div className="pc-notices-mist" aria-hidden />
+          <div className="pc-notices-mist pc-notices-mist--drift" aria-hidden />
         </aside>
         <div className="pc-notices-list min-w-0">
           <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} fill />
