@@ -106,11 +106,12 @@ export function LotsPhotoGrid({
           "flex min-h-0 flex-1 flex-col",
           detail
             ? cn(
-                "h-full justify-center p-4 md:min-h-[22rem] md:p-6 lg:p-8",
+                /* 제목을 이미지 칼럼 상단에 맞춤 (세로 중앙 정렬 제거) */
+                "h-full justify-start p-4 md:min-h-[22rem] md:p-6 lg:p-8",
                 alignEnd ? "items-start md:items-end" : "items-start",
               )
             : "p-3",
-          item.text ? "gap-1" : "",
+          !detail && item.text ? "gap-1" : "",
         )}
       >
         <h2
@@ -126,7 +127,8 @@ export function LotsPhotoGrid({
           <div
             className={cn(
               "w-full text-muted-foreground",
-              detail ? "space-y-2 text-base" : "space-y-1 text-sm",
+              /* detail: 제목 아래 약 두 줄 간격 */
+              detail ? "mt-[2lh] space-y-2 text-base" : "space-y-1 text-sm",
               alignEnd && "md:text-right",
             )}
           >
