@@ -1,5 +1,7 @@
 import { DirectionsMap } from "@/components/directions-map";
-import { SITE } from "@/lib/site";
+import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
+import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
+import { FEATURES, SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -8,8 +10,29 @@ export async function generateMetadata() {
   return { title: t(locale, "dir.title") };
 }
 
+const TRANSIT_FALLBACK = [
+  { titleKey: "dir.car", bodyKey: "dir.carBody", image: FEATURES[0].image },
+  { titleKey: "dir.bus", bodyKey: "dir.busBody", image: FEATURES[1].image },
+  { titleKey: "dir.taxi", bodyKey: "dir.taxiBody", image: FEATURES[2].image },
+] as const;
+
 export default async function DirectionsPage() {
   const locale = await readLocale();
+  const cms = await getCmsPageLocalized("directions", locale);
+  const rawItems = stripDirectionsAddressItems(cms.items ?? []);
+  const items = (rawItems.length
+    ? rawItems
+    : TRANSIT_FALLBACK.map((row) => ({
+        id: row.titleKey,
+        title: t(locale, row.titleKey),
+        text: t(locale, row.bodyKey),
+        image: row.image,
+      }))
+  ).map((item, index) => ({
+    ...item,
+    // 공개 카드: 제목 미표시 · 본문 첫 줄만(FeaturesPhotoGrid captionFirstLine)
+    image: item.image?.trim() || TRANSIT_FALLBACK[index % TRANSIT_FALLBACK.length]?.image,
+  }));
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
@@ -18,12 +41,15 @@ export default async function DirectionsPage() {
         <p>{SITE.address}</p>
         <p>
           <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
-            전화번호 : 031-482-2949
+            {t(locale, "phone")} : {SITE.phone}
           </a>
         </p>
       </div>
-      <div className="flex min-h-0 w-full flex-1 flex-col px-2 py-2 sm:px-3">
-        <DirectionsMap fill />
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-2 pb-2 sm:px-3 md:flex md:flex-col md:overflow-hidden">
+        <FeaturesPhotoGrid className="shrink-0 md:grid-cols-3" dense captionFirstLine items={items} />
+        <div className="flex min-h-[12rem] w-full flex-1 flex-col md:min-h-0">
+          <DirectionsMap fill />
+        </div>
       </div>
     </div>
   );

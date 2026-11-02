@@ -49,13 +49,13 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
     return {
       slug,
       title: ko["dir.title"],
-      lead: ko["dir.lead"],
+      lead: "",
       body: "",
+      // AMP-64: 자가용·버스·택시만 (주소 항목 없음 — 공개는 SITE.address)
       items: [
-        { id: nid(), title: ko["dir.car"], text: ko["dir.carBody"] },
-        { id: nid(), title: ko["dir.bus"], text: ko["dir.busBody"] },
-        { id: nid(), title: ko["dir.taxi"], text: ko["dir.taxiBody"] },
-        { id: nid(), title: ko["dir.alt"], text: `${ko["site.address"]}\n${SITE.phone}` },
+        { id: nid(), title: ko["dir.car"], text: ko["dir.carBody"], image: "", galleryId: "" },
+        { id: nid(), title: ko["dir.bus"], text: ko["dir.busBody"], image: "", galleryId: "" },
+        { id: nid(), title: ko["dir.taxi"], text: ko["dir.taxiBody"], image: "", galleryId: "" },
       ],
       updatedAt: now,
     };
@@ -182,10 +182,39 @@ function currentCmsTitle(slug: CmsSlug, title: string) {
   return title;
 }
 
+/** 오시는길 CMS에서 주소 중복 항목 제거 (관리·공개 공통). */
+const DIRECTIONS_ADDRESS_TITLES = new Set(["주소", "Address", "地址", "dir.alt"]);
+
+export function stripDirectionsAddressItems(items: CmsItem[]): CmsItem[] {
+  return items.filter((item) => {
+    const title = String(item.title ?? "").trim();
+    if (!title) return true;
+    if (DIRECTIONS_ADDRESS_TITLES.has(title)) return false;
+    if (title === ko["dir.alt"]) return false;
+    return true;
+  });
+}
+
+function sanitizeDirectionsPage(page: CmsPage): CmsPage {
+  if (page.slug !== "directions") return page;
+  const items = stripDirectionsAddressItems(page.items ?? []);
+  const i18n = page.i18n
+    ? Object.fromEntries(
+        Object.entries(page.i18n).map(([locale, fields]) => [
+          locale,
+          fields
+            ? { ...fields, items: stripDirectionsAddressItems(fields.items ?? []) }
+            : fields,
+        ]),
+      )
+    : undefined;
+  return { ...page, items, ...(i18n ? { i18n: i18n as CmsPage["i18n"] } : {}) };
+}
+
 function fromDoc(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
-  return {
+  const page: CmsPage = {
     slug,
     title: currentCmsTitle(slug, String(doc.title ?? "")),
     lead: String(doc.lead ?? ""),
@@ -195,6 +224,7 @@ function fromDoc(doc: Record<string, unknown>): CmsPage {
     ...(bodyImage ? { bodyImage } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   };
+  return sanitizeDirectionsPage(page);
 }
 
 async function readLocal(): Promise<CmsPage[]> {
@@ -290,27 +320,28 @@ export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage
 
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
   const bodyImage = String(input.bodyImage ?? "").trim();
-  const page: CmsPage = {
+  const rawItems = (input.items ?? []).map((item) => {
+    const image = String(item.image ?? "").trim();
+    const galleryId = String(item.galleryId ?? "").trim();
+    return {
+      id: item.id || nid(),
+      title: item.title.trim(),
+      text: item.text ?? "",
+      image,
+      ...(galleryId ? { galleryId } : {}),
+      won: item.won,
+      remaining: item.remaining,
+    };
+  });
+  const page: CmsPage = sanitizeDirectionsPage({
     slug: input.slug,
     title: input.title.trim(),
     lead: input.lead.trim(),
     body: input.body,
-    items: (input.items ?? []).map((item) => {
-      const image = String(item.image ?? "").trim();
-      const galleryId = String(item.galleryId ?? "").trim();
-      return {
-        id: item.id || nid(),
-        title: item.title.trim(),
-        text: item.text ?? "",
-        image,
-        ...(galleryId ? { galleryId } : {}),
-        won: item.won,
-        remaining: item.remaining,
-      };
-    }),
+    items: rawItems,
     updatedAt: new Date().toISOString(),
     ...(bodyImage ? { bodyImage } : {}),
-  };
+  });
   page.i18n = await fillCmsI18n(page, true);
 
   if (hasMongo()) {

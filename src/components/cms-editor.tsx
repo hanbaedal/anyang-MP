@@ -47,6 +47,8 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const showBodyImage = page.slug === "greeting";
   const galleryLinkItems = CMS_GALLERY_LINK_ITEM_SLUGS.includes(page.slug);
   const galleryTag = GALLERY_TAG_BY_SLUG[page.slug];
+  const directionsPage = page.slug === "directions";
+  const hidePageCopy = directionsPage;
 
   useEffect(() => {
     pageRef.current = page;
@@ -133,20 +135,29 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
 
   return (
     <form onSubmit={onSave} className="mx-auto max-w-6xl space-y-5 px-4 py-10">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-1 text-sm">
-          <span className="font-medium">제목</span>
-          <input className={field} value={page.title} onChange={(e) => setPage({ ...page, title: e.target.value })} />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="font-medium">요약</span>
-          <input className={field} value={page.lead} onChange={(e) => setPage({ ...page, lead: e.target.value })} />
-        </label>
-      </div>
-      <label className="block space-y-1 text-sm">
-        <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
-        <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
-      </label>
+      {hidePageCopy ? (
+        <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          오시는 길: 페이지 제목·요약·본문은 쓰지 않습니다. 자가용·버스·택시 카드만 편집하세요(주소 항목 없음 —
+          공개 주소는 사이트 설정). 공개 카드는 갤러리 사진 + 설명 첫 줄만 보입니다.
+        </p>
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1 text-sm">
+              <span className="font-medium">제목</span>
+              <input className={field} value={page.title} onChange={(e) => setPage({ ...page, title: e.target.value })} />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="font-medium">요약</span>
+              <input className={field} value={page.lead} onChange={(e) => setPage({ ...page, lead: e.target.value })} />
+            </label>
+          </div>
+          <label className="block space-y-1 text-sm">
+            <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
+            <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
+          </label>
+        </>
+      )}
       {showBodyImage ? (
         <div className="space-y-2 rounded-xl border bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -216,12 +227,18 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
           <ul className="space-y-3">
             {page.items.map((item, index) => (
               <li key={item.id} className="space-y-2 rounded-xl border bg-card p-4">
-                <input
-                  className={field}
-                  placeholder="제목"
-                  value={item.title}
-                  onChange={(e) => patchItem(item.id, { title: e.target.value })}
-                />
+                {directionsPage ? (
+                  <p className="text-xs font-medium text-muted-foreground">
+                    관리용 구분: {item.title.trim() || `카드 ${index + 1}`} (공개에는 제목 없음)
+                  </p>
+                ) : (
+                  <input
+                    className={field}
+                    placeholder="제목"
+                    value={item.title}
+                    onChange={(e) => patchItem(item.id, { title: e.target.value })}
+                  />
+                )}
                 {showPrices ? (
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input
@@ -240,7 +257,11 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                 ) : (
                   <textarea
                     className={area}
-                    placeholder="설명 (Enter=줄바꿈, 빈 줄=문단)"
+                    placeholder={
+                      directionsPage
+                        ? "설명 (공개는 첫 줄만 · 비우면 사진만)"
+                        : "설명 (Enter=줄바꿈, 빈 줄=문단)"
+                    }
                     value={item.text ?? ""}
                     onChange={(e) => patchItem(item.id, { text: e.target.value })}
                   />
@@ -250,11 +271,16 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <p className="text-sm font-medium">
-                          {page.slug === "procedure" ? `단계 사진 ${index + 1}` : `카드 사진 ${index + 1}`}
+                          {page.slug === "procedure"
+                            ? `단계 사진 ${index + 1}`
+                            : page.slug === "directions"
+                              ? `교통 카드 사진 ${index + 1}`
+                              : `카드 사진 ${index + 1}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을
-                          씁니다.
+                          {page.slug === "directions"
+                            ? "자가용·버스·택시만 둡니다. 주소 항목은 넣지 마세요(공개 주소는 사이트 설정). 갤러리에서만 고르고, 없으면 기본 공원 사진을 씁니다."
+                            : "갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다."}
                         </p>
                       </div>
                       {item.image || item.galleryId ? (
