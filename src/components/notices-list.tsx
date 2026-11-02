@@ -18,6 +18,20 @@ function formatDate(value: string, locale: string) {
   return new Intl.DateTimeFormat(tag, { dateStyle: "medium" }).format(date);
 }
 
+/** 본문 첫 문장·첫 줄 위주 한 줄 요약 (표용) */
+function summarizeBody(body: string, max = 72) {
+  const flat = body
+    .replace(/\r\n/g, "\n")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" ");
+  if (flat.length <= max) return flat;
+  const cut = flat.slice(0, max);
+  const sp = cut.lastIndexOf(" ");
+  return `${(sp > 40 ? cut.slice(0, sp) : cut).trimEnd()}…`;
+}
+
 export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: string }) {
   const t = useT();
   const locale = useLocale();
@@ -50,44 +64,78 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
 
   return (
     <div className="space-y-4">
-      <ol className="space-y-3">
-        {pageItems.map((notice, offset) => {
-          const itemIndex = windowStart + offset;
-          const n = itemIndex + 1;
-          return (
-            <li key={notice.slug}>
-              <button
-                type="button"
-                className={cn(
-                  "flex w-full items-start gap-3 rounded-xl border bg-card p-4 text-left transition-colors",
-                  "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
-                  itemIndex === safeIndex && "border-[#c4a574] bg-[#f8eedd]/80",
-                )}
-                onClick={() => openAt(itemIndex)}
-                aria-label={t("notices.item", { n })}
-              >
-                <span className="w-7 shrink-0 pt-0.5 text-center text-sm font-medium tabular-nums text-muted-foreground">
-                  {n}
-                </span>
-                <span className="min-w-0 flex-1 space-y-2">
-                  <span className="flex flex-wrap items-start justify-between gap-2">
-                    <span className="min-w-0 text-sm font-medium">
-                      {notice.pinned ? (
-                        <span className="mr-2 text-xs font-normal text-ring">{t("pinned")}</span>
+      <div className="overflow-x-auto rounded-xl border border-[#c4a574]/55 bg-[#fffcf7]">
+        <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-[#c4a574]/45 bg-[#e8f4fb] text-[color:var(--pastel-chrome-fg)]">
+              <th scope="col" className="w-14 px-3 py-3 text-center text-xs font-semibold tracking-wide sm:w-16 sm:px-4">
+                {t("notices.col.no")}
+              </th>
+              <th scope="col" className="px-3 py-3 text-xs font-semibold tracking-wide sm:px-4">
+                {t("notices.col.subject")}
+              </th>
+              <th scope="col" className="w-28 px-3 py-3 text-right text-xs font-semibold tracking-wide sm:w-32 sm:px-4">
+                {t("notices.col.date")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {pageItems.map((notice, offset) => {
+              const itemIndex = windowStart + offset;
+              const n = itemIndex + 1;
+              const summary = summarizeBody(notice.body);
+              return (
+                <tr
+                  key={notice.slug}
+                  className={cn(
+                    "border-b border-[#ead7b4]/80 last:border-b-0",
+                    itemIndex === safeIndex && open ? "bg-[#f8eedd]/70" : "bg-transparent",
+                  )}
+                >
+                  <td className="px-3 py-3 text-center align-middle sm:px-4">
+                    <button
+                      type="button"
+                      className="w-full tabular-nums text-muted-foreground hover:text-primary"
+                      onClick={() => openAt(itemIndex)}
+                      aria-label={t("notices.item", { n })}
+                    >
+                      {n}
+                    </button>
+                  </td>
+                  <td className="px-3 py-3 align-middle sm:px-4">
+                    <button
+                      type="button"
+                      className="block w-full min-w-0 text-left hover:text-primary"
+                      onClick={() => openAt(itemIndex)}
+                      aria-label={t("notices.item", { n })}
+                    >
+                      <span className="block font-medium leading-snug">
+                        {notice.pinned ? (
+                          <span className="mr-2 text-xs font-normal text-ring">{t("pinned")}</span>
+                        ) : null}
+                        {notice.title}
+                      </span>
+                      {summary ? (
+                        <span className="mt-1 block text-[13px] leading-5 text-muted-foreground">{summary}</span>
                       ) : null}
-                      {notice.title}
-                    </span>
-                    <time className="shrink-0 text-xs text-muted-foreground" dateTime={notice.publishedAt}>
-                      {formatDate(notice.publishedAt, locale)}
-                    </time>
-                  </span>
-                  <span className="line-clamp-2 text-sm whitespace-pre-wrap text-muted-foreground">{notice.body}</span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+                    </button>
+                  </td>
+                  <td className="px-3 py-3 text-right align-middle sm:px-4">
+                    <button
+                      type="button"
+                      className="w-full text-right text-xs text-muted-foreground hover:text-primary"
+                      onClick={() => openAt(itemIndex)}
+                      aria-label={t("notices.item", { n })}
+                    >
+                      <time dateTime={notice.publishedAt}>{formatDate(notice.publishedAt, locale)}</time>
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {total > DECADE ? (
         <DecadePager

@@ -1,10 +1,9 @@
+import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { PageHero } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
-import { FEATURES, pastelCardClass } from "@/lib/site";
+import { FEATURES } from "@/lib/site";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { cn } from "@/lib/utils";
 
 export async function generateMetadata() {
   const locale = await readLocale();
@@ -14,9 +13,19 @@ export async function generateMetadata() {
 export default async function FeaturesPage() {
   const locale = await readLocale();
   const cms = await getCmsPageLocalized("features", locale);
-  const items = cms.items?.length
+  const items = (cms.items?.length
     ? cms.items
-    : FEATURES.map((feature) => ({ id: feature.titleKey, title: t(locale, feature.titleKey), text: t(locale, feature.bodyKey) }));
+    : FEATURES.map((feature) => ({
+        id: feature.titleKey,
+        title: t(locale, feature.titleKey),
+        text: t(locale, feature.bodyKey),
+        image: feature.image,
+      }))
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
+
   return (
     <>
       <PageHero
@@ -25,20 +34,8 @@ export default async function FeaturesPage() {
         lead={cms.lead || t(locale, "features.lead")}
         image={{ src: "/images/park-overview.jpg", alt: t(locale, "features.title") }}
       />
-      <div className="mx-auto grid max-w-6xl gap-5 px-4 py-12 md:grid-cols-2">
-        {items.map((item, index) => (
-          <article
-            key={item.id || item.title}
-            className={cn("rounded-xl border p-6 shadow-sm", pastelCardClass(index))}
-          >
-            <h2 className="text-xl">{item.title}</h2>
-            {item.text ? (
-              <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground">
-                <Paragraphs text={item.text} />
-              </div>
-            ) : null}
-          </article>
-        ))}
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <FeaturesPhotoGrid items={items} />
       </div>
     </>
   );

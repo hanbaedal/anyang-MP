@@ -40,6 +40,7 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
         id: nid(),
         title: ko[feature.titleKey],
         text: ko[feature.bodyKey],
+        image: feature.image,
       })),
       updatedAt: now,
     };

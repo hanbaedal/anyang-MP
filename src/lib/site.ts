@@ -359,9 +359,10 @@ export const SALE_STEPS = [
   { n: "5", titleKey: "step.5.title", textKey: "step.5.text" },
 ] as const;
 
+/** 공원 특징 2×2 카드 — CMS 이미지 없을 때 쓰는 공원 사진 */
 export const FEATURES = [
-  { titleKey: "feature.1.title", bodyKey: "feature.1.body" },
-  { titleKey: "feature.2.title", bodyKey: "feature.2.body" },
-  { titleKey: "feature.3.title", bodyKey: "feature.3.body" },
-  { titleKey: "feature.4.title", bodyKey: "feature.4.body" },
+  { titleKey: "feature.1.title", bodyKey: "feature.1.body", image: "/images/hero.jpg" },
+  { titleKey: "feature.2.title", bodyKey: "feature.2.body", image: "/images/plots.jpg" },
+  { titleKey: "feature.3.title", bodyKey: "feature.3.body", image: "/images/lawn.jpg" },
+  { titleKey: "feature.4.title", bodyKey: "feature.4.body", image: "/images/park-overview.jpg" },
 ] as const;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { DirectionsMap } from "@/components/directions-map";
+import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { NoticesList } from "@/components/notices-list";
 import { PageHero, Prose } from "@/components/page-hero";
@@ -10,8 +11,7 @@ import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import { uploadOriginalUrl } from "@/lib/media";
 import { listNoticesLocalized } from "@/lib/notices";
-import { FEATURES, SITE, pastelCardClass } from "@/lib/site";
-import { cn } from "@/lib/utils";
+import { FEATURES, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -29,13 +29,18 @@ export default async function IntroHubPage() {
   ]);
   const bodyImage = greeting.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
-  const featureItems = featuresCms.items?.length
+  const featureItems = (featuresCms.items?.length
     ? featuresCms.items
     : FEATURES.map((feature) => ({
         id: feature.titleKey,
         title: t(locale, feature.titleKey),
         text: t(locale, feature.bodyKey),
-      }));
+        image: feature.image,
+      }))
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
 
   return (
     <>
@@ -95,21 +100,7 @@ export default async function IntroHubPage() {
           href="/intro/features"
           moreLabel={t(locale, "more.detail")}
         >
-          <div className="grid gap-5 md:grid-cols-2">
-            {featureItems.map((item, index) => (
-              <article
-                key={item.id || item.title}
-                className={cn("rounded-xl border p-6 shadow-sm", pastelCardClass(index))}
-              >
-                <h3 className="text-xl">{item.title}</h3>
-                {item.text ? (
-                  <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground">
-                    <Paragraphs text={item.text} />
-                  </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
+          <FeaturesPhotoGrid items={featureItems} />
         </MenuHubSection>
 
         <MenuHubSection
