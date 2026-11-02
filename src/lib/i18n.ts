@@ -385,7 +385,7 @@ const ko: Record<string, string> = {
   "account.registerTitle": "회원가입",
   "account.registerLead": "아이디, 비밀번호, 이름, 연락처, 이메일이 필요합니다. 직위는 선택입니다.",
   "account.myTitle": "계정",
-  "account.myLead": "직원 계정입니다. 로그인 뒤 탐색기에 업무프로그램이 생깁니다.",
+  "account.myLead": "직원 계정입니다. 로그인 뒤 상단 메뉴에 홈페이지 관리·업무프로그램이 생깁니다.",
   "account.password": "비밀번호",
   "account.password2": "비밀번호 확인",
   "account.showPassword": "비밀번호 보기",
