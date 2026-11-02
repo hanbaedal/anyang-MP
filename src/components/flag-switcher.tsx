@@ -20,7 +20,7 @@ function FlagImage({ code }: { code: "KR" | "US" | "CN" }) {
       alt=""
       width={28}
       height={19}
-      className="h-3.5 w-[1.35rem] shrink-0 rounded-[2px] bg-white object-cover outline outline-1 outline-black/25 lg:h-5 lg:w-[1.875rem]"
+      className="h-3.5 w-[1.35rem] shrink-0 rounded-[2px] bg-white object-cover outline outline-1 outline-white/35 lg:h-5 lg:w-[1.875rem]"
       aria-hidden
       draggable={false}
     />
@@ -58,8 +58,8 @@ export function FlagSwitcher() {
             aria-pressed={selected}
             title={name}
             className={cn(
-              "inline-flex size-7 items-center justify-center rounded-md hover:bg-accent lg:size-9",
-              selected && "ring-2 ring-primary lg:ring-offset-1",
+              "inline-flex size-7 items-center justify-center rounded-md hover:bg-white/15 lg:size-9",
+              selected && "ring-2 ring-white/80 lg:ring-offset-1 lg:ring-offset-[color:var(--chrome)]",
             )}
           >
             <FlagImage code={code} />

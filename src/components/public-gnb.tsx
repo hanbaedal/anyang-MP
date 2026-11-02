@@ -74,8 +74,8 @@ export function PublicGnb({ className }: { className?: string }) {
                 href={item.href}
                 className={cn(
                   "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[15px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-base",
-                  "text-[color:var(--chrome-foreground)] hover:bg-primary/15",
-                  (open || parentActive) && "bg-primary/20",
+                  "text-[color:var(--chrome-foreground)] hover:bg-white/15",
+                  (open || parentActive) && "bg-white/20",
                 )}
                 aria-expanded={hasChildren ? open : undefined}
                 aria-controls={hasChildren ? panelId : undefined}

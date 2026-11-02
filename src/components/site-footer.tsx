@@ -14,7 +14,7 @@ export async function SiteFooter() {
     </a>
   );
   return (
-    <footer className="relative z-30 shrink-0 border-t border-[color:var(--chrome-border)] bg-[color:var(--chrome)] pb-[env(safe-area-inset-bottom)] text-xs leading-snug text-[color:var(--chrome-foreground)] md:text-base md:leading-snug">
+    <footer className="relative z-30 shrink-0 border-t border-[color:var(--chrome-border)] bg-[color:var(--chrome)] pb-[env(safe-area-inset-bottom)] text-xs leading-snug text-[color:var(--chrome-foreground)] backdrop-blur md:text-base md:leading-snug">
       <div className="flex items-center justify-between gap-2 px-3 py-1 sm:px-5 md:items-end md:gap-8 md:px-5 md:py-2">
         <div className="min-w-0 text-left leading-snug">
           <p className="font-serif text-sm leading-tight md:text-lg">{t(uiLocale, "site.legalName")}</p>

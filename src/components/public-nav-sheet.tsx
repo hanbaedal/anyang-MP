@@ -13,7 +13,7 @@ import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import { isNavActive } from "@/components/nav-tree";
 
 const triggerClass =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-primary hover:bg-accent lg:hidden";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:hidden";
 
 /** 모바일 햄버거 → 공개 NAV 아코디언 오버레이 (폴더 트리 크롬 없음) */
 export function PublicNavSheet() {
@@ -54,12 +54,12 @@ export function PublicNavSheet() {
       <SheetContent
         side="top"
         showCloseButton={false}
-        className="inset-0 z-50 flex h-dvh max-h-dvh w-full max-w-none flex-col gap-0 border-0 bg-[color:var(--chrome)] p-0 text-[color:var(--chrome-foreground)] data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
+        className="inset-0 z-50 flex h-dvh max-h-dvh w-full max-w-none flex-col gap-0 border-0 bg-[color:var(--chrome)] p-0 text-[color:var(--chrome-foreground)] backdrop-blur data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 border-b border-[color:var(--chrome-border)] px-3 py-2">
-          <SheetTitle className="font-serif text-base text-primary">{chrome("site.legalName")}</SheetTitle>
+          <SheetTitle className="font-serif text-base text-[color:var(--chrome-foreground)]">{chrome("site.legalName")}</SheetTitle>
           <SheetClose asChild>
-            <Button size="icon" variant="ghost" className="shrink-0 text-primary" aria-label={chrome("close")}>
+            <Button size="icon" variant="ghost" className="shrink-0 text-[color:var(--chrome-foreground)] hover:bg-white/15" aria-label={chrome("close")}>
               <X />
             </Button>
           </SheetClose>

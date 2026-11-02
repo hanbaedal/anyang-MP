@@ -19,16 +19,23 @@
   --border: #d9d0c3;
   --input: #d9d0c3;
   --ring: #3f5d4a;
-  /* 헤더·푸터 소라색 (sky blue, 한 단계 밝게); 글자는 남색으로 대비 */
-  --chrome: #9ec9e3;
-  --chrome-foreground: #002b50;
-  --chrome-muted: rgba(0, 43, 80, 0.78);
-  --chrome-border: rgba(0, 43, 80, 0.18);
+  /* 헤더·푸터 물유리 (안 A): 남색 반투명 + 흰 글자; 모바일은 불투명도 소폭↑ */
+  --chrome: rgba(0, 70, 120, 0.55);
+  --chrome-foreground: #ffffff;
+  --chrome-muted: rgba(255, 255, 255, 0.78);
+  --chrome-border: rgba(255, 255, 255, 0.22);
   /* 본문 파스텔 박스 — 크롬 틴트(~25%) + 남색 글자 */
   --pastel-chrome-bg: #e8f4fb;
   --pastel-chrome-fg: #002b50;
   --pastel-chrome-border: rgba(0, 43, 80, 0.14);
   --radius: 0.75rem;
+}
+
+/* 모바일: 얇은 헤더·햄버거 시트에서 본문이 비칠 때 대비 여유 */
+@media (max-width: 767px) {
+  :root {
+    --chrome: rgba(0, 70, 120, 0.62);
+  }
 }
 
 @theme inline {
