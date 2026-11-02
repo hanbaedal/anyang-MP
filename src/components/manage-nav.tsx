@@ -9,7 +9,7 @@ const LABELS: Record<string, string> = {
   "manage.announcements": "메인 이벤트·팝업",
   "manage.gallery": "갤러리",
   "manage.galleryAdmin": "갤러리 관리",
-  "manage.servicesPage": "이용 서비스",
+  "manage.servicesPage": "이용안내",
   "manage.notices": "공지",
   "manage.noticesPage": "공지사항",
   "manage.inquiries": "문의",

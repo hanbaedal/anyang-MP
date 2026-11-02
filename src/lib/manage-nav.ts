@@ -28,7 +28,7 @@ export function manageNavItems(): ManageNavItem[] {
     cmsPage("burial"),
     cmsPage("lawn"),
     cmsPage("columbarium"),
-    // 이용안내: 분양 절차 → 관리비 → 이용 서비스 → 이용절차
+    // 이용안내: 분양 절차 → 관리비 → 이용안내 → 이용절차
     cmsPage("procedure"),
     cmsPage("fees"),
     { href: "/manage/pages/services", i18n: "manage.servicesPage" },

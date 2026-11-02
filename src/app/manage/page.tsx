@@ -19,7 +19,7 @@ const CARD_COPY: Record<string, { title: string; lead: string }> = {
     lead: "일반·종류별 사진을 올립니다. 「일반」은 공개 갤러리와 메인 팝업 등에서 고를 수 있습니다.",
   },
   "manage.servicesPage": {
-    title: "이용 서비스",
+    title: "이용안내",
     lead: "이용안내 본문·항목을 수정합니다.",
   },
   "manage.noticesPage": {
