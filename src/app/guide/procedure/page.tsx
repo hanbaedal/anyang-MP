@@ -19,6 +19,7 @@ export default async function ProcedurePage() {
     n: String(index + 1),
     title: item.title,
     text: item.text ?? "",
+    image: item.image?.trim() || undefined,
   }));
 
   const noteBoxes = cms.body?.trim()

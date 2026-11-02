@@ -41,6 +41,7 @@ export default async function GuideHubPage() {
     n: String(index + 1),
     title: item.title,
     text: item.text ?? "",
+    image: item.image?.trim() || undefined,
   }));
   const noteBoxes = procedure.body?.trim()
     ? procedure.body

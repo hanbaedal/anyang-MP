@@ -249,9 +249,12 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                   <div className="space-y-2 rounded-lg border border-dashed border-input bg-muted/30 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <p className="text-sm font-medium">카드 사진 {index + 1}</p>
+                        <p className="text-sm font-medium">
+                          {page.slug === "procedure" ? `단계 사진 ${index + 1}` : `카드 사진 ${index + 1}`}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          갤러리에서만 고릅니다. 없으면 공개 홈은 기본 공원 사진을 씁니다.
+                          갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을
+                          씁니다.
                         </p>
                       </div>
                       {item.image || item.galleryId ? (
