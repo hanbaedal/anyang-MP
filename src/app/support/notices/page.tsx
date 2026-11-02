@@ -20,7 +20,7 @@ export default async function NoticesPage() {
   const src = page.listImage?.trim() ? uploadOriginalUrl(page.listImage) : "";
 
   return (
-    <div className="pc-notices-fill mx-auto w-full max-w-7xl px-4 py-8 md:py-0">
+    <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{t(locale, "notices.title")}</h1>
       <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
         <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-2xl border border-[#c4a574]/40 bg-[#f4efe6] md:mx-0 md:max-w-none md:aspect-auto">
@@ -30,7 +30,7 @@ export default async function NoticesPage() {
               alt=""
               fill
               className="object-cover object-center"
-              sizes="(max-width: 767px) 90vw, 36rem"
+              sizes="(max-width: 767px) 90vw, (min-width: 2560px) 48rem, 42rem"
               unoptimized={src.includes("/api/uploads/")}
               priority
             />

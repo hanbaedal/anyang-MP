@@ -161,7 +161,18 @@
   }
 }
 
-/* AMP-58: 공지 목록 — 헤더·푸터 사이 잔여 높이에 맞춤(PC) */
+/* AMP-58/59/60: 공지 목록 — 잔여 높이 + 가로 폭(노트북 +20% · 4K +50% vs 7xl) */
+.pc-notices-fill {
+  width: 100%;
+  max-width: 96rem; /* 80rem(7xl)×1.2 — 노트북·일반 PC */
+}
+
+@media (min-width: 2560px) {
+  .pc-notices-fill {
+    max-width: 120rem; /* 80rem×1.5 — 4K */
+  }
+}
+
 @media (min-width: 768px) {
   .pc-notices-fill {
     display: flex;
@@ -174,20 +185,27 @@
     padding-bottom: 1.25rem;
   }
 
-  /* AMP-59: 세로는 유지(stretch), 사진·리스트 가로만 확대 */
+  /* AMP-59/60: 세로는 유지(stretch), 사진·리스트 가로 확대 */
   .pc-notices-fill-grid {
     display: grid;
     min-height: 0;
     flex: 1;
-    grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(20rem, 0.95fr) minmax(0, 1.25fr);
     align-items: stretch;
     gap: 1.25rem;
   }
 
   @media (min-width: 1024px) {
     .pc-notices-fill-grid {
-      grid-template-columns: minmax(20rem, 1fr) minmax(0, 1.3fr);
+      grid-template-columns: minmax(22rem, 1fr) minmax(0, 1.3fr);
       gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 2560px) {
+    .pc-notices-fill-grid {
+      grid-template-columns: minmax(28rem, 1.05fr) minmax(0, 1.35fr);
+      gap: 1.75rem;
     }
   }
 
