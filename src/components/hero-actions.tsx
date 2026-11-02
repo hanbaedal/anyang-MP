@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const logoBtn =
   "inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white";
 const logoBtnSm =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white md:size-11";
 
 function FacebookMark() {
   return (
@@ -107,7 +107,10 @@ export function SocialActions({ compact = false }: { compact?: boolean }) {
   return (
     <nav
       aria-label="소셜 바로 가기"
-      className={cn("flex shrink-0 items-center", compact ? "gap-1.5 [&_svg]:size-4" : "gap-2 sm:gap-2.5")}
+      className={cn(
+        "flex shrink-0 items-center",
+        compact ? "gap-1.5 [&_svg]:size-4 md:gap-2 md:[&_svg]:size-5" : "gap-2 sm:gap-2.5",
+      )}
     >
       {items.map((item) => (
         <SocialLink key={item.label} href={item.href} label={item.label} compact={compact}>

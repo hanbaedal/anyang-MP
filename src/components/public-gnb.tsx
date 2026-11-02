@@ -73,7 +73,7 @@ export function PublicGnb({ className }: { className?: string }) {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[13px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-sm",
+                  "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[15px] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-base",
                   "text-[color:var(--chrome-foreground)] hover:bg-primary/15",
                   (open || parentActive) && "bg-primary/20",
                 )}
@@ -104,7 +104,7 @@ export function PublicGnb({ className }: { className?: string }) {
                           role="menuitem"
                           href={child.href}
                           className={cn(
-                            "block px-3 py-2.5 text-center text-[12px] whitespace-nowrap transition-colors hover:bg-white/15 xl:text-[13px]",
+                            "block px-3 py-2.5 text-center text-[14px] whitespace-nowrap transition-colors hover:bg-white/15 xl:text-[15px]",
                             active && "bg-white/20 font-medium",
                           )}
                           onClick={() => setOpenKey(null)}

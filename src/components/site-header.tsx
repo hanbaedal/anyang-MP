@@ -28,7 +28,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
   const staff = signedIn && isStaffRole(role);
 
   return (
-    <header className="relative z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur">
+    <header className="relative z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur lg:h-14">
       <div className="flex h-full min-w-0 items-center gap-1 px-1 sm:gap-2 sm:px-3">
         <PublicNavSheet />
 
@@ -39,7 +39,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
             width={512}
             height={512}
             priority
-            className="size-7 object-contain lg:size-8"
+            className="size-7 object-contain lg:size-9"
             aria-hidden
           />
           <p className="whitespace-nowrap font-serif text-[11px] leading-none text-primary lg:text-lg">
@@ -89,7 +89,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
 
           <Link
             href="/sitemap"
-            className="whitespace-nowrap rounded-md px-1 py-1 text-[10px] text-primary/80 underline-offset-4 hover:bg-accent hover:underline sm:px-1.5 sm:text-[11px]"
+            className="whitespace-nowrap rounded-md px-1 py-1 text-[10px] text-primary/80 underline-offset-4 hover:bg-accent hover:underline sm:px-1.5 sm:text-xs"
           >
             {chrome("nav.sitemap")}
           </Link>
