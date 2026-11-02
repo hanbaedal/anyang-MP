@@ -60,7 +60,7 @@ export default async function ProcedurePage() {
       ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+    <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-12">
       <h1 className="sr-only">{cms.title || t(locale, "proc.title")}</h1>
       <SaleSteps steps={steps.length ? steps : undefined} />
       <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>

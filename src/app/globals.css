@@ -137,13 +137,66 @@
 }
 
 /*
+ * AMP-77: 특징·분양절차 본문 폭 (6xl=72rem 기준 · 공지와 동일 +20% / 4K +50%).
+ * 풀블리드 아님. 오시는길 dense 카드는 미적용.
+ */
+.pc-soft-card-fill {
+  width: 100%;
+  max-width: 72rem; /* 6xl */
+}
+
+@media (min-width: 768px) {
+  .pc-soft-card-fill {
+    max-width: 86.4rem; /* 72×1.2 — 노트북·일반 PC */
+  }
+}
+
+@media (min-width: 2560px) {
+  .pc-soft-card-fill {
+    max-width: 108rem; /* 72×1.5 — 4K */
+  }
+}
+
+/*
+ * AMP-77 PC: 비-dense 소프트 카드 — 열 폭에 비례한 aspect (사진 면적↑).
+ * 모바일·dense(오시는길)는 컴포넌트 rem min-height 유지.
+ */
+@media (min-width: 768px) {
+  .pc-viewport-card--scale {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    min-height: 0 !important;
+  }
+
+  .pc-viewport-card--scale > .pc-viewport-card-body {
+    position: absolute;
+    inset: 0;
+    min-height: 0 !important;
+    height: 100%;
+    max-width: 90%;
+  }
+}
+
+/*
  * AMP-58 PC: 특징·절차 소프트 카드 높이 — 짧은 뷰포트에서 한 화면에 가깝게.
+ * AMP-77 scale 카드는 짧은 창에서 aspect를 끄고 rem 바닥으로 복귀.
  * 모바일 min-height는 컴포넌트 Tailwind 유지.
  */
 @media (min-width: 768px) and (max-height: 1000px) {
   .pc-viewport-card,
   .pc-viewport-card > .pc-viewport-card-body {
     min-height: 14.5rem !important;
+  }
+
+  .pc-viewport-card--scale {
+    aspect-ratio: auto;
+  }
+
+  .pc-viewport-card--scale > .pc-viewport-card-body {
+    position: relative;
+    inset: auto;
+    height: auto;
+    max-width: 90%;
   }
 }
 

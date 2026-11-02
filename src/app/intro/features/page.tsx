@@ -26,7 +26,7 @@ export default async function FeaturesPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="pc-soft-card-fill mx-auto px-4 py-12">
       <h1 className="sr-only">{cms.title || t(locale, "features.title")}</h1>
       <FeaturesPhotoGrid items={items} />
     </div>

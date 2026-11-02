@@ -14,8 +14,8 @@ function fallbackImage(index: number) {
 }
 
 /**
- * 분양 절차 — 공원 특징과 같은 카드 크기(2열·min-height)·소프트 오버레이.
- * 단계 번호는 유지. 사진은 CMS 갤러리 연결(없으면 기본 공원 사진).
+ * 분양 절차 — 공원 특징과 같은 2열·소프트 오버레이 (AMP-77: PC aspect·폭 토큰).
+ * 단계 번호 유지. 사진은 CMS 갤러리 연결(없으면 기본 공원 사진).
  */
 export function SaleSteps({
   compact = false,
@@ -47,7 +47,7 @@ export function SaleSteps({
         return (
           <li
             key={`${step.n}-${step.title}`}
-            className="pc-viewport-card relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
+            className="pc-viewport-card pc-viewport-card--scale relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
           >
             <Image
               src={src}

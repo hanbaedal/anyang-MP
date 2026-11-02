@@ -31,7 +31,7 @@ export function firstBodyLine(text: string) {
 
 /**
  * 공원 특징 2×2 — 풀블리드 사진 + 좌측 흰 글씨 오버레이.
- * 고정 높이로 자르지 않고 min-height만 두어 본문이 잘리지 않게 함.
+ * 비-dense(AMP-77): PC에서 열 폭 비례 aspect. dense(오시는길)는 rem 높이만.
  */
 export function FeaturesPhotoGrid({
   items,
@@ -68,6 +68,7 @@ export function FeaturesPhotoGrid({
             key={item.id || item.title || String(index)}
             className={cn(
               "pc-viewport-card relative isolate overflow-hidden rounded-2xl shadow-sm",
+              !dense && "pc-viewport-card--scale",
               dense
                 ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
                 : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
