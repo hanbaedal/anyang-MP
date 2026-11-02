@@ -346,6 +346,7 @@ export function publicGnbItems(): NavItem[] {
  * AMP-67/68: 로그인 역할별 GNB 확장 (갤러리 오른쪽).
  * - CMS 스태프(anyang001 admin 등): 홈페이지 관리
  * - 스태프(anyang005 등): 업무프로그램
+ * - CEO·감독(isStatusStaff): 경영관리
  */
 export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
   const items = [...publicGnbItems()];
@@ -372,6 +373,20 @@ export function publicGnbItemsForRole(role?: Role | null): NavItem[] {
       i18n: "work.program",
       tone: "guide",
       children: WORK_NAV.map((item) => ({
+        href: item.href,
+        label: item.i18n,
+        i18n: item.i18n,
+      })),
+    });
+  }
+
+  if (isStatusStaff(role)) {
+    extras.push({
+      href: EXEC_NAV[0].href,
+      label: "경영관리",
+      i18n: "work.overview",
+      tone: "lots",
+      children: EXEC_NAV.map((item) => ({
         href: item.href,
         label: item.i18n,
         i18n: item.i18n,
