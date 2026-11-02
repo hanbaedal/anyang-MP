@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DecadePager, DECADE } from "@/components/decade-pager";
+import { DecadePager } from "@/components/decade-pager";
 import { Paragraphs } from "@/components/paragraphs";
 import { Prose } from "@/components/page-hero";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import type { Notice } from "@/lib/notices";
 
 export type NoticeListItem = Pick<Notice, "slug" | "title" | "body" | "publishedAt" | "pinned">;
+
+const PAGE_SIZE = 15;
 
 function formatDate(value: string, locale: string) {
   const date = new Date(value);
@@ -35,27 +37,26 @@ function summarizeBody(body: string, max = 72) {
 export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: string }) {
   const t = useT();
   const locale = useLocale();
-  const [index, setIndex] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const total = items.length;
-  const safeIndex = total ? Math.min(index, total - 1) : 0;
-  const windowStart = Math.floor(safeIndex / DECADE) * DECADE;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
   const pageItems = useMemo(
-    () => items.slice(windowStart, windowStart + DECADE),
-    [items, windowStart],
+    () => items.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE),
+    [items, safePage],
   );
-  const current = items[safeIndex] ?? null;
+  const current = openIndex !== null ? (items[openIndex] ?? null) : null;
 
-  function openAt(next: number) {
-    if (next < 0 || next >= total) return;
-    setIndex(next);
-    setOpen(true);
+  function openAt(itemIndex: number) {
+    if (itemIndex < 0 || itemIndex >= total) return;
+    setOpenIndex(itemIndex);
   }
 
-  function goTo(next: number) {
+  function goToPage(next: number) {
     if (!total) return;
-    setIndex(Math.max(0, Math.min(next, total - 1)));
+    setPage(Math.max(0, Math.min(next, pageCount - 1)));
   }
 
   if (total === 0) {
@@ -81,7 +82,7 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
           </thead>
           <tbody>
             {pageItems.map((notice, offset) => {
-              const itemIndex = windowStart + offset;
+              const itemIndex = safePage * PAGE_SIZE + offset;
               const n = itemIndex + 1;
               const summary = summarizeBody(notice.body);
               return (
@@ -89,7 +90,7 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
                   key={notice.slug}
                   className={cn(
                     "border-b border-[#ead7b4]/80 last:border-b-0",
-                    itemIndex === safeIndex && open ? "bg-[#f8eedd]/70" : "bg-transparent",
+                    openIndex === itemIndex ? "bg-[#f8eedd]/70" : "bg-transparent",
                   )}
                 >
                   <td className="px-3 py-3 text-center align-middle sm:px-4">
@@ -137,18 +138,22 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
         </table>
       </div>
 
-      {total > DECADE ? (
+      {pageCount > 1 ? (
         <DecadePager
-          total={total}
-          index={safeIndex}
-          onGo={goTo}
-          onSelect={openAt}
-          itemLabel={(n) => t("notices.item", { n })}
+          total={pageCount}
+          index={safePage}
+          onGo={goToPage}
+          itemLabel={(n) => t("gallery.page", { n })}
           label={t("notices.title")}
         />
       ) : null}
 
-      <Dialog open={open && Boolean(current)} onOpenChange={setOpen}>
+      <Dialog
+        open={openIndex !== null && Boolean(current)}
+        onOpenChange={(next) => {
+          if (!next) setOpenIndex(null);
+        }}
+      >
         <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
           {current ? (
             <>
