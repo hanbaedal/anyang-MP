@@ -16,19 +16,13 @@ import {
   naverMapAppRouteUrl,
   naverNaviUrl,
 } from "@/lib/site";
-import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ImageLightboxDialog } from "@/components/image-lightbox-dialog";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
-const MAP_OVERVIEW = "/images/directions-map-wide.jpg";
-const MAP_DETAIL = "/images/directions-map-route-v2.png";
-const MAP_W = 1024;
-const MAP_H = 512;
-/** 광역 지도에서 안양공원묘원 위치 */
-const PIN_LEFT = "55.8%";
-const PIN_TOP = "55.2%";
+const MAP_SRC = "/images/anyang-route-map.png";
+const MAP_W = 2752;
+const MAP_H = 1536;
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -85,7 +79,6 @@ function watchAppHandoff(ms: number): Promise<boolean> {
 export function DirectionsMap({ compact = false, fill = false }: { compact?: boolean; fill?: boolean }) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
@@ -149,7 +142,7 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
           }
         >
           <Image
-            src={MAP_OVERVIEW}
+            src={MAP_SRC}
             alt={`${DEST_NAME} ${t("directions")}`}
             fill={fill}
             width={fill ? undefined : MAP_W}
@@ -163,24 +156,8 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
             unoptimized
             priority
           />
-          <button
-            type="button"
-            className="absolute z-[1] flex -translate-x-1/2 -translate-y-[88%] flex-col items-center rounded-full focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
-            style={{ left: PIN_LEFT, top: PIN_TOP }}
-            aria-label={t("map.pin")}
-            onClick={() => setDetailOpen(true)}
-          >
-            <span className="absolute bottom-1 size-8 animate-ping rounded-full bg-red-500/35" aria-hidden />
-            <MapPin className="relative size-10 fill-red-600 text-red-700 drop-shadow md:size-11" aria-hidden />
-          </button>
         </figure>
       </div>
-      <ImageLightboxDialog
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        src={MAP_DETAIL}
-        alt={t("map.detailAlt")}
-      />
     </div>
   );
 }

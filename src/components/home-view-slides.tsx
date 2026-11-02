@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
@@ -8,28 +8,35 @@ import { cn } from "@/lib/utils";
 export type ViewSlide = { src: string; alt: string };
 
 const INTERVAL_MS = 3000;
+const TRANSITION_MS = 700;
 
 const navBtn =
   "pointer-events-auto absolute top-1/2 z-[6] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 backdrop-blur-sm hover:bg-black/60 sm:size-12";
 
 /**
  * 홈 인트로 정적 전경 슬라이드 — 3초마다 왼쪽 전환.
+ * 끝↔처음은 클론 트랙으로 끊김 없이 루프.
  * 호버·reduced-motion·모달 pause 시 정지.
  */
 export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]; paused?: boolean }) {
   const t = useT();
-  const [index, setIndex] = useState(0);
+  const n = photos.length;
+  // track: [clone last, ...photos, clone first] → real slides at positions 1..n
+  const [pos, setPos] = useState(1);
+  const [animating, setAnimating] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [hoverPaused, setHoverPaused] = useState(false);
   const [resumeKey, setResumeKey] = useState(0);
+  const jumping = useRef(false);
 
   const go = useCallback(
     (delta: number) => {
-      if (photos.length < 2) return;
-      setIndex((prev) => (prev + delta + photos.length) % photos.length);
-      setResumeKey((n) => n + 1);
+      if (n < 2 || jumping.current) return;
+      setAnimating(true);
+      setPos((prev) => prev + delta);
+      setResumeKey((k) => k + 1);
     },
-    [photos.length],
+    [n],
   );
 
   useEffect(() => {
@@ -43,15 +50,17 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   const autoPaused = reduceMotion || paused || hoverPaused;
 
   useEffect(() => {
-    if (autoPaused || photos.length < 2) return;
+    if (autoPaused || n < 2) return;
     const timer = window.setInterval(() => {
-      setIndex((prev) => (prev + 1) % photos.length);
+      if (jumping.current) return;
+      setAnimating(true);
+      setPos((prev) => prev + 1);
     }, INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [autoPaused, photos.length, resumeKey]);
+  }, [autoPaused, n, resumeKey]);
 
   useEffect(() => {
-    if (paused || photos.length < 2) return;
+    if (paused || n < 2) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -63,12 +72,39 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [paused, photos.length, go]);
+  }, [paused, n, go]);
 
-  if (!photos.length) return null;
+  function onTransitionEnd() {
+    if (n < 2) return;
+    if (pos === n + 1) {
+      // landed on clone of first after last → snap to real first
+      jumping.current = true;
+      setAnimating(false);
+      setPos(1);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          jumping.current = false;
+        });
+      });
+    } else if (pos === 0) {
+      // landed on clone of last before first → snap to real last
+      jumping.current = true;
+      setAnimating(false);
+      setPos(n);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          jumping.current = false;
+        });
+      });
+    }
+  }
 
-  const showIndex = reduceMotion ? 0 : index;
-  const showNav = photos.length > 1 && !paused;
+  if (!n) return null;
+
+  const trackCount = n < 2 ? n : n + 2;
+  const track = n < 2 ? photos : [photos[n - 1], ...photos, photos[0]];
+  const showPos = n < 2 ? 0 : reduceMotion ? 1 : pos;
+  const showNav = n > 1 && !paused;
 
   return (
     <div
@@ -78,21 +114,26 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     >
       <div className="absolute inset-0 overflow-hidden bg-primary" aria-hidden>
         <div
-          className="flex h-full transition-transform duration-700 ease-out motion-reduce:transition-none"
+          className={cn(
+            "flex h-full ease-out motion-reduce:transition-none",
+            animating && !reduceMotion && "transition-transform",
+          )}
           style={{
-            width: `${photos.length * 100}%`,
-            transform: `translateX(-${(showIndex * 100) / photos.length}%)`,
+            width: `${trackCount * 100}%`,
+            transform: `translateX(-${(showPos * 100) / trackCount}%)`,
+            transitionDuration: animating && !reduceMotion ? `${TRANSITION_MS}ms` : "0ms",
           }}
+          onTransitionEnd={onTransitionEnd}
         >
-          {photos.map((photo, i) => (
-            <div key={`${photo.src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / photos.length}%` }}>
+          {track.map((photo, i) => (
+            <div key={`${photo.src}-t${i}`} className="relative h-full shrink-0" style={{ width: `${100 / trackCount}%` }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.src}
                 alt=""
                 className={cn("h-full w-full object-cover object-[center_32%]")}
                 loading="eager"
-                fetchPriority={i === 0 ? "high" : "low"}
+                fetchPriority={i <= 1 ? "high" : "low"}
                 decoding="async"
               />
             </div>
