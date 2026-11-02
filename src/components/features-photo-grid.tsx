@@ -37,13 +37,16 @@ export function FeaturesPhotoGrid({
   items,
   className,
   dense = false,
-  /** 오시는길: 제목 숨김 · 본문 첫 줄만(없으면 생략) */
+  /** 오시는길 등: 카드 제목 숨김 */
+  hideTitle = false,
+  /** @deprecated AMP-75 — 본문 전체 표시. 제목만 숨기려면 hideTitle */
   captionFirstLine = false,
 }: {
   items: FeaturePhotoItem[];
   className?: string;
   /** 오시는길 등 — 한 화면용 낮은 카드 */
   dense?: boolean;
+  hideTitle?: boolean;
   captionFirstLine?: boolean;
 }) {
   if (!items.length) return null;
@@ -54,7 +57,7 @@ export function FeaturesPhotoGrid({
         const title = normalizeFeatureCopy(item.title);
         const raw = item.text ? normalizeFeatureCopy(item.text) : "";
         const text = captionFirstLine ? firstBodyLine(raw) : raw;
-        const showTitle = !captionFirstLine && Boolean(title);
+        const showTitle = !(hideTitle || captionFirstLine) && Boolean(title);
         const showText = Boolean(text);
         const showCopy = showTitle || showText;
         const src = item.image?.trim() ? uploadOriginalUrl(item.image) : "";
@@ -120,7 +123,7 @@ export function FeaturesPhotoGrid({
                     className={cn(
                       "text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]",
                       dense
-                        ? "text-[12px] leading-5 sm:text-[13px] sm:leading-6"
+                        ? "space-y-1 text-[12px] leading-5 sm:text-[13px] sm:leading-6"
                         : "space-y-1.5 text-[13px] leading-6 sm:text-sm sm:leading-7",
                     )}
                   >

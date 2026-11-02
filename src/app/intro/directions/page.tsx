@@ -30,7 +30,7 @@ export default async function DirectionsPage() {
       }))
   ).map((item, index) => ({
     ...item,
-    // 공개 카드: 제목 미표시 · 본문 첫 줄만(FeaturesPhotoGrid captionFirstLine)
+    // 공개 카드: 제목 미표시 · CMS 본문 전체(AMP-75)
     image: item.image?.trim() || TRANSIT_FALLBACK[index % TRANSIT_FALLBACK.length]?.image,
   }));
 
@@ -42,7 +42,7 @@ export default async function DirectionsPage() {
         <div className="flex min-h-[12rem] w-full flex-1 flex-col md:min-h-0">
           <DirectionsMap fill />
         </div>
-        <FeaturesPhotoGrid className="shrink-0 md:grid-cols-3" dense captionFirstLine items={items} />
+        <FeaturesPhotoGrid className="shrink-0 md:grid-cols-3" dense hideTitle items={items} />
       </div>
     </div>
   );
