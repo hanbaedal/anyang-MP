@@ -26,9 +26,9 @@ export default async function FeaturesPage() {
   }));
 
   return (
-    <div className="pc-soft-card-fill mx-auto px-4 py-12">
+    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{cms.title || t(locale, "features.title")}</h1>
-      <FeaturesPhotoGrid items={items} />
+      <FeaturesPhotoGrid viewportFill items={items} />
     </div>
   );
 }

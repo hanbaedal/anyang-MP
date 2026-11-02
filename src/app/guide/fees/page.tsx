@@ -22,11 +22,11 @@ export default async function FeesPage() {
     : [t(locale, "fees.p1"), t(locale, "fees.p2"), t(locale, "fees.p3"), t(locale, "fees.p4")];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{cms.title || t(locale, "fees.title")}</h1>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="pc-onepage-grow pc-onepage-grid-2 grid gap-4">
         {sections.map((section) => (
-          <PastelBox key={section.slice(0, 48)}>
+          <PastelBox key={section.slice(0, 48)} className="pc-onepage-cell">
             <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
               <Paragraphs text={section} />
             </Prose>

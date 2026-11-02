@@ -29,14 +29,14 @@ export default async function ProcedurePage() {
         .map((block) => block.trim())
         .filter(Boolean)
         .map((block) => (
-          <PastelBox key={block.slice(0, 48)}>
+          <PastelBox key={block.slice(0, 48)} className="pc-onepage-cell p-3 md:p-4">
             <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
               <Paragraphs text={block} />
             </Prose>
           </PastelBox>
         ))
     : [
-        <PastelBox key="consult">
+        <PastelBox key="consult" className="pc-onepage-cell p-3 md:p-4">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             <p>
               {t(locale, "proc.consult")}{" "}
@@ -47,12 +47,12 @@ export default async function ProcedurePage() {
             </p>
           </Prose>
         </PastelBox>,
-        <PastelBox key="account">
+        <PastelBox key="account" className="pc-onepage-cell p-3 md:p-4">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             <p>{t(locale, "proc.account")}</p>
           </Prose>
         </PastelBox>,
-        <PastelBox key="use-date">
+        <PastelBox key="use-date" className="pc-onepage-cell p-3 md:p-4">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             <p>{t(locale, "proc.twoDays")}</p>
           </Prose>
@@ -60,10 +60,12 @@ export default async function ProcedurePage() {
       ];
 
   return (
-    <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-12">
+    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{cms.title || t(locale, "proc.title")}</h1>
-      <SaleSteps steps={steps.length ? steps : undefined} />
-      <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>
+      <div className="pc-onepage-stack space-y-6 md:space-y-0">
+        <SaleSteps viewportFill steps={steps.length ? steps : undefined} />
+        <div className="pc-onepage-foot grid gap-3 sm:grid-cols-2 md:gap-3">{noteBoxes}</div>
+      </div>
     </div>
   );
 }

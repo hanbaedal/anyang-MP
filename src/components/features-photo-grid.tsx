@@ -41,6 +41,8 @@ export function FeaturesPhotoGrid({
   hideTitle = false,
   /** @deprecated AMP-75 — 본문 전체 표시. 제목만 숨기려면 hideTitle */
   captionFirstLine = false,
+  /** PC 잔여 높이 2×2 fill (AMP-79) — dense와 병행하지 않음 */
+  viewportFill = false,
 }: {
   items: FeaturePhotoItem[];
   className?: string;
@@ -48,11 +50,20 @@ export function FeaturesPhotoGrid({
   dense?: boolean;
   hideTitle?: boolean;
   captionFirstLine?: boolean;
+  viewportFill?: boolean;
 }) {
   if (!items.length) return null;
+  const fill = viewportFill && !dense;
 
   return (
-    <div className={cn("grid gap-4 sm:gap-5 md:grid-cols-2", dense && "gap-3 sm:gap-3", className)}>
+    <div
+      className={cn(
+        "grid gap-4 sm:gap-5 md:grid-cols-2",
+        dense && "gap-3 sm:gap-3",
+        fill && "pc-onepage-grow pc-onepage-grid-2 md:gap-3",
+        className,
+      )}
+    >
       {items.map((item, index) => {
         const title = normalizeFeatureCopy(item.title);
         const raw = item.text ? normalizeFeatureCopy(item.text) : "";
@@ -71,7 +82,9 @@ export function FeaturesPhotoGrid({
               !dense && "pc-viewport-card--scale",
               dense
                 ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
-                : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
+                : fill
+                  ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
+                  : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
             )}
           >
             {src ? (
@@ -106,7 +119,9 @@ export function FeaturesPhotoGrid({
                   "pc-viewport-card-body relative z-10 flex flex-col justify-end md:max-w-[90%]",
                   dense
                     ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
-                    : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-center",
+                    : fill
+                      ? "min-h-[12rem] gap-2.5 p-5 sm:min-h-[13rem] sm:p-6 md:h-full md:min-h-0 md:justify-center md:p-7"
+                      : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-center",
                 )}
               >
                 {showTitle ? (

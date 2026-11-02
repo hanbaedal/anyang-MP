@@ -27,29 +27,36 @@ export default async function FuneralPage() {
       ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{cms.title || t(locale, "fun.title")}</h1>
-        <ul className="grid gap-4 md:grid-cols-4">
+      <div className="pc-onepage-stack space-y-8 md:space-y-0">
+        <ul className="pc-onepage-grow pc-onepage-grid-4 grid gap-4 md:grid-cols-4">
           {steps.map((step, index) => (
-            <li key={step.id || step.title} className={cn("rounded-xl border p-4 shadow-sm", pastelCardClass(index))}>
+            <li
+              key={step.id || step.title}
+              className={cn("pc-onepage-cell rounded-xl border p-4 shadow-sm", pastelCardClass(index))}
+            >
               <h2 className="text-lg">{step.title}</h2>
               {step.text ? (
-                <div className="mt-2 space-y-2 text-sm text-muted-foreground">
+                <div className="mt-2 min-h-0 flex-1 space-y-2 overflow-auto text-sm text-muted-foreground">
                   <Paragraphs text={step.text} />
                 </div>
               ) : null}
             </li>
           ))}
         </ul>
-        <FuneralDocList locale={locale} docs={docs} />
-        <Prose>
-          {cms.body?.trim() ? <Paragraphs text={cms.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
-          <p>
-            <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
-              {SITE.phone}
-            </a>
-          </p>
-        </Prose>
+        <div className="pc-onepage-foot space-y-3">
+          <FuneralDocList locale={locale} docs={docs} />
+          <Prose>
+            {cms.body?.trim() ? <Paragraphs text={cms.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
+            <p>
+              <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
+                {SITE.phone}
+              </a>
+            </p>
+          </Prose>
+        </div>
+      </div>
     </div>
   );
 }
