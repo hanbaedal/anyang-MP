@@ -4,7 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CmsPhotoItems } from "@/components/cms-photo-items";
 import { ManageImagePicker } from "@/components/manage-image-picker";
-import { CMS_TEXT_ITEM_SLUGS, type CmsItem, type CmsPage, type CmsSlug } from "@/lib/cms-types";
+import {
+  CMS_GALLERY_LINK_ITEM_SLUGS,
+  CMS_TEXT_ITEM_SLUGS,
+  type CmsItem,
+  type CmsPage,
+  type CmsSlug,
+} from "@/lib/cms-types";
 
 const field =
   "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -24,6 +30,7 @@ const BODY_ONLY_SLUGS: CmsSlug[] = ["greeting", "fees"];
 function emptyItem(slug: CmsSlug): CmsItem {
   const id = crypto.randomUUID();
   if (slug === "prices") return { id, title: "", won: "", remaining: "" };
+  if (CMS_GALLERY_LINK_ITEM_SLUGS.includes(slug)) return { id, title: "", text: "", image: "", galleryId: "" };
   if (CMS_TEXT_ITEM_SLUGS.includes(slug)) return { id, title: "", text: "" };
   return { id, title: "", text: "", image: "" };
 }
@@ -38,6 +45,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const photoGrid = PHOTO_SLUGS.includes(page.slug);
   const showPrices = page.slug === "prices";
   const showBodyImage = page.slug === "greeting";
+  const galleryLinkItems = CMS_GALLERY_LINK_ITEM_SLUGS.includes(page.slug);
   const galleryTag = GALLERY_TAG_BY_SLUG[page.slug];
 
   useEffect(() => {
@@ -206,7 +214,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
             </Button>
           </div>
           <ul className="space-y-3">
-            {page.items.map((item) => (
+            {page.items.map((item, index) => (
               <li key={item.id} className="space-y-2 rounded-xl border bg-card p-4">
                 <input
                   className={field}
@@ -237,6 +245,45 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                     onChange={(e) => patchItem(item.id, { text: e.target.value })}
                   />
                 )}
+                {galleryLinkItems ? (
+                  <div className="space-y-2 rounded-lg border border-dashed border-input bg-muted/30 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">카드 사진 {index + 1}</p>
+                        <p className="text-xs text-muted-foreground">
+                          갤러리에서만 고릅니다. 없으면 공개 홈은 기본 공원 사진을 씁니다.
+                        </p>
+                      </div>
+                      {item.image || item.galleryId ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => {
+                            patchItem(item.id, { image: "", galleryId: "" });
+                            setMessage("카드 사진 연결을 해제했습니다. 「페이지 저장」을 눌러 반영하세요.");
+                          }}
+                        >
+                          연결 해제
+                        </Button>
+                      ) : null}
+                    </div>
+                    <ManageImagePicker
+                      src={item.image ?? ""}
+                      disabled={busy}
+                      libraryOnly
+                      label="갤러리에서 고르기"
+                      onPickSrc={(src, photo) => {
+                        patchItem(item.id, { image: src, galleryId: photo?.id ?? "" });
+                        setMessage("갤러리 사진을 연결했습니다. 「페이지 저장」을 눌러야 공개에 반영됩니다.");
+                      }}
+                    />
+                    {item.galleryId ? (
+                      <p className="truncate text-[10px] text-muted-foreground">galleryId: {item.galleryId}</p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <Button
                   type="button"
                   size="sm"

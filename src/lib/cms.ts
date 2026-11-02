@@ -295,14 +295,19 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     title: input.title.trim(),
     lead: input.lead.trim(),
     body: input.body,
-    items: (input.items ?? []).map((item) => ({
-      id: item.id || nid(),
-      title: item.title.trim(),
-      text: item.text ?? "",
-      image: item.image ?? "",
-      won: item.won,
-      remaining: item.remaining,
-    })),
+    items: (input.items ?? []).map((item) => {
+      const image = String(item.image ?? "").trim();
+      const galleryId = String(item.galleryId ?? "").trim();
+      return {
+        id: item.id || nid(),
+        title: item.title.trim(),
+        text: item.text ?? "",
+        image,
+        ...(galleryId ? { galleryId } : {}),
+        won: item.won,
+        remaining: item.remaining,
+      };
+    }),
     updatedAt: new Date().toISOString(),
     ...(bodyImage ? { bodyImage } : {}),
   };

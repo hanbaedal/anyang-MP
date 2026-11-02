@@ -20,6 +20,8 @@ export type CmsItem = {
   title: string;
   text?: string;
   image?: string;
+  /** 갤러리 사진 id (공원 특징 등 링크로 연결할 때) */
+  galleryId?: string;
   won?: string;
   remaining?: string;
 };
@@ -48,5 +50,7 @@ export function isCmsSlug(value: string): value is CmsSlug {
   return CMS_SLUGS.some((item) => item.slug === value);
 }
 
-/** 제목·설명 항목만 (사진·분양가 없음) */
-export const CMS_TEXT_ITEM_SLUGS: CmsSlug[] = ["features", "directions", "procedure", "services", "funeral"];
+/** 제목·설명 항목만 (사진·분양가 없음). 공원 특징은 갤러리 사진 연결 가능. */
+export const CMS_TEXT_ITEM_SLUGS: CmsSlug[] = ["directions", "procedure", "services", "funeral"];
+/** 항목마다 갤러리 사진만 연결 (새 업로드 없음) */
+export const CMS_GALLERY_LINK_ITEM_SLUGS: CmsSlug[] = ["features"];
