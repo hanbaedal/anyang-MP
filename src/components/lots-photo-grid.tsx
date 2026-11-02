@@ -60,7 +60,7 @@ export function LotsPhotoGrid({
         <div
           className={cn(
             "flex items-center justify-center bg-transparent text-sm text-muted-foreground",
-            detail ? "aspect-[4/3] h-full w-full md:min-h-[22rem]" : "aspect-[4/3]",
+            detail ? "aspect-[4/3] w-full md:min-h-[22rem]" : "aspect-[4/3]",
           )}
         >
           사진 없음
@@ -72,7 +72,7 @@ export function LotsPhotoGrid({
         type="button"
         className={cn(
           "relative w-full cursor-zoom-in overflow-hidden bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-          detail ? "aspect-[4/3] h-full md:min-h-[22rem]" : "aspect-[4/3]",
+          detail ? "aspect-[4/3] w-full md:min-h-[22rem]" : "aspect-[4/3]",
         )}
         onClick={() => openAt(item.image!)}
         onMouseEnter={() => preload(item.image!)}
@@ -103,11 +103,11 @@ export function LotsPhotoGrid({
     return (
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col",
+          "flex flex-col",
           detail
             ? cn(
-                /* 제목을 이미지 칼럼 상단에 맞춤 (세로 중앙 정렬 제거) */
-                "h-full justify-start p-4 md:min-h-[22rem] md:p-6 lg:p-8",
+                /* 설명 전부 표시 — 길면 카드·행이 함께 성장 (clip 금지) */
+                "justify-start p-4 md:min-h-[22rem] md:p-6 lg:p-8",
                 alignEnd ? "items-start md:items-end" : "items-start",
               )
             : "p-3",
@@ -165,8 +165,8 @@ export function LotsPhotoGrid({
             <li
               key={item.id || item.title || String(i)}
               className={cn(
-                "overflow-hidden rounded-xl border border-[#ead7b4] bg-[#fffcf7] shadow-sm",
-                "grid grid-cols-1 md:items-stretch",
+                "rounded-xl border border-[#ead7b4] bg-[#fffcf7] shadow-sm",
+                "grid grid-cols-1 md:items-start",
                 photoOnRight
                   ? "md:grid-cols-[minmax(14rem,1fr)_minmax(0,1.65fr)]"
                   : "md:grid-cols-[minmax(0,1.65fr)_minmax(14rem,1fr)]",

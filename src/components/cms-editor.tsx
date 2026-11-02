@@ -11,7 +11,14 @@ const field =
 const area =
   "min-h-32 w-full rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-const PHOTO_SLUGS: CmsSlug[] = ["burial", "lawn", "columbarium", "remodeling"];
+/** 리모델링만 CMS에서 사진 격자 편집. 매장·평장·봉안은 갤러리 태그. */
+const PHOTO_SLUGS: CmsSlug[] = ["remodeling"];
+const GALLERY_DRIVEN_SLUGS: CmsSlug[] = ["burial", "lawn", "columbarium"];
+const GALLERY_TAG_BY_SLUG: Partial<Record<CmsSlug, string>> = {
+  burial: "매장묘",
+  lawn: "평장묘",
+  columbarium: "봉안묘",
+};
 const BODY_ONLY_SLUGS: CmsSlug[] = ["greeting", "fees"];
 
 function emptyItem(slug: CmsSlug): CmsItem {
@@ -26,10 +33,12 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error" | "busy">("idle");
   const [message, setMessage] = useState("");
   const pageRef = useRef(page);
-  const showItems = !BODY_ONLY_SLUGS.includes(page.slug);
+  const galleryDriven = GALLERY_DRIVEN_SLUGS.includes(page.slug);
+  const showItems = !BODY_ONLY_SLUGS.includes(page.slug) && !galleryDriven;
   const photoGrid = PHOTO_SLUGS.includes(page.slug);
   const showPrices = page.slug === "prices";
   const showBodyImage = page.slug === "greeting";
+  const galleryTag = GALLERY_TAG_BY_SLUG[page.slug];
 
   useEffect(() => {
     pageRef.current = page;
@@ -168,6 +177,12 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
             }}
           />
         </div>
+      ) : null}
+      {galleryDriven && galleryTag ? (
+        <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          이 페이지 사진은 갤러리에서 「{galleryTag}」 태그를 붙인 사진으로 표시됩니다. 제목·요약·본문만 여기서
+          수정하세요.
+        </p>
       ) : null}
       {showItems && photoGrid ? (
         <CmsPhotoItems
