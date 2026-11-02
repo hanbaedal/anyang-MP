@@ -13,6 +13,13 @@ export type GalleryPhoto = {
 
 export const GALLERY_TAGS: GalleryTag[] = ["일반", "전경", "매장묘", "평장묘", "봉안묘", "리모델링"];
 
+/** 공개 갤러리·슬라이드용 소분류. 「일반」만 있거나 태그가 비면 공개에서 숨김. */
+export const GALLERY_SUBCATEGORY_TAGS: GalleryTag[] = GALLERY_TAGS.filter((tag) => tag !== "일반");
+
+export function hasGallerySubcategory(photo: Pick<GalleryPhoto, "tags">): boolean {
+  return photo.tags.some((tag) => tag !== "일반");
+}
+
 /** 분양안내 상세 slug → 갤러리 분류 태그 (기존 GALLERY_TAGS 문자열과 동일). */
 export const LOTS_GALLERY_TAG = {
   burial: "매장묘",

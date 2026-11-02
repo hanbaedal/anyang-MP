@@ -214,50 +214,52 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
         </section>
       ) : null}
 
-      <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {pageItems.map((item, offset) => {
-          const index = page * PAGE_SIZE + offset;
-          return (
-            <li key={item.src}>
-              <button
-                type="button"
-                className={cn(
-                  "flex h-full w-full items-stretch gap-3 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors sm:gap-4",
-                  "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
-                  index === safeIndex && "border-[#c4a574] bg-[#f8eedd]/80",
-                )}
-                onClick={() => {
-                  setSlideIndex(index);
-                  setListIndex(index);
-                }}
-              >
-                <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
-                  <OriginalPhoto
-                    src={item.src}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading="lazy"
-                    onFail={onFail}
-                  />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
-                  <span className="font-medium text-foreground">{item.alt}</span>
-                  <span className="text-sm text-muted-foreground">{item.tags.join(" · ")}</span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="space-y-10">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {pageItems.map((item, offset) => {
+            const index = page * PAGE_SIZE + offset;
+            return (
+              <li key={item.src}>
+                <button
+                  type="button"
+                  className={cn(
+                    "flex h-full w-full items-stretch gap-3 rounded-xl border border-[#ead7b4] bg-[#fffcf7] p-3 text-left transition-colors sm:gap-4",
+                    "hover:border-[#d4c08a] hover:bg-[#f8eedd]/60",
+                    index === safeIndex && "border-[#c4a574] bg-[#f8eedd]/80",
+                  )}
+                  onClick={() => {
+                    setSlideIndex(index);
+                    setListIndex(index);
+                  }}
+                >
+                  <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
+                    <OriginalPhoto
+                      src={item.src}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      loading="lazy"
+                      onFail={onFail}
+                    />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-0.5">
+                    <span className="font-medium text-foreground">{item.alt}</span>
+                    <span className="text-sm text-muted-foreground">{item.tags.join(" · ")}</span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-      {total > 0 ? (
-        <DecadePager
-          total={total}
-          index={safeIndex}
-          onGo={goTo}
-          itemLabel={(n) => t("gallery.photo", { n })}
-          label={t("gallery.title")}
-        />
-      ) : null}
+        {total > 0 ? (
+          <DecadePager
+            total={total}
+            index={safeIndex}
+            onGo={goTo}
+            itemLabel={(n) => t("gallery.photo", { n })}
+            label={t("gallery.title")}
+          />
+        ) : null}
+      </div>
 
       {visibleItems.length === 0 ? <p className="text-sm text-muted-foreground">{t("gallery.empty")}</p> : null}
       {listIndex !== null && visibleItems.length > 0 ? (

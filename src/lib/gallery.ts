@@ -6,6 +6,7 @@ import { getDb, hasMongo } from "./mongo";
 import {
   GALLERY_TAGS,
   LOTS_GALLERY_TAG,
+  hasGallerySubcategory,
   type GalleryPhoto,
   type LotsGallerySlug,
 } from "./gallery-types";
@@ -13,7 +14,7 @@ import type { Locale } from "./i18n";
 import { CONTENT_LOCALES, localizeStoredText, translateText, type ContentLocale } from "./translate-content";
 
 export type { GalleryPhoto, LotsGallerySlug } from "./gallery-types";
-export { GALLERY_TAGS, LOTS_GALLERY_TAG } from "./gallery-types";
+export { GALLERY_TAGS, GALLERY_SUBCATEGORY_TAGS, LOTS_GALLERY_TAG, hasGallerySubcategory } from "./gallery-types";
 
 const localFile = dataFile("gallery.local.json");
 
@@ -73,6 +74,11 @@ export async function listGalleryLocalized(locale: Locale): Promise<GalleryPhoto
     }
     return item;
   });
+}
+
+/** 공개 갤러리 슬라이드·목록: 소분류(일반 외 태그)가 있는 사진만. 관리 목록은 listGallery 사용. */
+export async function listPublicGalleryLocalized(locale: Locale): Promise<GalleryPhoto[]> {
+  return (await listGalleryLocalized(locale)).filter(hasGallerySubcategory);
 }
 
 /** 분양안내 사진 격자: 갤러리 분류 태그와 일치하는 항목만. 없으면 빈 배열. */
