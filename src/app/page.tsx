@@ -1,15 +1,15 @@
+import { preload } from "react-dom";
 import { HomeIntro } from "@/components/home-intro";
 import { SiteAnnouncements } from "@/components/site-announcements";
-import { listGalleryLocalized } from "@/lib/gallery";
 import { getHomeHeroSettings } from "@/lib/home-hero";
-import { readLocale } from "@/lib/i18n-server";
+import { INTRO_VIEW_SLIDES } from "@/lib/intro-slides";
 
 export default async function HomePage() {
-  const locale = await readLocale();
-  const [heroMedia, gallery] = await Promise.all([getHomeHeroSettings(), listGalleryLocalized(locale)]);
-  const viewPhotos = gallery
-    .filter((item) => item.tags.includes("전경") && item.src)
-    .map((item) => ({ src: item.src, alt: item.alt }));
+  const heroMedia = await getHomeHeroSettings();
+
+  for (const slide of INTRO_VIEW_SLIDES) {
+    preload(slide.src, { as: "image" });
+  }
 
   return (
     <>
@@ -19,7 +19,7 @@ export default async function HomePage() {
         videoSrc={heroMedia.videoSrc}
         audioSrc={heroMedia.audioSrc}
         posterSrc={heroMedia.posterSrc}
-        viewPhotos={viewPhotos}
+        viewPhotos={INTRO_VIEW_SLIDES}
       />
     </>
   );
