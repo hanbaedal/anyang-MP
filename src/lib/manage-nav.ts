@@ -11,7 +11,7 @@ function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
 
 /**
  * 홈페이지 관리 서브메뉴 (AMP-70).
- * 공개 GNB에 있는 페이지만. 리모델링·분양가는 숨김.
+ * 숨김: 리모델링 · 분양가·잔여 · 문의.
  * 중복 표기 피하려고 일부는 manage.* 키 사용.
  */
 export function manageNavItems(): ManageNavItem[] {
@@ -30,6 +30,5 @@ export function manageNavItems(): ManageNavItem[] {
     cmsPage("funeral"),
     { href: "/manage/gallery", i18n: "manage.galleryAdmin" },
     { href: "/manage/notices", i18n: "manage.noticesPage" },
-    { href: "/manage/inquiries", i18n: "manage.inquiries" },
   ];
 }
