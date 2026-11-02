@@ -23,7 +23,7 @@ export default async function NoticesPage() {
     <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{t(locale, "notices.title")}</h1>
       <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
-        <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-2xl border border-[#c4a574]/40 bg-[#f4efe6] md:mx-0 md:max-w-none md:aspect-auto">
+        <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm md:mx-0 md:max-w-none md:aspect-auto">
           {src ? (
             <Image
               src={src}
@@ -37,7 +37,7 @@ export default async function NoticesPage() {
           ) : (
             <span className="sr-only">{t(locale, "notices.listImageEmpty")}</span>
           )}
-          {/* AMP-61: soft cream mist — photo stays; CSS overlay only */}
+          {/* AMP-61/62: cream mist · AMP-63: soft feathered edges (no hard border) */}
           <div className="pc-notices-mist" aria-hidden />
           <div className="pc-notices-mist pc-notices-mist--drift" aria-hidden />
         </aside>
