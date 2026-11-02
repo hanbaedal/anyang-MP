@@ -124,7 +124,12 @@ export function FeaturesPhotoGrid({
                         : "space-y-1.5 text-[13px] leading-6 sm:text-sm sm:leading-7",
                     )}
                   >
-                    {captionFirstLine ? <p className="text-inherit">{text}</p> : <Paragraphs text={text} className="text-inherit" />}
+                    {captionFirstLine ? (
+                      /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */
+                      <p className="whitespace-normal break-words text-inherit">{text}</p>
+                    ) : (
+                      <Paragraphs text={text} className="text-inherit" />
+                    )}
                   </div>
                 ) : null}
               </div>
