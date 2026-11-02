@@ -31,11 +31,6 @@ export function LotsPhotoGrid({
 }) {
   const [index, setIndex] = useState<number | null>(null);
   const detail = layout === "detail";
-
-  if (!items.length) {
-    return emptyLabel ? <p className="mt-10 text-sm text-muted-foreground">{emptyLabel}</p> : null;
-  }
-
   const slides = useMemo(
     () =>
       items
@@ -43,6 +38,10 @@ export function LotsPhotoGrid({
         .map((item) => ({ src: item.image, alt: item.title })),
     [items],
   );
+
+  if (!items.length) {
+    return emptyLabel ? <p className="mt-10 text-sm text-muted-foreground">{emptyLabel}</p> : null;
+  }
 
   function openAt(src: string) {
     const i = slides.findIndex((s) => s.src === src);
@@ -163,6 +162,7 @@ export function LotsPhotoGrid({
           index={Math.min(index, slides.length - 1)}
           onIndexChange={setIndex}
           imageFit="contain"
+          contentArea
         />
       ) : null}
     </>
