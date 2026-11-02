@@ -72,10 +72,30 @@
     @apply border-border;
   }
 
+  /*
+   * PC fluid rem (AMP-52) — 모니터·창 폭에 따라 재계산.
+   * 4K 원판 zoom/scale 금지. 앵커: ~1366·1920·2880 CSS폭, 상한 4K.
+   * 모바일(<768)은 브라우저 기본(보통 16px) 유지.
+   */
   html {
     height: 100%;
     overflow: hidden;
     scroll-behavior: smooth;
+    font-size: 100%;
+  }
+
+  /* PC: ~16px@1280 → ~18px@1920 → 상한 1.25rem(20px)@~2560+ / 4K */
+  @media (min-width: 768px) {
+    html {
+      font-size: clamp(1rem, 0.75rem + 0.3125vw, 1.25rem);
+    }
+  }
+
+  /* 짧은 랩톱 뷰포트(예: 2880×1800 + OS 배율): 과도 확대 완화 */
+  @media (min-width: 768px) and (max-height: 900px) {
+    html {
+      font-size: clamp(1rem, 0.82rem + 0.22vw, 1.125rem);
+    }
   }
 
   body {
@@ -317,6 +337,7 @@
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
+    font-size: 16px !important; /* 유체 rem이 거래명세서 mm 레이아웃을 흔들지 않게 */
   }
 
   body > *:not(#receipt-print-root) {

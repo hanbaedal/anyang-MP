@@ -18,7 +18,7 @@ export async function SiteFooter() {
       <div className="flex items-center justify-between gap-2 px-3 py-1 sm:px-5 md:items-end md:gap-8 md:px-5 md:py-2">
         <div className="min-w-0 text-left leading-snug">
           <p className="font-serif text-sm leading-tight md:text-lg">{t(uiLocale, "site.legalName")}</p>
-          <p className="mt-0.5 text-[11px] text-[color:var(--chrome-muted)] md:hidden">{phone}</p>
+          <p className="mt-0.5 text-[0.6875rem] text-[color:var(--chrome-muted)] md:hidden">{phone}</p>
           <p className="mt-0.5 hidden text-[color:var(--chrome-muted)] md:block">{t(uiLocale, "site.address")}</p>
           <p className="mt-0 hidden text-[color:var(--chrome-muted)] md:block">{phone}</p>
         </div>

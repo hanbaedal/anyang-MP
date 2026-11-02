@@ -17,7 +17,7 @@ import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import { isStaffRole, type Role } from "@/lib/auth-types";
 
 const chromeLink =
-  "whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] text-[color:var(--chrome-foreground)] underline-offset-4 hover:bg-white/15 hover:underline sm:px-2 sm:text-sm";
+  "whitespace-nowrap rounded-md px-1.5 py-1 text-[0.6875rem] text-[color:var(--chrome-foreground)] underline-offset-4 hover:bg-white/15 hover:underline sm:px-2 sm:text-sm";
 
 export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role | null }) {
   const t = useT();
@@ -42,7 +42,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
             className="size-7 object-contain lg:size-9"
             aria-hidden
           />
-          <p className="whitespace-nowrap font-serif text-[11px] leading-none text-[color:var(--chrome-foreground)] lg:text-lg">
+          <p className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--chrome-foreground)] lg:text-lg">
             {chrome("site.legalName")}
           </p>
         </Link>
@@ -89,7 +89,7 @@ export function SiteHeader({ signedIn, role }: { signedIn: boolean; role?: Role 
 
           <Link
             href="/sitemap"
-            className="whitespace-nowrap rounded-md px-1 py-1 text-[10px] text-[color:var(--chrome-muted)] underline-offset-4 hover:bg-white/15 hover:underline sm:px-1.5 sm:text-xs"
+            className="whitespace-nowrap rounded-md px-1 py-1 text-[0.625rem] text-[color:var(--chrome-muted)] underline-offset-4 hover:bg-white/15 hover:underline sm:px-1.5 sm:text-xs"
           >
             {chrome("nav.sitemap")}
           </Link>
