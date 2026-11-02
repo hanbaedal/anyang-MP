@@ -1,5 +1,5 @@
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
@@ -20,17 +20,10 @@ export default async function LawnPage() {
     listLotsPhotosFromGallery("lawn", locale),
   ]);
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "lawn.kicker")}
-        title={cms.title || t(locale, "lawn.title")}
-        lead={cms.lead || t(locale, "lawn.lead")}
-        image={{ src: "/images/lawn.jpg", alt: t(locale, "lawn.title") }}
-      />
-      <div className="mx-auto w-full max-w-7xl px-4 py-12">
-        <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
-        <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "lawn.title")}</h1>
+      <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
+      <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
+    </div>
   );
 }

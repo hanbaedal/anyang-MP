@@ -1,4 +1,4 @@
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -22,23 +22,17 @@ export default async function FeesPage() {
     : [t(locale, "fees.p1"), t(locale, "fees.p2"), t(locale, "fees.p3"), t(locale, "fees.p4")];
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "fees.kicker")}
-        title={cms.title || t(locale, "fees.title")}
-        lead={cms.lead || t(locale, "fees.lead")}
-      />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-4 md:grid-cols-2">
-          {sections.map((section) => (
-            <PastelBox key={section.slice(0, 48)}>
-              <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-                <Paragraphs text={section} />
-              </Prose>
-            </PastelBox>
-          ))}
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "fees.title")}</h1>
+      <div className="grid gap-4 md:grid-cols-2">
+        {sections.map((section) => (
+          <PastelBox key={section.slice(0, 48)}>
+            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+              <Paragraphs text={section} />
+            </Prose>
+          </PastelBox>
+        ))}
       </div>
-    </>
+    </div>
   );
 }

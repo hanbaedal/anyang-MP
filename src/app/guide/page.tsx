@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
@@ -106,14 +106,8 @@ export default async function GuideHubPage() {
       ];
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "nav.guide")}
-        title={t(locale, "nav.guide")}
-        lead={t(locale, "hub.guide.lead")}
-        image={{ src: "/images/lawn.jpg", alt: t(locale, "nav.guide") }}
-      />
-      <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+    <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+      <h1 className="sr-only">{t(locale, "nav.guide")}</h1>
         <MenuHubSection
           id="procedure"
           title={procedure.title || t(locale, "proc.title")}
@@ -196,7 +190,6 @@ export default async function GuideHubPage() {
             </Prose>
           </div>
         </MenuHubSection>
-      </div>
-    </>
+    </div>
   );
 }

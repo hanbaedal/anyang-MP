@@ -1,5 +1,5 @@
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { REMODEL_TYPES } from "@/lib/content";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -18,26 +18,19 @@ export default async function RemodelPage() {
     ? cms.items
     : REMODEL_TYPES.map((item) => ({ id: item.title, title: item.title, text: item.text, image: item.image }));
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "remodel.kicker")}
-        title={cms.title || t(locale, "remodel.title")}
-        lead={cms.lead || t(locale, "remodel.lead")}
-        image={{ src: "/images/remodel-3.jpg", alt: t(locale, "remodel.title") }}
-      />
-      <div className="mx-auto w-full max-w-7xl px-4 py-12">
-        <Prose>
-          {cms.body ? (
-            <Paragraphs text={cms.body} />
-          ) : (
-            <>
-              <p>{t(locale, "remodel.body")}</p>
-              <p className="text-sm text-muted-foreground">{t(locale, "remodel.cost")}</p>
-            </>
-          )}
-        </Prose>
-        <LotsPhotoGrid items={items} />
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "remodel.title")}</h1>
+      <Prose>
+        {cms.body ? (
+          <Paragraphs text={cms.body} />
+        ) : (
+          <>
+            <p>{t(locale, "remodel.body")}</p>
+            <p className="text-sm text-muted-foreground">{t(locale, "remodel.cost")}</p>
+          </>
+        )}
+      </Prose>
+      <LotsPhotoGrid items={items} />
+    </div>
   );
 }

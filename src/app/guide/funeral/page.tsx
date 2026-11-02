@@ -1,5 +1,5 @@
 import { FuneralDocList } from "@/components/funeral-doc-list";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
@@ -27,13 +27,8 @@ export default async function FuneralPage() {
       ];
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "fun.kicker")}
-        title={cms.title || t(locale, "fun.title")}
-        lead={cms.lead || t(locale, "fun.lead")}
-      />
-      <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+    <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "fun.title")}</h1>
         <ul className="grid gap-4 md:grid-cols-4">
           {steps.map((step, index) => (
             <li key={step.id || step.title} className={cn("rounded-xl border p-4 shadow-sm", pastelCardClass(index))}>
@@ -55,7 +50,6 @@ export default async function FuneralPage() {
             </a>
           </p>
         </Prose>
-      </div>
-    </>
+    </div>
   );
 }

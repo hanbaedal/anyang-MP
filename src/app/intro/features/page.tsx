@@ -1,5 +1,4 @@
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
-import { PageHero } from "@/components/page-hero";
 import { FEATURES } from "@/lib/site";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { t } from "@/lib/i18n";
@@ -27,16 +26,9 @@ export default async function FeaturesPage() {
   }));
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "features.kicker")}
-        title={cms.title || t(locale, "features.title")}
-        lead={cms.lead || t(locale, "features.lead")}
-        image={{ src: "/images/park-overview.jpg", alt: t(locale, "features.title") }}
-      />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <FeaturesPhotoGrid items={items} />
-      </div>
-    </>
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "features.title")}</h1>
+      <FeaturesPhotoGrid items={items} />
+    </div>
   );
 }

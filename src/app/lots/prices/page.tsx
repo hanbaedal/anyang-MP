@@ -1,4 +1,4 @@
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PRICES, REMAINING, UNCONFIRMED } from "@/lib/facts";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -31,13 +31,8 @@ export default async function PricesPage() {
     : REMAINING.map((row) => ({ name: t(locale, row.nameKey), seats: row.seats === UNCONFIRMED ? unconfirmed : row.seats }));
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "prices.kicker")}
-        title={cms.title || t(locale, "prices.title")}
-        lead={cms.lead || t(locale, "prices.lead")}
-      />
-      <div className="mx-auto max-w-6xl space-y-8 px-4 py-12">
+    <div className="mx-auto max-w-6xl space-y-8 px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "prices.title")}</h1>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead className="bg-muted text-left">
@@ -78,7 +73,6 @@ export default async function PricesPage() {
         <Button asChild>
           <Link href="/support/inquiry">{t(locale, "prices.ask")}</Link>
         </Button>
-      </div>
-    </>
+    </div>
   );
 }

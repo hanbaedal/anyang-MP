@@ -1,4 +1,3 @@
-import { PageHero } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { pastelCardClass } from "@/lib/site";
@@ -35,25 +34,18 @@ export default async function ServicesPage() {
       }));
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "svc.kicker")}
-        title={cms.title || t(locale, "svc.title")}
-        lead={cms.lead || t(locale, "svc.lead")}
-        image={{ src: "/images/remodel-before.jpg", alt: cms.title || t(locale, "svc.title") }}
-      />
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-12">
-        {items.map((service, index) => (
-          <article key={service.id || service.title} className={cn("rounded-xl border p-6 shadow-sm", pastelCardClass(index))}>
-            <h2 className="text-xl">{service.title}</h2>
-            {service.text ? (
-              <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground">
-                <Paragraphs text={service.text} />
-              </div>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </>
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "svc.title")}</h1>
+      {items.map((service, index) => (
+        <article key={service.id || service.title} className={cn("rounded-xl border p-6 shadow-sm", pastelCardClass(index))}>
+          <h2 className="text-xl">{service.title}</h2>
+          {service.text ? (
+            <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground">
+              <Paragraphs text={service.text} />
+            </div>
+          ) : null}
+        </article>
+      ))}
+    </div>
   );
 }

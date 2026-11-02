@@ -1,5 +1,4 @@
 import { NoticesList } from "@/components/notices-list";
-import { PageHero } from "@/components/page-hero";
 import { listNoticesLocalized } from "@/lib/notices";
 import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
@@ -17,11 +16,9 @@ export default async function NoticesPage() {
   const notices = await listNoticesLocalized(locale);
 
   return (
-    <>
-      <PageHero kicker={t(locale, "notices.kicker")} title={t(locale, "notices.title")} />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} />
-      </div>
-    </>
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="sr-only">{t(locale, "notices.title")}</h1>
+      <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} />
+    </div>
   );
 }

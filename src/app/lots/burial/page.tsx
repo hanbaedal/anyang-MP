@@ -1,5 +1,5 @@
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
@@ -20,17 +20,10 @@ export default async function BurialPage() {
     listLotsPhotosFromGallery("burial", locale),
   ]);
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "burial.kicker")}
-        title={cms.title || t(locale, "burial.title")}
-        lead={cms.lead || t(locale, "burial.lead")}
-        image={{ src: "/images/burial.jpg", alt: t(locale, "burial.title") }}
-      />
-      <div className="mx-auto w-full max-w-7xl px-4 py-12">
-        <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "burial.body")}</p>}</Prose>
-        <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "burial.title")}</h1>
+      <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "burial.body")}</p>}</Prose>
+      <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
+    </div>
   );
 }

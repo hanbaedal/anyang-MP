@@ -1,6 +1,6 @@
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { MenuHubSection } from "@/components/menu-hub-section";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
@@ -45,14 +45,8 @@ export default async function LotsHubPage() {
   ]);
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "nav.lots")}
-        title={t(locale, "nav.lots")}
-        lead={t(locale, "hub.lots.lead")}
-        image={{ src: "/images/plots.jpg", alt: t(locale, "nav.lots") }}
-      />
-      <div className="mx-auto w-full max-w-7xl space-y-16 px-4 py-12">
+    <div className="mx-auto w-full max-w-7xl space-y-16 px-4 py-12">
+      <h1 className="sr-only">{t(locale, "nav.lots")}</h1>
         <MenuHubSection id="burial" title={burial.title} href="/lots/burial" moreLabel={t(locale, "more.detail")}>
           <Prose>{burial.body}</Prose>
           <LotsPhotoGrid items={burial.items} emptyLabel={emptyLabel} />
@@ -70,7 +64,6 @@ export default async function LotsHubPage() {
           <Prose>{col.body}</Prose>
           <LotsPhotoGrid items={col.items} emptyLabel={emptyLabel} />
         </MenuHubSection>
-      </div>
-    </>
+    </div>
   );
 }

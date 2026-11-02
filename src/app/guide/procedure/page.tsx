@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
@@ -60,16 +60,10 @@ export default async function ProcedurePage() {
       ];
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "proc.kicker")}
-        title={cms.title || t(locale, "proc.title")}
-        lead={cms.lead || t(locale, "proc.lead")}
-      />
-      <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
-        <SaleSteps steps={steps.length ? steps : undefined} />
-        <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>
-      </div>
-    </>
+    <div className="mx-auto max-w-6xl space-y-10 px-4 py-12">
+      <h1 className="sr-only">{cms.title || t(locale, "proc.title")}</h1>
+      <SaleSteps steps={steps.length ? steps : undefined} />
+      <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>
+    </div>
   );
 }

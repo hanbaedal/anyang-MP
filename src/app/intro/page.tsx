@@ -3,7 +3,7 @@ import { DirectionsMap } from "@/components/directions-map";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { NoticesList } from "@/components/notices-list";
-import { PageHero, Prose } from "@/components/page-hero";
+import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -43,14 +43,8 @@ export default async function IntroHubPage() {
   }));
 
   return (
-    <>
-      <PageHero
-        kicker={t(locale, "nav.intro")}
-        title={t(locale, "nav.intro")}
-        lead={t(locale, "hub.intro.lead")}
-        image={{ src: "/images/park-overview.jpg", alt: t(locale, "nav.intro") }}
-      />
-      <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+    <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+      <h1 className="sr-only">{t(locale, "nav.intro")}</h1>
         <MenuHubSection
           id="greeting"
           title={greeting.title || t(locale, "greeting.title")}
@@ -121,7 +115,6 @@ export default async function IntroHubPage() {
           <p className="mb-4 text-sm text-muted-foreground">{SITE.address}</p>
           <DirectionsMap />
         </MenuHubSection>
-      </div>
-    </>
+    </div>
   );
 }
