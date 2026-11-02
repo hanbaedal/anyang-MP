@@ -59,8 +59,8 @@ export function LotsPhotoGrid({
       return (
         <div
           className={cn(
-            "flex items-center justify-center bg-[#f3e6cf] text-sm text-muted-foreground",
-            detail ? "aspect-[4/3] w-full md:min-h-[22rem]" : "aspect-[4/3]",
+            "flex items-center justify-center bg-transparent text-sm text-muted-foreground",
+            detail ? "aspect-[4/3] h-full w-full md:min-h-[22rem]" : "aspect-[4/3]",
           )}
         >
           사진 없음
@@ -71,8 +71,8 @@ export function LotsPhotoGrid({
       <button
         type="button"
         className={cn(
-          "relative w-full cursor-zoom-in overflow-hidden bg-[#f3e6cf] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-          detail ? "aspect-[4/3] md:min-h-[22rem]" : "aspect-[4/3]",
+          "relative w-full cursor-zoom-in overflow-hidden bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+          detail ? "aspect-[4/3] h-full md:min-h-[22rem]" : "aspect-[4/3]",
         )}
         onClick={() => openAt(item.image!)}
         onMouseEnter={() => preload(item.image!)}
@@ -98,15 +98,39 @@ export function LotsPhotoGrid({
     );
   }
 
-  function caption(item: LotsPhotoItem) {
+  /** alignEnd: md+에서 사진이 오른쪽일 때 제목·설명(text)만 우측 정렬 */
+  function caption(item: LotsPhotoItem, alignEnd = false) {
     return (
-      <div className={cn("flex min-h-0 flex-1 flex-col", detail ? "justify-center p-4 md:p-6 lg:p-8" : "p-3", item.text ? "gap-1" : "")}>
-        <h2 className={cn("font-medium leading-snug", detail ? "text-xl md:text-2xl" : "text-base sm:text-lg")}>
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          detail
+            ? cn(
+                "h-full justify-center p-4 md:min-h-[22rem] md:p-6 lg:p-8",
+                alignEnd ? "items-start md:items-end" : "items-start",
+              )
+            : "p-3",
+          item.text ? "gap-1" : "",
+        )}
+      >
+        <h2
+          className={cn(
+            "w-full font-medium leading-snug",
+            detail ? "text-xl md:text-2xl" : "text-base sm:text-lg",
+            alignEnd && "md:text-right",
+          )}
+        >
           {item.title}
         </h2>
         {item.text ? (
-          <div className={cn("text-muted-foreground", detail ? "space-y-2 text-base" : "space-y-1 text-sm")}>
-            <Paragraphs text={item.text} />
+          <div
+            className={cn(
+              "w-full text-muted-foreground",
+              detail ? "space-y-2 text-base" : "space-y-1 text-sm",
+              alignEnd && "md:text-right",
+            )}
+          >
+            <Paragraphs text={item.text} className={alignEnd ? "md:text-right" : undefined} />
           </div>
         ) : null}
       </div>
@@ -147,7 +171,7 @@ export function LotsPhotoGrid({
               )}
             >
               <div className={cn("min-w-0", photoOnRight && "md:order-2")}>{photo(item, i)}</div>
-              <div className={cn("min-w-0", photoOnRight && "md:order-1")}>{caption(item)}</div>
+              <div className={cn("min-w-0", photoOnRight && "md:order-1")}>{caption(item, photoOnRight)}</div>
             </li>
           );
         })}
