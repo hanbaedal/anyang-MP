@@ -14,10 +14,6 @@ export type Notice = {
   body: string;
   publishedAt: string;
   pinned?: boolean;
-  /** 갤러리 연결 사진 경로 (공개 목록 썸네일) */
-  image?: string;
-  /** 갤러리 사진 id */
-  galleryId?: string;
   i18n?: Partial<Record<"en" | "zh", NoticeLocaleFields>>;
 };
 
@@ -26,16 +22,12 @@ const localFile = dataFile("notices.local.json");
 
 function fromDoc(doc: Record<string, unknown>): Notice {
   const published = doc.publishedAt instanceof Date ? doc.publishedAt.toISOString() : String(doc.publishedAt ?? "");
-  const image = String(doc.image ?? "").trim();
-  const galleryId = String(doc.galleryId ?? "").trim();
   return {
     slug: String(doc.slug ?? ""),
     title: String(doc.title ?? ""),
     body: String(doc.body ?? ""),
     publishedAt: published,
     pinned: Boolean(doc.pinned),
-    ...(image ? { image } : {}),
-    ...(galleryId ? { galleryId } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as Notice["i18n"]) : undefined,
   };
 }
@@ -199,27 +191,16 @@ export function validateNotice(input: { title?: string; body?: string; slug?: st
   return null;
 }
 
-export async function createNotice(input: {
-  title: string;
-  body: string;
-  slug?: string;
-  pinned?: boolean;
-  image?: string;
-  galleryId?: string;
-}) {
+export async function createNotice(input: { title: string; body: string; slug?: string; pinned?: boolean }) {
   const items = await listNotices();
   let slug = (input.slug?.trim() || slugify(input.title)).toLowerCase();
   if (items.some((item) => item.slug === slug)) slug = `${slug}-${Date.now()}`;
-  const image = String(input.image ?? "").trim();
-  const galleryId = String(input.galleryId ?? "").trim();
   const notice: Notice = {
     slug,
     title: input.title.trim(),
     body: input.body.trim(),
     publishedAt: new Date().toISOString(),
     pinned: Boolean(input.pinned),
-    ...(image ? { image } : {}),
-    ...(galleryId ? { galleryId } : {}),
   };
   notice.i18n = await fillNoticeI18n(notice, true);
   items.unshift(notice);
@@ -229,14 +210,7 @@ export async function createNotice(input: {
 
 export async function updateNotice(
   slug: string,
-  input: {
-    title?: string;
-    body?: string;
-    pinned?: boolean;
-    nextSlug?: string;
-    image?: string;
-    galleryId?: string;
-  },
+  input: { title?: string; body?: string; pinned?: boolean; nextSlug?: string },
 ) {
   const items = await listNotices();
   const idx = items.findIndex((item) => item.slug === slug);
@@ -249,10 +223,6 @@ export async function updateNotice(
   const title = input.title !== undefined ? input.title.trim() : prev.title;
   const body = input.body !== undefined ? input.body.trim() : prev.body;
   const contentChanged = title !== prev.title || body !== prev.body;
-  const image =
-    input.image !== undefined ? String(input.image).trim() : String(prev.image ?? "").trim();
-  const galleryId =
-    input.galleryId !== undefined ? String(input.galleryId).trim() : String(prev.galleryId ?? "").trim();
   const next: Notice = {
     ...prev,
     slug: nextSlug,
@@ -260,10 +230,6 @@ export async function updateNotice(
     body,
     pinned: input.pinned !== undefined ? input.pinned : prev.pinned,
   };
-  if (image) next.image = image;
-  else delete next.image;
-  if (galleryId) next.galleryId = galleryId;
-  else delete next.galleryId;
   if (contentChanged) {
     next.i18n = await fillNoticeI18n(next, true);
   }

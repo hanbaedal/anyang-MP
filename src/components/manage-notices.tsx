@@ -3,21 +3,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ManageImagePicker } from "@/components/manage-image-picker";
-import { thumbUrl } from "@/lib/media";
 import type { Notice } from "@/lib/notices";
+import type { NoticesPageSettings } from "@/lib/notices-page";
 
 const field =
   "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const area =
   "min-h-28 w-full rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function ManageNotices({ initial }: { initial: Notice[] }) {
+export function ManageNotices({
+  initial,
+  initialPage,
+}: {
+  initial: Notice[];
+  initialPage: NoticesPageSettings;
+}) {
   const [items, setItems] = useState(initial);
+  const [listImage, setListImage] = useState(initialPage.listImage);
+  const [galleryId, setGalleryId] = useState(initialPage.galleryId);
+  const [pageBusy, setPageBusy] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [pinned, setPinned] = useState(false);
-  const [image, setImage] = useState("");
-  const [galleryId, setGalleryId] = useState("");
   const [editing, setEditing] = useState<Notice | null>(null);
   const [message, setMessage] = useState("");
 
@@ -27,12 +34,36 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
     if (json.items) setItems(json.items);
   }
 
+  async function savePageImage() {
+    setPageBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/manage/notices-page", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listImage, galleryId }),
+      });
+      const json = (await res.json()) as { ok?: boolean; error?: string; settings?: NoticesPageSettings };
+      if (!res.ok || !json.ok || !json.settings) {
+        setMessage(json.error || "목록 사진 저장에 실패했습니다.");
+        return;
+      }
+      setListImage(json.settings.listImage);
+      setGalleryId(json.settings.galleryId);
+      setMessage("공지 목록 좌측 사진을 저장했습니다.");
+    } catch {
+      setMessage("네트워크 오류입니다.");
+    } finally {
+      setPageBusy(false);
+    }
+  }
+
   async function onCreate(event: React.FormEvent) {
     event.preventDefault();
     const res = await fetch("/api/manage/notices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body, pinned, image, galleryId }),
+      body: JSON.stringify({ title, body, pinned }),
     });
     const json = (await res.json()) as { ok?: boolean; error?: string };
     if (!res.ok || !json.ok) {
@@ -42,8 +73,6 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
     setTitle("");
     setBody("");
     setPinned(false);
-    setImage("");
-    setGalleryId("");
     setMessage("등록했습니다.");
     await refresh();
   }
@@ -53,14 +82,7 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
     const res = await fetch("/api/manage/notices", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        slug: editing.slug,
-        title: editing.title,
-        body: editing.body,
-        pinned: editing.pinned,
-        image: editing.image ?? "",
-        galleryId: editing.galleryId ?? "",
-      }),
+      body: JSON.stringify(editing),
     });
     const json = (await res.json()) as { ok?: boolean; error?: string };
     if (!res.ok || !json.ok) {
@@ -80,27 +102,25 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-      <form onSubmit={onCreate} className="space-y-3 rounded-xl border bg-card p-5">
-        <h2 className="font-medium">새 공지</h2>
-        <input className={field} placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <textarea className={area} placeholder="본문" value={body} onChange={(e) => setBody(e.target.value)} />
+      <div className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-medium">공지 목록 좌측 사진</h2>
+        <p className="text-sm text-muted-foreground">
+          공개 공지 목록 페이지 왼쪽에 크게 보입니다. 글마다 붙는 썸네일이 아니라, 목록 전체용 한 장입니다. 갤러리에서만
+          고르며 새 파일 업로드는 없습니다.
+        </p>
         <div className="space-y-2 rounded-lg border border-dashed border-input bg-muted/30 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="text-sm font-medium">목록 썸네일</p>
-              <p className="text-xs text-muted-foreground">
-                갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 없으면 공개 목록은 빈 자리로 둡니다.
-              </p>
-            </div>
-            {image || galleryId ? (
+            <p className="text-sm font-medium">갤러리 연결</p>
+            {listImage || galleryId ? (
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
+                disabled={pageBusy}
                 onClick={() => {
-                  setImage("");
+                  setListImage("");
                   setGalleryId("");
-                  setMessage("썸네일 연결을 해제했습니다.");
+                  setMessage("연결을 해제했습니다. 「목록 사진 저장」을 눌러 반영하세요.");
                 }}
               >
                 연결 해제
@@ -108,16 +128,26 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
             ) : null}
           </div>
           <ManageImagePicker
-            src={image}
+            src={listImage}
+            disabled={pageBusy}
             libraryOnly
             label="갤러리에서 고르기"
             onPickSrc={(src, photo) => {
-              setImage(src);
+              setListImage(src);
               setGalleryId(photo?.id ?? "");
-              setMessage("갤러리 사진을 연결했습니다. 「등록」을 눌러 저장하세요.");
+              setMessage("갤러리 사진을 골랐습니다. 「목록 사진 저장」을 눌러 반영하세요.");
             }}
           />
         </div>
+        <Button type="button" disabled={pageBusy} onClick={() => void savePageImage()}>
+          {pageBusy ? "저장 중…" : "목록 사진 저장"}
+        </Button>
+      </div>
+
+      <form onSubmit={onCreate} className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-medium">새 공지</h2>
+        <input className={field} placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <textarea className={area} placeholder="본문" value={body} onChange={(e) => setBody(e.target.value)} />
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
           고정
@@ -140,29 +170,6 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
                   value={editing.body}
                   onChange={(e) => setEditing({ ...editing, body: e.target.value })}
                 />
-                <div className="space-y-2 rounded-lg border border-dashed border-input bg-muted/30 p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium">목록 썸네일</p>
-                    {editing.image || editing.galleryId ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditing({ ...editing, image: "", galleryId: "" })}
-                      >
-                        연결 해제
-                      </Button>
-                    ) : null}
-                  </div>
-                  <ManageImagePicker
-                    src={editing.image ?? ""}
-                    libraryOnly
-                    label="갤러리에서 고르기"
-                    onPickSrc={(src, photo) =>
-                      setEditing({ ...editing, image: src, galleryId: photo?.id ?? "" })
-                    }
-                  />
-                </div>
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
@@ -182,20 +189,12 @@ export function ManageNotices({ initial }: { initial: Notice[] }) {
               </div>
             ) : (
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex min-w-0 gap-3">
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border bg-muted">
-                    {item.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={thumbUrl(item.image)} alt="" className="h-full w-full object-cover" />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-medium">
-                      {item.pinned ? <span className="mr-2 text-xs text-ring">고정</span> : null}
-                      {item.title}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.body}</p>
-                  </div>
+                <div>
+                  <p className="font-medium">
+                    {item.pinned ? <span className="mr-2 text-xs text-ring">고정</span> : null}
+                    {item.title}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.body}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button type="button" size="sm" variant="outline" onClick={() => setEditing(item)}>
