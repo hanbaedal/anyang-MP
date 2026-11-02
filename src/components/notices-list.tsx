@@ -6,10 +6,11 @@ import { Paragraphs } from "@/components/paragraphs";
 import { Prose } from "@/components/page-hero";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLocale, useT } from "@/components/locale-provider";
+import { thumbUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import type { Notice } from "@/lib/notices";
 
-export type NoticeListItem = Pick<Notice, "slug" | "title" | "body" | "publishedAt" | "pinned">;
+export type NoticeListItem = Pick<Notice, "slug" | "title" | "body" | "publishedAt" | "pinned" | "image">;
 
 const PAGE_SIZE = 15;
 
@@ -32,6 +33,23 @@ function summarizeBody(body: string, max = 72) {
   const cut = flat.slice(0, max);
   const sp = cut.lastIndexOf(" ");
   return `${(sp > 40 ? cut.slice(0, sp) : cut).trimEnd()}…`;
+}
+
+function NoticeThumb({ src, label }: { src?: string; label: string }) {
+  const trimmed = src?.trim() ?? "";
+  return (
+    <span
+      className="block h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-[#c4a574]/40 bg-[#f4efe6] sm:h-12 sm:w-12"
+      aria-hidden={!trimmed}
+    >
+      {trimmed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumbUrl(trimmed)} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <span className="sr-only">{label}</span>
+      )}
+    </span>
+  );
 }
 
 export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: string }) {
@@ -66,9 +84,12 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-xl border border-[#c4a574]/55 bg-[#fffcf7]">
-        <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+        <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[#c4a574]/45 bg-[#e8f4fb] text-[color:var(--pastel-chrome-fg)]">
+              <th scope="col" className="w-[4.25rem] px-3 py-3 sm:w-[4.75rem] sm:px-4">
+                <span className="sr-only">{t("notices.col.thumb")}</span>
+              </th>
               <th scope="col" className="w-14 px-3 py-3 text-center text-xs font-semibold tracking-wide sm:w-16 sm:px-4">
                 {t("notices.col.no")}
               </th>
@@ -93,6 +114,16 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
                     openIndex === itemIndex ? "bg-[#f8eedd]/70" : "bg-transparent",
                   )}
                 >
+                  <td className="px-3 py-2.5 align-middle sm:px-4">
+                    <button
+                      type="button"
+                      className="block"
+                      onClick={() => openAt(itemIndex)}
+                      aria-label={t("notices.item", { n })}
+                    >
+                      <NoticeThumb src={notice.image} label={t("notices.col.thumb")} />
+                    </button>
+                  </td>
                   <td className="px-3 py-3 text-center align-middle sm:px-4">
                     <button
                       type="button"
@@ -168,6 +199,16 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
                   <time dateTime={current.publishedAt}>{formatDate(current.publishedAt, locale)}</time>
                 </DialogDescription>
               </DialogHeader>
+              {current.image?.trim() ? (
+                <div className="overflow-hidden rounded-xl border border-[#c4a574]/35 bg-[#f4efe6]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={thumbUrl(current.image)}
+                    alt=""
+                    className="mx-auto max-h-56 w-full object-contain sm:max-h-72"
+                  />
+                </div>
+              ) : null}
               <Prose className="max-w-none">
                 <Paragraphs text={current.body} />
               </Prose>

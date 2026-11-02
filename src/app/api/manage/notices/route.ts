@@ -11,7 +11,14 @@ export async function GET() {
 export async function POST(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
-  const body = (await request.json()) as { title?: string; body?: string; slug?: string; pinned?: boolean };
+  const body = (await request.json()) as {
+    title?: string;
+    body?: string;
+    slug?: string;
+    pinned?: boolean;
+    image?: string;
+    galleryId?: string;
+  };
   const error = validateNotice(body);
   if (error) return NextResponse.json({ ok: false, error }, { status: 400 });
   const notice = await createNotice({
@@ -19,6 +26,8 @@ export async function POST(request: Request) {
     body: body.body!,
     slug: body.slug,
     pinned: body.pinned,
+    image: body.image,
+    galleryId: body.galleryId,
   });
   return NextResponse.json({ ok: true, notice });
 }
@@ -32,6 +41,8 @@ export async function PATCH(request: Request) {
     body?: string;
     pinned?: boolean;
     nextSlug?: string;
+    image?: string;
+    galleryId?: string;
   };
   if (!body.slug) return NextResponse.json({ ok: false, error: "공지가 없습니다." }, { status: 400 });
   const error = validateNotice({ title: body.title, body: body.body, slug: body.nextSlug });
