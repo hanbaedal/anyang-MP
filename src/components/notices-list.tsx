@@ -34,7 +34,16 @@ function summarizeBody(body: string, max = 72) {
   return `${(sp > 40 ? cut.slice(0, sp) : cut).trimEnd()}…`;
 }
 
-export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: string }) {
+export function NoticesList({
+  items,
+  empty,
+  fill = false,
+}: {
+  items: NoticeListItem[];
+  empty: string;
+  /** PC 공지 페이지: 표 영역만 스크롤해 한 뷰포트에 맞춤 */
+  fill?: boolean;
+}) {
   const t = useT();
   const locale = useLocale();
   const [page, setPage] = useState(0);
@@ -64,8 +73,13 @@ export function NoticesList({ items, empty }: { items: NoticeListItem[]; empty: 
   }
 
   return (
-    <div className="space-y-4">
-      <div className="overflow-x-auto rounded-xl border border-[#c4a574]/55 bg-[#fffcf7]">
+    <div className={cn("space-y-4", fill && "flex min-h-0 flex-1 flex-col md:h-full")}>
+      <div
+        className={cn(
+          "overflow-x-auto rounded-xl border border-[#c4a574]/55 bg-[#fffcf7]",
+          fill && "pc-notices-list-scroll",
+        )}
+      >
         <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[#c4a574]/45 bg-[#e8f4fb] text-[color:var(--pastel-chrome-fg)]">

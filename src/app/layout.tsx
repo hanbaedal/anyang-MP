@@ -78,9 +78,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
             >
               <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
-                <div className="flex min-h-full flex-col">
+                {/* PC: h-full로 잔여 뷰포트 전달(공지 한 화면 등). 긴 페이지는 이 스크롤 영역이 담당. */}
+                <div className="flex min-h-full flex-col md:h-full md:min-h-0">
                   <NavSwipe>
-                    <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                    <div className="flex min-h-0 flex-1 flex-col md:h-full">{children}</div>
                   </NavSwipe>
                 </div>
               </div>

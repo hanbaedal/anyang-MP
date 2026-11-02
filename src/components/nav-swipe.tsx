@@ -63,7 +63,7 @@ export function NavSwipe({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="flex min-h-0 flex-1 flex-col">
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="flex min-h-0 flex-1 flex-col md:h-full">
       {children}
       {prev || next ? (
         <nav

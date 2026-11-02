@@ -38,7 +38,7 @@ export function FeaturesPhotoGrid({
         return (
           <article
             key={item.id || item.title || String(index)}
-            className="relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
+            className="pc-viewport-card relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
           >
             {src ? (
               <Image
@@ -60,7 +60,7 @@ export function FeaturesPhotoGrid({
             />
             <div className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/35 to-transparent" aria-hidden />
 
-            <div className="relative z-10 flex min-h-[15.5rem] flex-col justify-center gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:max-w-[85%] md:p-7">
+            <div className="pc-viewport-card-body relative z-10 flex min-h-[15.5rem] flex-col justify-center gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:max-w-[85%] md:p-7">
               <h3 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] sm:text-xl md:text-[1.35rem]">
                 {title}
               </h3>

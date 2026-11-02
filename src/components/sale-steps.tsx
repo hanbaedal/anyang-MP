@@ -47,7 +47,7 @@ export function SaleSteps({
         return (
           <li
             key={`${step.n}-${step.title}`}
-            className="relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
+            className="pc-viewport-card relative isolate min-h-[15.5rem] overflow-hidden rounded-2xl shadow-sm sm:min-h-[17rem] md:min-h-[18.5rem]"
           >
             <Image
               src={src}
@@ -65,7 +65,7 @@ export function SaleSteps({
             />
             <div className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/35 to-transparent" aria-hidden />
 
-            <div className="relative z-10 flex min-h-[15.5rem] flex-col justify-center gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:max-w-[85%] md:p-7">
+            <div className="pc-viewport-card-body relative z-10 flex min-h-[15.5rem] flex-col justify-center gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:max-w-[85%] md:p-7">
               <p className="font-serif text-sm tracking-wide text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)] sm:text-base">
                 {t("step.n", { n: step.n })}
               </p>
