@@ -1,7 +1,7 @@
 import { DirectionsMap } from "@/components/directions-map";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
-import { FEATURES, SITE } from "@/lib/site";
+import { FEATURES } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -37,19 +37,12 @@ export default async function DirectionsPage() {
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <h1 className="sr-only">{t(locale, "dir.title")}</h1>
-      <div className="shrink-0 space-y-1 px-3 py-2 text-sm text-muted-foreground sm:px-4">
-        <p>{SITE.address}</p>
-        <p>
-          <a className="underline-offset-4 hover:underline" href={SITE.phoneTel}>
-            {t(locale, "phone")} : {SITE.phone}
-          </a>
-        </p>
-      </div>
+      {/* AMP-74: 지도 위 · 자가용/버스/택시 카드 아래 · 주소·전화(지도/푸터 중복) 숨김 */}
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-2 pb-2 sm:px-3 md:flex md:flex-col md:overflow-hidden">
-        <FeaturesPhotoGrid className="shrink-0 md:grid-cols-3" dense captionFirstLine items={items} />
         <div className="flex min-h-[12rem] w-full flex-1 flex-col md:min-h-0">
           <DirectionsMap fill />
         </div>
+        <FeaturesPhotoGrid className="shrink-0 md:grid-cols-3" dense captionFirstLine items={items} />
       </div>
     </div>
   );
