@@ -3,12 +3,17 @@ import { GALLERY } from "./content";
 import type { GalleryTag } from "./content";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import { getDb, hasMongo } from "./mongo";
-import { GALLERY_TAGS, type GalleryPhoto } from "./gallery-types";
+import {
+  GALLERY_TAGS,
+  LOTS_GALLERY_TAG,
+  type GalleryPhoto,
+  type LotsGallerySlug,
+} from "./gallery-types";
 import type { Locale } from "./i18n";
 import { CONTENT_LOCALES, localizeStoredText, translateText, type ContentLocale } from "./translate-content";
 
-export type { GalleryPhoto } from "./gallery-types";
-export { GALLERY_TAGS } from "./gallery-types";
+export type { GalleryPhoto, LotsGallerySlug } from "./gallery-types";
+export { GALLERY_TAGS, LOTS_GALLERY_TAG } from "./gallery-types";
 
 const localFile = dataFile("gallery.local.json");
 
@@ -17,6 +22,7 @@ export function defaultGallery(): GalleryPhoto[] {
     id: `seed-${index + 1}`,
     src: item.src,
     alt: item.alt,
+    description: "",
     tags: item.tags,
   }));
 }
@@ -29,6 +35,7 @@ function fromDoc(doc: Record<string, unknown>): GalleryPhoto {
     id: String(doc.id ?? doc._id ?? ""),
     src: String(doc.src ?? ""),
     alt: String(doc.alt ?? ""),
+    description: typeof doc.description === "string" ? doc.description : "",
     tags,
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as GalleryPhoto["i18n"]) : undefined,
   };
@@ -59,19 +66,45 @@ export async function listGalleryLocalized(locale: Locale): Promise<GalleryPhoto
   return (await listGallery()).map((item) => {
     if (locale === "en" || locale === "zh") {
       const alt = item.i18n?.[locale]?.alt || localizeStoredText(item.alt, locale);
-      return { ...item, alt };
+      const description =
+        item.i18n?.[locale]?.description ||
+        (item.description ? localizeStoredText(item.description, locale) : item.description);
+      return { ...item, alt, description };
     }
     return item;
   });
 }
 
-async function fillGalleryAltI18n(alt: string): Promise<GalleryPhoto["i18n"]> {
+/** 분양안내 사진 격자: 갤러리 분류 태그와 일치하는 항목만. 없으면 빈 배열. */
+export async function listLotsPhotosFromGallery(
+  slug: LotsGallerySlug,
+  locale: Locale,
+): Promise<Array<{ id: string; title: string; text?: string; image: string }>> {
+  const tag = LOTS_GALLERY_TAG[slug];
+  const photos = await listGalleryLocalized(locale);
+  return photos
+    .filter((item) => item.tags.includes(tag))
+    .map((item) => ({
+      id: item.id,
+      title: item.alt || tag,
+      text: item.description?.trim() || undefined,
+      image: item.src,
+    }));
+}
+
+async function fillGalleryTextI18n(alt: string, description: string): Promise<GalleryPhoto["i18n"]> {
   const i18n: NonNullable<GalleryPhoto["i18n"]> = {};
   for (const to of CONTENT_LOCALES) {
     try {
-      i18n[to] = { alt: await translateText(alt, to as ContentLocale) };
+      const localeFields: { alt: string; description?: string } = {
+        alt: await translateText(alt, to as ContentLocale),
+      };
+      if (description.trim()) {
+        localeFields.description = await translateText(description, to as ContentLocale);
+      }
+      i18n[to] = localeFields;
     } catch (error) {
-      console.error(`[gallery] translate alt ${to} failed`, error);
+      console.error(`[gallery] translate fields ${to} failed`, error);
     }
   }
   return i18n;
@@ -114,14 +147,21 @@ async function ensureMongoMaterialized(): Promise<void> {
   }
 }
 
-export async function addGalleryPhoto(input: { src: string; alt: string; tags: GalleryTag[] }) {
+export async function addGalleryPhoto(input: {
+  src: string;
+  alt: string;
+  description?: string;
+  tags: GalleryTag[];
+}) {
   const alt = input.alt.trim() || "공원 사진";
+  const description = (input.description ?? "").trim();
   const photo: GalleryPhoto = {
     id: randomUUID(),
     src: input.src,
     alt,
+    description,
     tags: input.tags.length ? input.tags : ["일반"],
-    i18n: await fillGalleryAltI18n(alt),
+    i18n: await fillGalleryTextI18n(alt, description),
   };
 
   if (hasMongo()) {
@@ -173,7 +213,10 @@ export async function addGalleryPhoto(input: { src: string; alt: string; tags: G
   return photo;
 }
 
-export async function updateGalleryPhoto(id: string, input: { alt?: string; tags?: GalleryTag[] }) {
+export async function updateGalleryPhoto(
+  id: string,
+  input: { alt?: string; description?: string; tags?: GalleryTag[] },
+) {
   if (hasMongo()) {
     await ensureMongoMaterialized();
     const db = await getDb();
@@ -184,18 +227,24 @@ export async function updateGalleryPhoto(id: string, input: { alt?: string; tags
 
     const current = fromDoc(existing as Record<string, unknown>);
     const alt = input.alt !== undefined ? input.alt.trim() : current.alt;
-    const altChanged = input.alt !== undefined && alt !== current.alt;
+    const description =
+      input.description !== undefined ? input.description.trim() : (current.description ?? "");
+    const textChanged =
+      (input.alt !== undefined && alt !== current.alt) ||
+      (input.description !== undefined && description !== (current.description ?? ""));
     const next: GalleryPhoto = {
       ...current,
       alt,
+      description,
       tags: input.tags ?? current.tags,
-      i18n: altChanged ? await fillGalleryAltI18n(alt) : current.i18n,
+      i18n: textChanged ? await fillGalleryTextI18n(alt, description) : current.i18n,
     };
     await col.updateOne(
       { id },
       {
         $set: {
           alt: next.alt,
+          description: next.description,
           tags: next.tags,
           i18n: next.i18n,
         },
@@ -208,12 +257,17 @@ export async function updateGalleryPhoto(id: string, input: { alt?: string; tags
   const idx = items.findIndex((item) => item.id === id);
   if (idx < 0) return { ok: false as const, error: "사진을 찾지 못했습니다." };
   const alt = input.alt !== undefined ? input.alt.trim() : items[idx].alt;
-  const altChanged = input.alt !== undefined && alt !== items[idx].alt;
+  const description =
+    input.description !== undefined ? input.description.trim() : (items[idx].description ?? "");
+  const textChanged =
+    (input.alt !== undefined && alt !== items[idx].alt) ||
+    (input.description !== undefined && description !== (items[idx].description ?? ""));
   items[idx] = {
     ...items[idx],
     alt,
+    description,
     tags: input.tags ?? items[idx].tags,
-    i18n: altChanged ? await fillGalleryAltI18n(alt) : items[idx].i18n,
+    i18n: textChanged ? await fillGalleryTextI18n(alt, description) : items[idx].i18n,
   };
   await persistLocal(items);
   return { ok: true as const, photo: items[idx] };

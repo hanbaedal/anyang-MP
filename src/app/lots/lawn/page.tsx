@@ -1,10 +1,12 @@
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { PageHero, Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
-import { LAWN } from "@/lib/content";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { listLotsPhotosFromGallery } from "@/lib/gallery";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const locale = await readLocale();
@@ -13,8 +15,10 @@ export async function generateMetadata() {
 
 export default async function LawnPage() {
   const locale = await readLocale();
-  const cms = await getCmsPageLocalized("lawn", locale);
-  const items = cms.items?.length ? cms.items : LAWN.map((item) => ({ id: item.title, title: item.title, image: item.image }));
+  const [cms, items] = await Promise.all([
+    getCmsPageLocalized("lawn", locale),
+    listLotsPhotosFromGallery("lawn", locale),
+  ]);
   return (
     <>
       <PageHero
@@ -25,7 +29,7 @@ export default async function LawnPage() {
       />
       <div className="mx-auto w-full max-w-7xl px-4 py-12">
         <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
-        <LotsPhotoGrid items={items} layout="detail" />
+        <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
       </div>
     </>
   );

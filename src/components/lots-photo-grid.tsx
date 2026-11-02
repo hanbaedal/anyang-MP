@@ -19,9 +19,22 @@ type Layout = "grid" | "detail";
 /**
  * 분양안내 허브는 작은 격자, 매장·평장·봉안 상세는 한 줄에 큰 사진 좌·우 교차.
  */
-export function LotsPhotoGrid({ items, layout = "grid" }: { items: LotsPhotoItem[]; layout?: Layout }) {
+export function LotsPhotoGrid({
+  items,
+  layout = "grid",
+  emptyLabel,
+}: {
+  items: LotsPhotoItem[];
+  layout?: Layout;
+  /** 갤러리 분류에 사진이 없을 때 안내 문구 */
+  emptyLabel?: string;
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const detail = layout === "detail";
+
+  if (!items.length) {
+    return emptyLabel ? <p className="mt-10 text-sm text-muted-foreground">{emptyLabel}</p> : null;
+  }
 
   const slides = useMemo(
     () =>

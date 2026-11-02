@@ -2,12 +2,13 @@ import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { PageHero, Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
-import { BURIAL, COLUMBARIUM, LAWN } from "@/lib/content";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { listLotsPhotosFromGallery } from "@/lib/gallery";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import type { CmsSlug } from "@/lib/cms-types";
 import type { Locale } from "@/lib/i18n";
+import type { LotsGallerySlug } from "@/lib/gallery-types";
 import type { LotsPhotoItem } from "@/components/lots-photo-grid";
 
 export const dynamic = "force-dynamic";
@@ -20,32 +21,27 @@ export async function generateMetadata() {
 async function lotsSection(
   locale: Locale,
   slug: Extract<CmsSlug, "burial" | "lawn" | "columbarium">,
-  fallbackItems: LotsPhotoItem[],
+  gallerySlug: LotsGallerySlug,
   fallbackBodyKey: string,
 ) {
-  const cms = await getCmsPageLocalized(slug, locale);
-  const items = cms.items?.length ? cms.items : fallbackItems;
+  const [cms, items] = await Promise.all([
+    getCmsPageLocalized(slug, locale),
+    listLotsPhotosFromGallery(gallerySlug, locale),
+  ]);
   return {
     title: cms.title || t(locale, `${slug === "columbarium" ? "col" : slug}.title`),
     body: cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, fallbackBodyKey)}</p>,
-    items,
+    items: items as LotsPhotoItem[],
   };
 }
 
 export default async function LotsHubPage() {
   const locale = await readLocale();
-  const burialFallback = BURIAL.map((item) => ({
-    id: item.title,
-    title: item.title,
-    text: item.caption,
-    image: item.image,
-  }));
-  const lawnFallback = LAWN.map((item) => ({ id: item.title, title: item.title, image: item.image }));
-  const colFallback = COLUMBARIUM.map((item) => ({ id: item.title, title: item.title, image: item.image }));
+  const emptyLabel = t(locale, "lots.galleryEmpty");
   const [burial, lawn, col] = await Promise.all([
-    lotsSection(locale, "burial", burialFallback, "burial.body"),
-    lotsSection(locale, "lawn", lawnFallback, "lawn.body"),
-    lotsSection(locale, "columbarium", colFallback, "col.body"),
+    lotsSection(locale, "burial", "burial", "burial.body"),
+    lotsSection(locale, "lawn", "lawn", "lawn.body"),
+    lotsSection(locale, "columbarium", "columbarium", "col.body"),
   ]);
 
   return (
@@ -59,11 +55,11 @@ export default async function LotsHubPage() {
       <div className="mx-auto w-full max-w-7xl space-y-16 px-4 py-12">
         <MenuHubSection id="burial" title={burial.title} href="/lots/burial" moreLabel={t(locale, "more.detail")}>
           <Prose>{burial.body}</Prose>
-          <LotsPhotoGrid items={burial.items} />
+          <LotsPhotoGrid items={burial.items} emptyLabel={emptyLabel} />
         </MenuHubSection>
         <MenuHubSection id="lawn" title={lawn.title} href="/lots/lawn" moreLabel={t(locale, "more.detail")}>
           <Prose>{lawn.body}</Prose>
-          <LotsPhotoGrid items={lawn.items} />
+          <LotsPhotoGrid items={lawn.items} emptyLabel={emptyLabel} />
         </MenuHubSection>
         <MenuHubSection
           id="columbarium"
@@ -72,7 +68,7 @@ export default async function LotsHubPage() {
           moreLabel={t(locale, "more.detail")}
         >
           <Prose>{col.body}</Prose>
-          <LotsPhotoGrid items={col.items} />
+          <LotsPhotoGrid items={col.items} emptyLabel={emptyLabel} />
         </MenuHubSection>
       </div>
     </>

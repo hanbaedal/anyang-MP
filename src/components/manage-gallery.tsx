@@ -10,6 +10,8 @@ import { thumbUrl } from "@/lib/media";
 
 const field =
   "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const area =
+  "min-h-20 w-full rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function formatMb(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1);
@@ -18,6 +20,7 @@ function formatMb(bytes: number) {
 export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [items, setItems] = useState(initial);
   const [alt, setAlt] = useState("");
+  const [description, setDescription] = useState("");
   const [tags, setTags] = useState<GalleryTag[]>(["일반"]);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -90,6 +93,7 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     const form = new FormData();
     form.set("file", file);
     form.set("alt", alt);
+    form.set("description", description);
     form.set("tags", tags.join(","));
     try {
       const res = await fetch("/api/manage/gallery", { method: "POST", body: form });
@@ -105,10 +109,13 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
         return;
       }
       setAlt("");
+      setDescription("");
       setTags(["일반"]);
       pickFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      setMessage("올렸습니다. 공개 갤러리와 홈페이지 관리(팝업·분양 사진)에서 바로 고를 수 있습니다.");
+      setMessage(
+        "올렸습니다. 분류(매장묘·평장묘·봉안묘) 태그가 분양안내 사진에 바로 반영됩니다.",
+      );
       await refresh();
     } catch {
       setMessage("네트워크 오류로 올리지 못했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
@@ -122,7 +129,12 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     await fetch("/api/manage/gallery", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(item),
+      body: JSON.stringify({
+        id: item.id,
+        alt: item.alt,
+        description: item.description ?? "",
+        tags: item.tags,
+      }),
     });
     await refresh();
     setBusy(false);
@@ -147,7 +159,8 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
       <form onSubmit={onUpload} className="space-y-3 rounded-xl border bg-card p-5">
         <h2 className="font-medium">사진 올리기</h2>
         <p className="text-sm text-muted-foreground">
-          일반 사진은 「일반」 태그를 켜 두세요. 올린 사진은 공개 갤러리와 홈페이지 관리에서 함께 씁니다.
+          「매장묘·평장묘·봉안묘」 태그는 분양안내 해당 페이지 사진을 구동합니다. 「일반」은 공개 갤러리·홈페이지
+          관리에서 함께 씁니다.
         </p>
         <div className="flex flex-wrap items-start gap-4">
           <div className="relative h-28 w-40 shrink-0 overflow-hidden rounded-md border bg-muted">
@@ -188,9 +201,15 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
         </div>
         <input
           className={field}
-          placeholder="설명 (갤러리·관리 화면 제목)"
+          placeholder="제목 (갤러리·분양안내 카드 제목)"
           value={alt}
           onChange={(e) => setAlt(e.target.value)}
+        />
+        <textarea
+          className={area}
+          placeholder="설명 (분양안내 카드 본문·캡션, Enter=줄바꿈)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <div className="flex flex-wrap gap-2 text-sm">
           {GALLERY_TAGS.map((tag) => (
@@ -231,8 +250,19 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
               <img src={thumbUrl(item.src)} alt={item.alt} className="aspect-[4/3] w-full rounded-md object-cover" />
               <input
                 className={field}
+                placeholder="제목"
                 value={item.alt}
                 onChange={(e) => setItems(items.map((row) => (row.id === item.id ? { ...row, alt: e.target.value } : row)))}
+              />
+              <textarea
+                className={area}
+                placeholder="설명 (분양안내 카드 본문)"
+                value={item.description ?? ""}
+                onChange={(e) =>
+                  setItems(
+                    items.map((row) => (row.id === item.id ? { ...row, description: e.target.value } : row)),
+                  )
+                }
               />
               <div className="flex flex-wrap gap-2 text-xs">
                 {GALLERY_TAGS.map((tag) => (
