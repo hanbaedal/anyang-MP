@@ -9,8 +9,7 @@ import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { FEATURES, SITE, pastelCardClass } from "@/lib/site";
-import { cn } from "@/lib/utils";
+import { FEATURES, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -97,14 +96,18 @@ export default async function GuideHubPage() {
     image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
   }));
 
-  const funeralSteps = funeral.items?.length
+  const funeralCards = (funeral.items?.length
     ? funeral.items
     : [
-        { id: "1", title: t(locale, "fun.s1t"), text: t(locale, "fun.s1d", { phone: SITE.phone }) },
-        { id: "2", title: t(locale, "fun.s2t"), text: t(locale, "fun.s2d") },
-        { id: "3", title: t(locale, "fun.s3t"), text: t(locale, "fun.s3d") },
-        { id: "4", title: t(locale, "fun.s4t"), text: t(locale, "fun.s4d") },
-      ];
+        { id: "1", title: t(locale, "fun.s1t"), text: t(locale, "fun.s1d", { phone: SITE.phone }), image: "" },
+        { id: "2", title: t(locale, "fun.s2t"), text: t(locale, "fun.s2d"), image: "" },
+        { id: "3", title: t(locale, "fun.s3t"), text: t(locale, "fun.s3d"), image: "" },
+        { id: "4", title: t(locale, "fun.s4t"), text: t(locale, "fun.s4d"), image: "" },
+      ]
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
 
   return (
     <div className="pc-soft-card-fill mx-auto space-y-16 px-4 py-12">
@@ -143,18 +146,7 @@ export default async function GuideHubPage() {
           moreLabel={t(locale, "more.detail")}
         >
           <div className="space-y-10">
-            <ul className="grid gap-4 md:grid-cols-4">
-              {funeralSteps.map((step, index) => (
-                <li key={step.id || step.title} className={cn("rounded-xl border p-4 shadow-sm", pastelCardClass(index))}>
-                  <h3 className="text-lg">{step.title}</h3>
-                  {step.text ? (
-                    <div className="mt-2 space-y-2 text-sm text-muted-foreground">
-                      <Paragraphs text={step.text} />
-                    </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <FeaturesPhotoGrid items={funeralCards} />
             <FuneralDocList locale={locale} docs={docs} />
             <Prose>
               {funeral.body?.trim() ? <Paragraphs text={funeral.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}

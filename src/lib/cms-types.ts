@@ -51,6 +51,13 @@ export function isCmsSlug(value: string): value is CmsSlug {
 }
 
 /** 제목·설명 항목만 (사진·분양가 없음). */
-export const CMS_TEXT_ITEM_SLUGS: CmsSlug[] = ["funeral"];
-/** 항목마다 갤러리 사진만 연결 (새 업로드 없음). 공원 특징·분양 절차·오시는길·관리비·이용안내 */
-export const CMS_GALLERY_LINK_ITEM_SLUGS: CmsSlug[] = ["features", "procedure", "directions", "fees", "services"];
+export const CMS_TEXT_ITEM_SLUGS: CmsSlug[] = [];
+/** 항목마다 갤러리 사진만 연결 (새 업로드 없음). 특징·절차·오시는길·관리비·이용안내·이용절차 */
+export const CMS_GALLERY_LINK_ITEM_SLUGS: CmsSlug[] = [
+  "features",
+  "procedure",
+  "directions",
+  "fees",
+  "services",
+  "funeral",
+];

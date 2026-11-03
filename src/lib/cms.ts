@@ -175,11 +175,18 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
     title: ko["fun.title"],
     lead: ko["fun.lead"],
     body: ko["fun.more"],
+    // AMP-89: 4단계 카드 + 갤러리 링크 (본문·서류는 카드 아래 유지)
     items: [
-      { id: nid(), title: ko["fun.s1t"], text: ko["fun.s1d"].replace("{phone}", SITE.phone) },
-      { id: nid(), title: ko["fun.s2t"], text: ko["fun.s2d"] },
-      { id: nid(), title: ko["fun.s3t"], text: ko["fun.s3d"] },
-      { id: nid(), title: ko["fun.s4t"], text: ko["fun.s4d"] },
+      {
+        id: nid(),
+        title: ko["fun.s1t"],
+        text: ko["fun.s1d"].replace("{phone}", SITE.phone),
+        image: "",
+        galleryId: "",
+      },
+      { id: nid(), title: ko["fun.s2t"], text: ko["fun.s2d"], image: "", galleryId: "" },
+      { id: nid(), title: ko["fun.s3t"], text: ko["fun.s3d"], image: "", galleryId: "" },
+      { id: nid(), title: ko["fun.s4t"], text: ko["fun.s4d"], image: "", galleryId: "" },
     ],
     updatedAt: now,
   };
@@ -235,6 +242,13 @@ export function servicesNeedsCardMigration(page: CmsPage): boolean {
   if (page.slug !== "services") return false;
   if (!page.items?.some((item) => item.title.trim() || item.text?.trim())) return true;
   if (page.body?.trim()) return true;
+  return page.items.some((item) => item.galleryId === undefined);
+}
+
+/** AMP-89: 이용절차 — 빈 items이거나 galleryId 미정규화 (body는 안내문으로 유지) */
+export function funeralNeedsCardMigration(page: CmsPage): boolean {
+  if (page.slug !== "funeral") return false;
+  if (!page.items?.some((item) => item.title.trim() || item.text?.trim())) return true;
   return page.items.some((item) => item.galleryId === undefined);
 }
 
@@ -302,8 +316,36 @@ export function ensureServicesCardItems(page: CmsPage): CmsPage {
   };
 }
 
+/** AMP-89: 이용절차 → 4 items (갤러리 링크). 본문(추가 안내)은 유지. */
+export function ensureFuneralCardItems(page: CmsPage): CmsPage {
+  if (page.slug !== "funeral") return page;
+  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+    return {
+      ...page,
+      items: page.items.map((item) => ({
+        ...item,
+        id: item.id || nid(),
+        image: String(item.image ?? "").trim(),
+        galleryId: String(item.galleryId ?? "").trim(),
+      })),
+    };
+  }
+  const defaults = defaultCmsPage("funeral").items;
+  return {
+    ...page,
+    items: defaults.map((item) => ({
+      ...item,
+      id: nid(),
+      image: "",
+      galleryId: "",
+    })),
+  };
+}
+
 function applyGalleryCardEnsures(page: CmsPage): CmsPage {
-  return ensureServicesCardItems(ensureFeesCardItems(sanitizeDirectionsPage(page)));
+  return ensureFuneralCardItems(
+    ensureServicesCardItems(ensureFeesCardItems(sanitizeDirectionsPage(page))),
+  );
 }
 
 function fromDocRaw(doc: Record<string, unknown>): CmsPage {
@@ -332,7 +374,10 @@ async function readLocal(): Promise<CmsPage[]> {
 /** AMP-87/88: 메모리만 마이그레이션하면 관리·DB 어긋남 → 디스크/Mongo에 한 번 저장 */
 async function ensureGalleryLinkCardsPersisted(page: CmsPage): Promise<CmsPage> {
   const sanitized = sanitizeDirectionsPage(page);
-  const needsPersist = feesNeedsCardMigration(sanitized) || servicesNeedsCardMigration(sanitized);
+  const needsPersist =
+    feesNeedsCardMigration(sanitized) ||
+    servicesNeedsCardMigration(sanitized) ||
+    funeralNeedsCardMigration(sanitized);
   const migrated = applyGalleryCardEnsures(sanitized);
   if (!needsPersist) return migrated;
   try {

@@ -51,6 +51,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const feesPage = page.slug === "fees";
   const servicesPage = page.slug === "services";
   const hidePageCopy = directionsPage;
+  /** 이용절차는 카드 아래 안내 body·서류 유지 — body 칸 숨기지 않음 */
   const hideBodyField = feesPage || servicesPage;
 
   useEffect(() => {
@@ -298,7 +299,9 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                                 ? `관리비 카드 사진 ${index + 1}`
                                 : page.slug === "services"
                                   ? `이용안내 카드 사진 ${index + 1}`
-                                  : `카드 사진 ${index + 1}`}
+                                  : page.slug === "funeral"
+                                    ? `이용절차 단계 사진 ${index + 1}`
+                                    : `카드 사진 ${index + 1}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {page.slug === "directions"
@@ -307,7 +310,9 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                               ? "카드 4장(부과·납부·연체·변동)에 갤러리 사진을 연결합니다. 새 파일 업로드는 없습니다."
                               : page.slug === "services"
                                 ? "이장·석축·잔디·특별관리·디자인 카드에 갤러리 사진을 연결합니다. 새 파일 업로드는 없습니다."
-                                : "갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다."}
+                                : page.slug === "funeral"
+                                  ? "안치 접수·도착·안치·비석 단계에 갤러리 사진을 연결합니다. 본문·공공서류는 카드 아래에서 편집합니다."
+                                  : "갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다."}
                         </p>
                       </div>
                       {item.image || item.galleryId ? (

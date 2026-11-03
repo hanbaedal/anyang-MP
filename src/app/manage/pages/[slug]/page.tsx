@@ -14,7 +14,7 @@ export default async function ManageCmsPage({ params }: { params: Promise<{ slug
 
   const lead =
     slug === "funeral"
-      ? "절차 카드·안내 문구를 수정하고, 아래에서 공공서류 PDF를 등록합니다. Enter=줄바꿈·빈 줄=문단, 한글 저장 시 영어·중국어 자동 번역."
+      ? "단계 카드(제목·설명·갤러리 사진)와 안내 본문을 수정하고, 아래에서 공공서류 PDF를 등록합니다. 공개는 사진 카드 후 서류·본문이 이어지며 한 화면 강제 스크롤이 없습니다. Enter=줄바꿈·빈 줄=문단, 한글 저장 시 영어·중국어 자동 번역."
       : slug === "greeting"
         ? "제목·본문과 본문 좌측 이미지를 등록합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
         : slug === "features" || slug === "procedure" || slug === "fees" || slug === "services"
