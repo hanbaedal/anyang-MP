@@ -307,7 +307,6 @@
    */
   .pc-procedure-note {
     gap: clamp(0.75rem, 0.55rem + 0.35vw, 1.25rem);
-    padding: clamp(1rem, 0.7rem + 0.55vw, 1.75rem);
     font-size: clamp(1.0625rem, 0.88rem + 0.55vw, 1.5rem);
     line-height: 1.65;
   }
