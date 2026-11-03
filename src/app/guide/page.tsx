@@ -52,9 +52,12 @@ export default async function GuideHubPage() {
         .slice(-2)
     : [t(locale, "proc.account"), t(locale, "proc.twoDays")];
   const procedureNoteAside = (
-    <PastelBox className="flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
+    <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
       {procedureNoteParts.map((block) => (
-        <Prose key={block.slice(0, 48)} className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+        <Prose
+          key={block.slice(0, 48)}
+          className="max-w-none space-y-3 text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]"
+        >
           <Paragraphs text={block} />
         </Prose>
       ))}

@@ -300,6 +300,29 @@
     flex-direction: column;
     overflow: auto;
   }
+
+  /*
+   * AMP-84: 분양절차 5번 옆 안내 Pastel — PC 유체 글자(노트북→4K).
+   * 모바일은 Prose text-[15px] 유지(이 블록은 md+만).
+   */
+  .pc-procedure-note {
+    gap: clamp(0.75rem, 0.55rem + 0.35vw, 1.25rem);
+    padding: clamp(1rem, 0.7rem + 0.55vw, 1.75rem);
+    font-size: clamp(1.0625rem, 0.88rem + 0.55vw, 1.5rem);
+    line-height: 1.65;
+  }
+
+  .pc-procedure-note > div {
+    font-size: inherit;
+    line-height: inherit;
+  }
+}
+
+@media (min-width: 2560px) {
+  .pc-procedure-note {
+    font-size: clamp(1.25rem, 0.85rem + 0.65vw, 1.75rem);
+    line-height: 1.7;
+  }
 }
 
 /* AMP-58/59/60: 공지 목록 — 잔여 높이 + 가로 폭(노트북 +20% · 4K +50% vs 7xl) */

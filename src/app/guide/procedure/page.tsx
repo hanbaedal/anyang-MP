@@ -22,19 +22,22 @@ function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, bod
         .slice(-2)
     : [];
 
+  const proseClass =
+    "max-w-none space-y-3 text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]";
+
   if (fromCms.length) {
     return fromCms.map((block, index) => (
-      <Prose key={`note-${index}`} className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+      <Prose key={`note-${index}`} className={proseClass}>
         <Paragraphs text={block} />
       </Prose>
     ));
   }
 
   return [
-    <Prose key="account" className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+    <Prose key="account" className={proseClass}>
       <p>{t(locale, "proc.account")}</p>
     </Prose>,
-    <Prose key="use-date" className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+    <Prose key="use-date" className={proseClass}>
       <p>{t(locale, "proc.twoDays")}</p>
     </Prose>,
   ];
@@ -51,7 +54,7 @@ export default async function ProcedurePage() {
   }));
 
   const noteAside = (
-    <PastelBox className="flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
+    <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
       {procedureNoteBlocks(locale, cms.body)}
     </PastelBox>
   );
