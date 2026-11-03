@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
 import { uploadOriginalUrl } from "@/lib/media";
+import { FEATURES } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export type FeaturePhotoItem = {
@@ -9,6 +10,9 @@ export type FeaturePhotoItem = {
   text?: string;
   image?: string;
 };
+
+/** 갤러리 미연결 시에도 단색 슬라브가 아니라 공원 사진이 보이게 (AMP-87) */
+const GRID_FALLBACK_IMAGES = FEATURES.map((feature) => feature.image);
 
 /** CMS·복사본에 남을 수 있는 「모억」오기를 「묘역」으로 통일 */
 export function normalizeFeatureCopy(text: string) {
@@ -71,7 +75,8 @@ export function FeaturesPhotoGrid({
         const showTitle = !(hideTitle || captionFirstLine) && Boolean(title);
         const showText = Boolean(text);
         const showCopy = showTitle || showText;
-        const src = item.image?.trim() ? uploadOriginalUrl(item.image) : "";
+        const rawImage = item.image?.trim() || GRID_FALLBACK_IMAGES[index % GRID_FALLBACK_IMAGES.length] || "";
+        const src = rawImage ? uploadOriginalUrl(rawImage) : "";
         const alt = title || text || "photo";
 
         return (

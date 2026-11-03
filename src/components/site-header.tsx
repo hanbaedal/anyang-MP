@@ -27,8 +27,8 @@ export function SiteHeader({
   const chrome = guestPath ? t : tKo;
 
   return (
-    <header className="relative z-40 h-12 shrink-0 border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur lg:h-14">
-      <div className="flex h-full min-w-0 items-center gap-1 px-1 sm:gap-2 sm:px-3">
+    <header className="relative z-50 h-12 shrink-0 overflow-visible border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur lg:h-14">
+      <div className="flex h-full min-w-0 items-center gap-1 overflow-visible px-1 sm:gap-2 sm:px-3">
         <PublicNavSheet role={role} username={username} />
 
         <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">

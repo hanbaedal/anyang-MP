@@ -57,9 +57,9 @@ export function PublicGnb({
     <nav
       ref={rootRef}
       aria-label={chrome("menu")}
-      className={cn("hidden h-full min-w-0 flex-1 items-stretch justify-center lg:flex", className)}
+      className={cn("hidden h-full min-w-0 flex-1 items-stretch justify-center overflow-visible lg:flex", className)}
     >
-      <ul className="flex h-full min-w-0 items-stretch">
+      <ul className="flex h-full min-w-0 items-stretch overflow-visible">
         {items.map((item) => {
           const children = item.children ?? [];
           const hasChildren = children.length > 0;
@@ -74,7 +74,7 @@ export function PublicGnb({
             <li
               key={item.i18n}
               className={cn(
-                "relative flex h-full",
+                "relative flex h-full overflow-visible",
                 "after:absolute after:top-1/2 after:right-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--chrome-border)] last:after:hidden",
               )}
               onMouseEnter={() => hasChildren && setOpenKey(item.i18n)}
@@ -100,15 +100,17 @@ export function PublicGnb({
                   id={panelId}
                   hidden={!open}
                   className={cn(
-                    "absolute top-full left-1/2 z-50 w-max min-w-[8.5rem] -translate-x-1/2 border border-[color:var(--chrome-border)] bg-primary text-primary-foreground shadow-md",
+                    "absolute top-full left-1/2 z-[100] w-max min-w-[9.5rem] -translate-x-1/2 overflow-visible border border-white/35 bg-primary text-primary-foreground shadow-lg",
                     "motion-safe:origin-top motion-safe:transition motion-safe:duration-150",
-                    open ? "motion-safe:scale-y-100 motion-safe:opacity-100" : "pointer-events-none",
+                    open
+                      ? "motion-safe:scale-y-100 motion-safe:opacity-100"
+                      : "pointer-events-none motion-safe:scale-y-95 motion-safe:opacity-0",
                   )}
                 >
-                  {/* AMP-83: 비링크 부모 그룹 제목 */}
+                  {/* AMP-83/87: 비링크 부모 그룹 제목 — 대비·계층 강화 */}
                   <p
                     id={labelId}
-                    className="border-b border-white/30 px-3.5 py-2 font-serif text-[0.8125rem] tracking-wide text-primary-foreground/90 xl:text-sm"
+                    className="border-b border-white/40 bg-[#001a33] px-3.5 py-2.5 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee] xl:text-[0.9375rem]"
                   >
                     {chrome(item.i18n)}
                   </p>

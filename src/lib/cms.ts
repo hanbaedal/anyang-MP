@@ -217,10 +217,16 @@ function sanitizeDirectionsPage(page: CmsPage): CmsPage {
   return { ...page, items, ...(i18n ? { i18n: i18n as CmsPage["i18n"] } : {}) };
 }
 
+/** AMP-86/87: body만 있는 옛 관리비 문서 → 4카드 마이그레이션 대상인지 */
+export function feesNeedsCardMigration(page: CmsPage): boolean {
+  if (page.slug !== "fees") return false;
+  return !page.items?.some((item) => item.title.trim() || item.text?.trim());
+}
+
 /** AMP-86: 예전 body 문단 → 4 items (갤러리 링크). 이미 items면 그대로. */
 export function ensureFeesCardItems(page: CmsPage): CmsPage {
   if (page.slug !== "fees") return page;
-  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+  if (!feesNeedsCardMigration(page)) {
     return { ...page, body: page.items.length ? "" : page.body };
   }
   const blocks = page.body?.trim()
@@ -245,10 +251,10 @@ export function ensureFeesCardItems(page: CmsPage): CmsPage {
   };
 }
 
-function fromDoc(doc: Record<string, unknown>): CmsPage {
+function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
-  const page: CmsPage = {
+  return {
     slug,
     title: currentCmsTitle(slug, String(doc.title ?? "")),
     lead: String(doc.lead ?? ""),
@@ -258,11 +264,29 @@ function fromDoc(doc: Record<string, unknown>): CmsPage {
     ...(bodyImage ? { bodyImage } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   };
-  return ensureFeesCardItems(sanitizeDirectionsPage(page));
+}
+
+function fromDoc(doc: Record<string, unknown>): CmsPage {
+  return ensureFeesCardItems(sanitizeDirectionsPage(fromDocRaw(doc)));
 }
 
 async function readLocal(): Promise<CmsPage[]> {
   return readJsonFile<CmsPage[]>(localFile, []);
+}
+
+/** AMP-87: 메모리만 마이그레이션하면 관리 화면·DB가 어긋남 → 디스크/Mongo에 한 번 저장 */
+async function ensureFeesCardItemsPersisted(page: CmsPage): Promise<CmsPage> {
+  const sanitized = sanitizeDirectionsPage(page);
+  if (!feesNeedsCardMigration(sanitized)) {
+    return ensureFeesCardItems(sanitized);
+  }
+  const migrated = ensureFeesCardItems(sanitized);
+  try {
+    await persistCmsPage(migrated);
+  } catch (error) {
+    console.error("[cms] fees card migration persist failed", error);
+  }
+  return migrated;
 }
 
 export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
@@ -271,7 +295,7 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
       const db = await getDb();
       if (db) {
         const row = await db.collection("cms").findOne({ slug });
-        if (row) return fromDoc(row as Record<string, unknown>);
+        if (row) return ensureFeesCardItemsPersisted(fromDocRaw(row as Record<string, unknown>));
       }
     } catch (error) {
       console.error("[cms] mongo read failed", error);
@@ -280,12 +304,12 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
   const all = await readLocal();
   const found = all.find((item) => item.slug === slug);
   if (!found) return null;
-  return ensureFeesCardItems({ ...found, title: currentCmsTitle(found.slug, found.title) });
+  return ensureFeesCardItemsPersisted({ ...found, title: currentCmsTitle(found.slug, found.title) });
 }
 
 export async function getCmsPageOrDefault(slug: CmsSlug): Promise<CmsPage> {
   const page = (await getCmsPage(slug)) ?? defaultCmsPage(slug);
-  return ensureFeesCardItems(page);
+  return ensureFeesCardItemsPersisted(page);
 }
 
 function cmsLocaleIncomplete(page: CmsPage, locale: ContentLocale) {

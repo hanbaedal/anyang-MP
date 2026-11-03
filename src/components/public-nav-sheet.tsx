@@ -123,8 +123,8 @@ export function PublicNavSheet({ role, username }: { role?: Role | null; usernam
                   </div>
                   {isOpen ? (
                     <div className="border-t border-[color:var(--chrome-border)] bg-primary text-primary-foreground">
-                      {/* AMP-83: 비링크 부모 그룹 제목 */}
-                      <p className="border-b border-white/30 px-5 py-2.5 font-serif text-[0.8125rem] tracking-wide text-primary-foreground/90">
+                      {/* AMP-83/87: 비링크 부모 그룹 제목 — 대비·계층 강화 */}
+                      <p className="border-b border-white/40 bg-[#001a33] px-5 py-3 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee]">
                         {chrome(item.i18n)}
                       </p>
                       <ul>
