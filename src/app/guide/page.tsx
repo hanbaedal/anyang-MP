@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { Prose } from "@/components/page-hero";
