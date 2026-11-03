@@ -1,7 +1,6 @@
-import { Prose } from "@/components/page-hero";
-import { PastelBox } from "@/components/pastel-box";
-import { Paragraphs } from "@/components/paragraphs";
+import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { FEATURES } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -10,29 +9,33 @@ export async function generateMetadata() {
   return { title: t(locale, "fees.title") };
 }
 
+const FEE_FALLBACK = [
+  { titleKey: "fees.c1.title", bodyKey: "fees.p1" },
+  { titleKey: "fees.c2.title", bodyKey: "fees.p2" },
+  { titleKey: "fees.c3.title", bodyKey: "fees.p3" },
+  { titleKey: "fees.c4.title", bodyKey: "fees.p4" },
+] as const;
+
 export default async function FeesPage() {
   const locale = await readLocale();
   const cms = await getCmsPageLocalized("fees", locale);
-  const sections = cms.body?.trim()
-    ? cms.body
-        .replace(/\r\n/g, "\n")
-        .split(/\n{2,}/)
-        .map((block) => block.trim())
-        .filter(Boolean)
-    : [t(locale, "fees.p1"), t(locale, "fees.p2"), t(locale, "fees.p3"), t(locale, "fees.p4")];
+  const items = (cms.items?.length
+    ? cms.items
+    : FEE_FALLBACK.map((row) => ({
+        id: row.titleKey,
+        title: t(locale, row.titleKey),
+        text: t(locale, row.bodyKey),
+        image: "",
+      }))
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
 
   return (
     <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
       <h1 className="sr-only">{cms.title || t(locale, "fees.title")}</h1>
-      <div className="pc-onepage-grow pc-onepage-grid-2 grid gap-4">
-        {sections.map((section) => (
-          <PastelBox key={section.slice(0, 48)} className="pc-onepage-cell">
-            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-              <Paragraphs text={section} />
-            </Prose>
-          </PastelBox>
-        ))}
-      </div>
+      <FeaturesPhotoGrid viewportFill items={items} />
     </div>
   );
 }

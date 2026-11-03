@@ -25,7 +25,7 @@ const GALLERY_TAG_BY_SLUG: Partial<Record<CmsSlug, string>> = {
   lawn: "평장묘",
   columbarium: "봉안묘",
 };
-const BODY_ONLY_SLUGS: CmsSlug[] = ["greeting", "fees"];
+const BODY_ONLY_SLUGS: CmsSlug[] = ["greeting"];
 
 function emptyItem(slug: CmsSlug): CmsItem {
   const id = crypto.randomUUID();
@@ -48,7 +48,9 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const galleryLinkItems = CMS_GALLERY_LINK_ITEM_SLUGS.includes(page.slug);
   const galleryTag = GALLERY_TAG_BY_SLUG[page.slug];
   const directionsPage = page.slug === "directions";
+  const feesPage = page.slug === "fees";
   const hidePageCopy = directionsPage;
+  const hideBodyField = feesPage;
 
   useEffect(() => {
     pageRef.current = page;
@@ -152,10 +154,17 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
               <input className={field} value={page.lead} onChange={(e) => setPage({ ...page, lead: e.target.value })} />
             </label>
           </div>
-          <label className="block space-y-1 text-sm">
-            <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
-            <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
-          </label>
+          {hideBodyField ? (
+            <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+              관리비: 본문 한 칸 대신 아래 <strong>카드 4개</strong>(제목·설명·갤러리 사진)를 편집하세요. 공개는 2×2
+              이미지 카드로 보입니다.
+            </p>
+          ) : (
+            <label className="block space-y-1 text-sm">
+              <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
+              <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
+            </label>
+          )}
         </>
       )}
       {showBodyImage ? (
@@ -275,12 +284,16 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                             ? `단계 사진 ${index + 1}`
                             : page.slug === "directions"
                               ? `교통 카드 사진 ${index + 1}`
-                              : `카드 사진 ${index + 1}`}
+                              : page.slug === "fees"
+                                ? `관리비 카드 사진 ${index + 1}`
+                                : `카드 사진 ${index + 1}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {page.slug === "directions"
                             ? "자가용·버스·택시만 둡니다. 주소 항목은 넣지 마세요(공개 주소는 사이트 설정). 갤러리에서만 고르고, 없으면 기본 공원 사진을 씁니다."
-                            : "갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다."}
+                            : page.slug === "fees"
+                              ? "카드 4장(부과·납부·연체·변동)에 갤러리 사진을 연결합니다. 새 파일 업로드는 없습니다."
+                              : "갤러리에서만 고릅니다. 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다."}
                         </p>
                       </div>
                       {item.image || item.galleryId ? (

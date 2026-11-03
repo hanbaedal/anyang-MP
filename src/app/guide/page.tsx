@@ -1,3 +1,4 @@
+import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { Prose } from "@/components/page-hero";
@@ -8,7 +9,7 @@ import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { SITE, pastelCardClass } from "@/lib/site";
+import { FEATURES, SITE, pastelCardClass } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -64,13 +65,24 @@ export default async function GuideHubPage() {
     </PastelBox>
   );
 
-  const feeSections = fees.body?.trim()
-    ? fees.body
-        .replace(/\r\n/g, "\n")
-        .split(/\n{2,}/)
-        .map((block) => block.trim())
-        .filter(Boolean)
-    : [t(locale, "fees.p1"), t(locale, "fees.p2"), t(locale, "fees.p3"), t(locale, "fees.p4")];
+  const feeCardFallback = [
+    { titleKey: "fees.c1.title", bodyKey: "fees.p1" },
+    { titleKey: "fees.c2.title", bodyKey: "fees.p2" },
+    { titleKey: "fees.c3.title", bodyKey: "fees.p3" },
+    { titleKey: "fees.c4.title", bodyKey: "fees.p4" },
+  ] as const;
+  const feeCards = (fees.items?.length
+    ? fees.items
+    : feeCardFallback.map((row) => ({
+        id: row.titleKey,
+        title: t(locale, row.titleKey),
+        text: t(locale, row.bodyKey),
+        image: "",
+      }))
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
 
   const serviceItems = services.items?.length
     ? services.items.map((item) => ({ id: item.id, title: item.title, text: item.text || "" }))
@@ -107,15 +119,7 @@ export default async function GuideHubPage() {
           href="/guide/fees"
           moreLabel={t(locale, "more.detail")}
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            {feeSections.map((section) => (
-              <PastelBox key={section.slice(0, 48)}>
-                <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-                  <Paragraphs text={section} />
-                </Prose>
-              </PastelBox>
-            ))}
-          </div>
+          <FeaturesPhotoGrid items={feeCards} />
         </MenuHubSection>
 
         <MenuHubSection

@@ -136,8 +136,14 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
       slug,
       title: ko["fees.title"],
       lead: ko["fees.lead"],
-      body: [ko["fees.p1"], ko["fees.p2"], ko["fees.p3"], ko["fees.p4"]].join("\n\n"),
-      items: [],
+      body: "",
+      // AMP-86: 4카드 items + 갤러리 링크 (본문 1칸 폐기)
+      items: [
+        { id: nid(), title: ko["fees.c1.title"], text: ko["fees.p1"], image: "", galleryId: "" },
+        { id: nid(), title: ko["fees.c2.title"], text: ko["fees.p2"], image: "", galleryId: "" },
+        { id: nid(), title: ko["fees.c3.title"], text: ko["fees.p3"], image: "", galleryId: "" },
+        { id: nid(), title: ko["fees.c4.title"], text: ko["fees.p4"], image: "", galleryId: "" },
+      ],
       updatedAt: now,
     };
   }
@@ -211,6 +217,34 @@ function sanitizeDirectionsPage(page: CmsPage): CmsPage {
   return { ...page, items, ...(i18n ? { i18n: i18n as CmsPage["i18n"] } : {}) };
 }
 
+/** AMP-86: 예전 body 문단 → 4 items (갤러리 링크). 이미 items면 그대로. */
+export function ensureFeesCardItems(page: CmsPage): CmsPage {
+  if (page.slug !== "fees") return page;
+  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+    return { ...page, body: page.items.length ? "" : page.body };
+  }
+  const blocks = page.body?.trim()
+    ? page.body
+        .replace(/\r\n/g, "\n")
+        .split(/\n{2,}/)
+        .map((block) => block.trim())
+        .filter(Boolean)
+    : [];
+  const titles = [ko["fees.c1.title"], ko["fees.c2.title"], ko["fees.c3.title"], ko["fees.c4.title"]];
+  const texts = [ko["fees.p1"], ko["fees.p2"], ko["fees.p3"], ko["fees.p4"]];
+  return {
+    ...page,
+    body: "",
+    items: titles.map((title, index) => ({
+      id: nid(),
+      title,
+      text: blocks[index] || texts[index] || "",
+      image: "",
+      galleryId: "",
+    })),
+  };
+}
+
 function fromDoc(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
@@ -224,7 +258,7 @@ function fromDoc(doc: Record<string, unknown>): CmsPage {
     ...(bodyImage ? { bodyImage } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   };
-  return sanitizeDirectionsPage(page);
+  return ensureFeesCardItems(sanitizeDirectionsPage(page));
 }
 
 async function readLocal(): Promise<CmsPage[]> {
@@ -246,11 +280,12 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
   const all = await readLocal();
   const found = all.find((item) => item.slug === slug);
   if (!found) return null;
-  return { ...found, title: currentCmsTitle(found.slug, found.title) };
+  return ensureFeesCardItems({ ...found, title: currentCmsTitle(found.slug, found.title) });
 }
 
 export async function getCmsPageOrDefault(slug: CmsSlug): Promise<CmsPage> {
-  return (await getCmsPage(slug)) ?? defaultCmsPage(slug);
+  const page = (await getCmsPage(slug)) ?? defaultCmsPage(slug);
+  return ensureFeesCardItems(page);
 }
 
 function cmsLocaleIncomplete(page: CmsPage, locale: ContentLocale) {
