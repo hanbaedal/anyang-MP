@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
 import { SALE_STEPS, FEATURES } from "@/lib/site";
@@ -15,13 +16,15 @@ function fallbackImage(index: number) {
 
 /**
  * 분양 절차 — 2열·소프트 오버레이.
- * AMP-77 폭/aspect · AMP-79 `viewportFill` 시 PC 잔여 높이 균등 분할(aspect 완화).
+ * AMP-77 폭/aspect · AMP-79 `viewportFill` · AMP-81 `aside` = 5번 옆(6번째 셀).
  */
 export function SaleSteps({
   compact = false,
   steps,
   className,
   viewportFill = false,
+  /** PC: 5번째 카드 우측 칸 · 모바일: 카드 아래 스택 */
+  aside = null,
 }: {
   compact?: boolean;
   /** CMS에서 넘긴 단계. 없으면 i18n 기본 5단계 */
@@ -29,6 +32,7 @@ export function SaleSteps({
   className?: string;
   /** PC 한 화면 fill (이용안내 하위) */
   viewportFill?: boolean;
+  aside?: ReactNode;
 }) {
   const t = useT();
   const rows: SaleStepView[] =
@@ -83,7 +87,7 @@ export function SaleSteps({
               className={cn(
                 "pc-viewport-card-body relative z-10 flex flex-col justify-center gap-2.5 p-5 sm:p-6 md:max-w-[85%] md:p-7",
                 viewportFill
-                  ? "min-h-[12rem] sm:min-h-[13rem] md:min-h-0 md:h-full"
+                  ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
               )}
             >
@@ -102,6 +106,18 @@ export function SaleSteps({
           </li>
         );
       })}
+      {aside ? (
+        <li
+          className={cn(
+            "list-none",
+            viewportFill
+              ? "pc-onepage-cell min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
+              : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
+          )}
+        >
+          {aside}
+        </li>
+      ) : null}
     </ol>
   );
 }

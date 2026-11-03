@@ -43,42 +43,24 @@ export default async function GuideHubPage() {
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
   }));
-  const noteBoxes = procedure.body?.trim()
+  /** AMP-81: 5번 옆 칸 — CMS body 끝 2블록 · 기본 계좌·2일 전 */
+  const procedureNoteParts = procedure.body?.trim()
     ? procedure.body
         .replace(/\r\n/g, "\n")
         .split(/\n{2,}/)
         .map((block) => block.trim())
         .filter(Boolean)
-        .map((block) => (
-          <PastelBox key={block.slice(0, 48)}>
-            <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-              <Paragraphs text={block} />
-            </Prose>
-          </PastelBox>
-        ))
-    : [
-        <PastelBox key="consult">
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <p>
-              {t(locale, "proc.consult")}{" "}
-              <Link href="/support/inquiry" className="underline-offset-4 hover:underline">
-                {t(locale, "proc.form")}
-              </Link>
-              {t(locale, "proc.consultEnd")}
-            </p>
-          </Prose>
-        </PastelBox>,
-        <PastelBox key="account">
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <p>{t(locale, "proc.account")}</p>
-          </Prose>
-        </PastelBox>,
-        <PastelBox key="use-date">
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <p>{t(locale, "proc.twoDays")}</p>
-          </Prose>
-        </PastelBox>,
-      ];
+        .slice(-2)
+    : [t(locale, "proc.account"), t(locale, "proc.twoDays")];
+  const procedureNoteAside = (
+    <PastelBox className="flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
+      {procedureNoteParts.map((block) => (
+        <Prose key={block.slice(0, 48)} className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+          <Paragraphs text={block} />
+        </Prose>
+      ))}
+    </PastelBox>
+  );
 
   const feeSections = fees.body?.trim()
     ? fees.body
@@ -114,10 +96,7 @@ export default async function GuideHubPage() {
           href="/guide/procedure"
           moreLabel={t(locale, "more.detail")}
         >
-          <div className="space-y-10">
-            <SaleSteps steps={steps.length ? steps : undefined} />
-            <div className="grid gap-4 sm:grid-cols-2">{noteBoxes}</div>
-          </div>
+          <SaleSteps steps={steps.length ? steps : undefined} aside={procedureNoteAside} />
         </MenuHubSection>
 
         <MenuHubSection
