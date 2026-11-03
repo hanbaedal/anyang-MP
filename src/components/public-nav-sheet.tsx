@@ -122,25 +122,31 @@ export function PublicNavSheet({ role, username }: { role?: Role | null; usernam
                     </button>
                   </div>
                   {isOpen ? (
-                    <ul className="border-t border-[color:var(--chrome-border)] bg-primary text-primary-foreground">
-                      {children.map((child) => {
-                        const active = isNavActive(pathname, child.href);
-                        return (
-                          <li key={child.href} className="border-b border-white/25 last:border-b-0">
-                            <Link
-                              href={child.href}
-                              className={cn(
-                                "block px-5 py-3 text-[14px] hover:bg-white/10",
-                                active && "bg-white/15 font-medium",
-                              )}
-                              onClick={() => setOpen(false)}
-                            >
-                              {chrome(child.i18n)}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    <div className="border-t border-[color:var(--chrome-border)] bg-primary text-primary-foreground">
+                      {/* AMP-83: 비링크 부모 그룹 제목 */}
+                      <p className="border-b border-white/30 px-5 py-2.5 font-serif text-[0.8125rem] tracking-wide text-primary-foreground/90">
+                        {chrome(item.i18n)}
+                      </p>
+                      <ul>
+                        {children.map((child) => {
+                          const active = isNavActive(pathname, child.href);
+                          return (
+                            <li key={child.href} className="border-b border-white/25 last:border-b-0">
+                              <Link
+                                href={child.href}
+                                className={cn(
+                                  "block px-5 py-3.5 text-[15px] leading-snug text-primary-foreground hover:bg-white/15",
+                                  active && "bg-white/20 font-medium",
+                                )}
+                                onClick={() => setOpen(false)}
+                              >
+                                {chrome(child.i18n)}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   ) : null}
                 </li>
               );

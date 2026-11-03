@@ -10,7 +10,7 @@ import { isGuestLocalePath, tKo } from "@/lib/i18n";
 import { isNavActive } from "@/components/nav-tree";
 import type { Role } from "@/lib/auth-types";
 
-/** PC 헤더 가로 GNB + 좁은 세로 드롭다운 (시안형 패턴, 안양 브랜드 토큰) */
+/** PC 헤더 가로 GNB + 좁은 세로 드롭다운 (시안형 · AMP-83 그룹 제목) */
 export function PublicGnb({
   className,
   role,
@@ -68,6 +68,7 @@ export function PublicGnb({
             isNavActive(pathname, item.href) ||
             children.some((child) => isNavActive(pathname, child.href));
           const panelId = `${baseId}-${item.i18n}`;
+          const labelId = `${panelId}-label`;
 
           return (
             <li
@@ -95,35 +96,43 @@ export function PublicGnb({
               </Link>
 
               {hasChildren ? (
-                <ul
+                <div
                   id={panelId}
-                  role="menu"
                   hidden={!open}
                   className={cn(
-                    "absolute top-full left-1/2 z-50 w-max min-w-full -translate-x-1/2 border border-[color:var(--chrome-border)] bg-primary text-primary-foreground shadow-md",
+                    "absolute top-full left-1/2 z-50 w-max min-w-[8.5rem] -translate-x-1/2 border border-[color:var(--chrome-border)] bg-primary text-primary-foreground shadow-md",
                     "motion-safe:origin-top motion-safe:transition motion-safe:duration-150",
                     open ? "motion-safe:scale-y-100 motion-safe:opacity-100" : "pointer-events-none",
                   )}
                 >
-                  {children.map((child) => {
-                    const active = isNavActive(pathname, child.href);
-                    return (
-                      <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
-                        <Link
-                          role="menuitem"
-                          href={child.href}
-                          className={cn(
-                            "block px-3 py-2.5 text-center text-[0.875rem] whitespace-nowrap transition-colors hover:bg-white/15 xl:text-[0.9375rem]",
-                            active && "bg-white/20 font-medium",
-                          )}
-                          onClick={() => setOpenKey(null)}
-                        >
-                          {chrome(child.i18n)}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
+                  {/* AMP-83: 비링크 부모 그룹 제목 */}
+                  <p
+                    id={labelId}
+                    className="border-b border-white/30 px-3.5 py-2 font-serif text-[0.8125rem] tracking-wide text-primary-foreground/90 xl:text-sm"
+                  >
+                    {chrome(item.i18n)}
+                  </p>
+                  <ul role="menu" aria-labelledby={labelId}>
+                    {children.map((child) => {
+                      const active = isNavActive(pathname, child.href);
+                      return (
+                        <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
+                          <Link
+                            role="menuitem"
+                            href={child.href}
+                            className={cn(
+                              "block px-3.5 py-3 text-left text-[0.9375rem] leading-snug whitespace-nowrap text-primary-foreground transition-colors hover:bg-white/15 xl:text-base",
+                              active && "bg-white/20 font-medium",
+                            )}
+                            onClick={() => setOpenKey(null)}
+                          >
+                            {chrome(child.i18n)}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               ) : null}
             </li>
           );
