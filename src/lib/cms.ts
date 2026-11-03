@@ -153,12 +153,19 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
       title: ko["svc.title"],
       lead: ko["svc.lead"],
       body: "",
+      // AMP-88: 5카드 items + 갤러리 링크 (fees형)
       items: [
-        { id: nid(), title: ko["svc.reloc.title"], text: [ko["svc.reloc.p1"], ko["svc.reloc.p2"]].join("\n\n") },
-        { id: nid(), title: ko["svc.stone.title"], text: ko["svc.stone.p1"] },
-        { id: nid(), title: ko["svc.turf.title"], text: ko["svc.turf.p1"] },
-        { id: nid(), title: ko["svc.weed.title"], text: ko["svc.weed.p1"] },
-        { id: nid(), title: ko["svc.design.title"], text: ko["svc.design.p1"] },
+        {
+          id: nid(),
+          title: ko["svc.reloc.title"],
+          text: [ko["svc.reloc.p1"], ko["svc.reloc.p2"]].join("\n\n"),
+          image: "",
+          galleryId: "",
+        },
+        { id: nid(), title: ko["svc.stone.title"], text: ko["svc.stone.p1"], image: "", galleryId: "" },
+        { id: nid(), title: ko["svc.turf.title"], text: ko["svc.turf.p1"], image: "", galleryId: "" },
+        { id: nid(), title: ko["svc.weed.title"], text: ko["svc.weed.p1"], image: "", galleryId: "" },
+        { id: nid(), title: ko["svc.design.title"], text: ko["svc.design.p1"], image: "", galleryId: "" },
       ],
       updatedAt: now,
     };
@@ -223,6 +230,14 @@ export function feesNeedsCardMigration(page: CmsPage): boolean {
   return !page.items?.some((item) => item.title.trim() || item.text?.trim());
 }
 
+/** AMP-88: 이용안내 — 빈 items이거나 galleryId 미정규화·잔여 body */
+export function servicesNeedsCardMigration(page: CmsPage): boolean {
+  if (page.slug !== "services") return false;
+  if (!page.items?.some((item) => item.title.trim() || item.text?.trim())) return true;
+  if (page.body?.trim()) return true;
+  return page.items.some((item) => item.galleryId === undefined);
+}
+
 /** AMP-86: 예전 body 문단 → 4 items (갤러리 링크). 이미 items면 그대로. */
 export function ensureFeesCardItems(page: CmsPage): CmsPage {
   if (page.slug !== "fees") return page;
@@ -251,6 +266,46 @@ export function ensureFeesCardItems(page: CmsPage): CmsPage {
   };
 }
 
+/** AMP-88: 이용안내 → 5 items (갤러리 링크). 기존 제목·설명 유지. */
+export function ensureServicesCardItems(page: CmsPage): CmsPage {
+  if (page.slug !== "services") return page;
+  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+    return {
+      ...page,
+      body: "",
+      items: page.items.map((item) => ({
+        ...item,
+        id: item.id || nid(),
+        image: String(item.image ?? "").trim(),
+        galleryId: String(item.galleryId ?? "").trim(),
+      })),
+    };
+  }
+  const defaults = defaultCmsPage("services").items;
+  const blocks = page.body?.trim()
+    ? page.body
+        .replace(/\r\n/g, "\n")
+        .split(/\n{2,}/)
+        .map((block) => block.trim())
+        .filter(Boolean)
+    : [];
+  return {
+    ...page,
+    body: "",
+    items: defaults.map((item, index) => ({
+      ...item,
+      id: nid(),
+      text: blocks[index] || item.text || "",
+      image: "",
+      galleryId: "",
+    })),
+  };
+}
+
+function applyGalleryCardEnsures(page: CmsPage): CmsPage {
+  return ensureServicesCardItems(ensureFeesCardItems(sanitizeDirectionsPage(page)));
+}
+
 function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
@@ -267,24 +322,23 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
 }
 
 function fromDoc(doc: Record<string, unknown>): CmsPage {
-  return ensureFeesCardItems(sanitizeDirectionsPage(fromDocRaw(doc)));
+  return applyGalleryCardEnsures(fromDocRaw(doc));
 }
 
 async function readLocal(): Promise<CmsPage[]> {
   return readJsonFile<CmsPage[]>(localFile, []);
 }
 
-/** AMP-87: 메모리만 마이그레이션하면 관리 화면·DB가 어긋남 → 디스크/Mongo에 한 번 저장 */
-async function ensureFeesCardItemsPersisted(page: CmsPage): Promise<CmsPage> {
+/** AMP-87/88: 메모리만 마이그레이션하면 관리·DB 어긋남 → 디스크/Mongo에 한 번 저장 */
+async function ensureGalleryLinkCardsPersisted(page: CmsPage): Promise<CmsPage> {
   const sanitized = sanitizeDirectionsPage(page);
-  if (!feesNeedsCardMigration(sanitized)) {
-    return ensureFeesCardItems(sanitized);
-  }
-  const migrated = ensureFeesCardItems(sanitized);
+  const needsPersist = feesNeedsCardMigration(sanitized) || servicesNeedsCardMigration(sanitized);
+  const migrated = applyGalleryCardEnsures(sanitized);
+  if (!needsPersist) return migrated;
   try {
     await persistCmsPage(migrated);
   } catch (error) {
-    console.error("[cms] fees card migration persist failed", error);
+    console.error("[cms] gallery-link card migration persist failed", error);
   }
   return migrated;
 }
@@ -295,7 +349,7 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
       const db = await getDb();
       if (db) {
         const row = await db.collection("cms").findOne({ slug });
-        if (row) return ensureFeesCardItemsPersisted(fromDocRaw(row as Record<string, unknown>));
+        if (row) return ensureGalleryLinkCardsPersisted(fromDocRaw(row as Record<string, unknown>));
       }
     } catch (error) {
       console.error("[cms] mongo read failed", error);
@@ -304,12 +358,12 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
   const all = await readLocal();
   const found = all.find((item) => item.slug === slug);
   if (!found) return null;
-  return ensureFeesCardItemsPersisted({ ...found, title: currentCmsTitle(found.slug, found.title) });
+  return ensureGalleryLinkCardsPersisted({ ...found, title: currentCmsTitle(found.slug, found.title) });
 }
 
 export async function getCmsPageOrDefault(slug: CmsSlug): Promise<CmsPage> {
   const page = (await getCmsPage(slug)) ?? defaultCmsPage(slug);
-  return ensureFeesCardItemsPersisted(page);
+  return ensureGalleryLinkCardsPersisted(page);
 }
 
 function cmsLocaleIncomplete(page: CmsPage, locale: ContentLocale) {

@@ -84,13 +84,18 @@ export default async function GuideHubPage() {
     image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
   }));
 
-  const serviceItems = services.items?.length
-    ? services.items.map((item) => ({ id: item.id, title: item.title, text: item.text || "" }))
+  const serviceCards = (services.items?.length
+    ? services.items
     : SERVICE_FALLBACK.map((service) => ({
         id: service.title,
         title: t(locale, service.title),
         text: service.bodies.map((key) => t(locale, key)).join("\n"),
-      }));
+        image: "",
+      }))
+  ).map((item, index) => ({
+    ...item,
+    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+  }));
 
   const funeralSteps = funeral.items?.length
     ? funeral.items
@@ -128,21 +133,7 @@ export default async function GuideHubPage() {
           href="/guide/services"
           moreLabel={t(locale, "more.detail")}
         >
-          <div className="space-y-6">
-            {serviceItems.map((service, index) => (
-              <article
-                key={service.id || service.title}
-                className={cn("rounded-xl border p-6 shadow-sm", pastelCardClass(index))}
-              >
-                <h3 className="text-xl">{service.title}</h3>
-                {service.text ? (
-                  <div className="mt-3 space-y-3 text-[15px] leading-7 text-muted-foreground">
-                    <Paragraphs text={service.text} />
-                  </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
+          <FeaturesPhotoGrid items={serviceCards} />
         </MenuHubSection>
 
         <MenuHubSection

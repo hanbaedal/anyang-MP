@@ -17,7 +17,7 @@ export default async function ManageCmsPage({ params }: { params: Promise<{ slug
       ? "절차 카드·안내 문구를 수정하고, 아래에서 공공서류 PDF를 등록합니다. Enter=줄바꿈·빈 줄=문단, 한글 저장 시 영어·중국어 자동 번역."
       : slug === "greeting"
         ? "제목·본문과 본문 좌측 이미지를 등록합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-        : slug === "features" || slug === "procedure" || slug === "fees"
+        : slug === "features" || slug === "procedure" || slug === "fees" || slug === "services"
           ? "제목·설명과 카드 사진을 수정합니다. 사진은 갤러리에 있는 것만 고르며, 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 기본 공원 사진을 씁니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
           : ["burial", "lawn", "columbarium"].includes(slug)
             ? "제목·요약·본문만 수정합니다. 사진은 갤러리에서 해당 태그(매장묘·평장묘·봉안묘)를 붙여 올립니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
