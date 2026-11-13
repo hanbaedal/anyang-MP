@@ -10,7 +10,7 @@ export async function SiteFooter() {
 
   return (
     <>
-      <footer className="relative z-30 shrink-0 border-t border-transparent bg-transparent pb-[env(safe-area-inset-bottom)] text-xs leading-snug text-[color:var(--pastel-chrome-fg)] md:text-base md:leading-snug">
+      <footer className="relative z-10 mt-auto shrink-0 border-t border-transparent bg-transparent pb-[env(safe-area-inset-bottom)] text-xs leading-snug text-[color:var(--pastel-chrome-fg)] md:text-base md:leading-snug">
         <div className="flex items-center justify-between gap-2 px-3 py-2 sm:px-5 md:px-5 md:py-3">
           <div className="min-w-0 text-left leading-snug">
             <p className="font-serif text-sm leading-tight md:text-lg">{t(uiLocale, "site.legalName")}</p>
