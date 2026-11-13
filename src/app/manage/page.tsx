@@ -8,7 +8,7 @@ import { manageNavItems } from "@/lib/manage-nav";
 const CARD_COPY: Record<string, { title: string; lead: string }> = {
   "manage.homeSlides": {
     title: "메인 이미지 등록",
-    lead: "홈 전경 슬라이드 사진을 올립니다. 없으면 05.jpg 한 장이 보입니다.",
+    lead: "갤러리에서 고른 순서대로 홈 슬라이드. 없으면 05.jpg.",
   },
   "manage.homeHero": {
     title: "메인 영상·음악",

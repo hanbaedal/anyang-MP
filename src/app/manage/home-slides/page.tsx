@@ -9,7 +9,7 @@ export default async function ManageHomeSlidesPage() {
       <PageHero
         kicker="관리"
         title="메인 이미지 등록"
-        lead="홈 전경 슬라이드 사진을 올립니다. 등록이 없으면 홈에는 기존 5번째 이미지(05.jpg) 한 장이 보입니다."
+        lead="갤러리 사진을 클릭한 순서로 홈 전경 슬라이드에 올립니다. 선택이 없으면 05.jpg 한 장이 보입니다."
       />
       <ManageHomeSlides initial={settings} />
     </>
