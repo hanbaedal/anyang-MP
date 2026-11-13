@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useT } from "@/components/locale-provider";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type ViewSlide = { src: string; alt: string };
@@ -10,8 +8,13 @@ export type ViewSlide = { src: string; alt: string };
 const INTERVAL_MS = 3000;
 const TRANSITION_MS = 700;
 
-const navBtn =
-  "pointer-events-auto absolute top-1/2 z-[6] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 backdrop-blur-sm hover:bg-black/60 sm:size-12";
+/** 클론 포함 허용 구간 [0, n+1] → 실장 1…n */
+function clampTrackPos(pos: number, n: number) {
+  if (n < 2) return 0;
+  if (pos < 0) return 0;
+  if (pos > n + 1) return n + 1;
+  return pos;
+}
 
 function clampRealPos(pos: number, n: number) {
   if (n < 2) return 0;
@@ -23,10 +26,9 @@ function clampRealPos(pos: number, n: number) {
 /**
  * 홈 인트로 정적 전경 슬라이드 — 3초마다 왼쪽 전환.
  * 끝↔처음은 클론 트랙으로 끊김 없이 루프.
- * AMP-91: 탭 복귀 시 스냅·타이머·이미지 재도장. 호버 정지 없음. reduced-motion·모달 pause만.
+ * AMP-91: 탭 복귀 스냅·재도장. AMP-94: 화살표 제거 · pos 가드로 남색 공백 방지.
  */
 export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]; paused?: boolean }) {
-  const t = useT();
   const n = photos.length;
   // track: [clone last, ...photos, clone first] → real slides at positions 1..n
   const [pos, setPos] = useState(1);
@@ -36,16 +38,8 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   /** 복귀 시 img 리마운트 — GPU/디코드 공백(남색) 복구 */
   const [paintKey, setPaintKey] = useState(0);
   const jumping = useRef(false);
-
-  const go = useCallback(
-    (delta: number) => {
-      if (n < 2 || jumping.current) return;
-      setAnimating(true);
-      setPos((prev) => prev + delta);
-      setResumeKey((k) => k + 1);
-    },
-    [n],
-  );
+  /** 전환 중 추가 +1 금지 — 클론 밖으로 나가지 않게 */
+  const advanceLocked = useRef(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -61,12 +55,23 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     if (autoPaused || n < 2) return;
     if (typeof document !== "undefined" && document.hidden) return;
     const timer = window.setInterval(() => {
-      if (jumping.current || document.hidden) return;
+      if (jumping.current || advanceLocked.current || document.hidden) return;
+      advanceLocked.current = true;
       setAnimating(true);
-      setPos((prev) => prev + 1);
+      setPos((prev) => clampTrackPos(prev + 1, n));
     }, INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [autoPaused, n, resumeKey]);
+
+  /** AMP-94: 트랙 밖 pos면 즉시 실장 스냅 (남색 공백 방지) */
+  useEffect(() => {
+    if (n < 2) return;
+    if (pos >= 0 && pos <= n + 1) return;
+    jumping.current = false;
+    advanceLocked.current = false;
+    setAnimating(false);
+    setPos(clampRealPos(pos, n));
+  }, [pos, n]);
 
   /** AMP-91: 숨김 시 즉시 스냅 · 복귀 시 스냅 + 타이머·이미지 재도장 */
   useEffect(() => {
@@ -74,12 +79,14 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
 
     function onHidden() {
       jumping.current = false;
+      advanceLocked.current = false;
       setAnimating(false);
       setPos((prev) => clampRealPos(prev, n));
     }
 
     function onVisible() {
       jumping.current = false;
+      advanceLocked.current = false;
       setAnimating(false);
       setPos((prev) => clampRealPos(prev, n));
       setPaintKey((k) => k + 1);
@@ -105,50 +112,41 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     };
   }, [n]);
 
-  useEffect(() => {
-    if (paused || n < 2) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        go(-1);
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        go(1);
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [paused, n, go]);
-
   function onTransitionEnd() {
     if (n < 2) return;
-    if (pos === n + 1) {
+    if (pos >= n + 1) {
       jumping.current = true;
       setAnimating(false);
       setPos(1);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           jumping.current = false;
+          advanceLocked.current = false;
         });
       });
-    } else if (pos === 0) {
+      return;
+    }
+    if (pos <= 0) {
       jumping.current = true;
       setAnimating(false);
       setPos(n);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           jumping.current = false;
+          advanceLocked.current = false;
         });
       });
+      return;
     }
+    advanceLocked.current = false;
   }
 
   if (!n) return null;
 
   const trackCount = n < 2 ? n : n + 2;
   const track = n < 2 ? photos : [photos[n - 1], ...photos, photos[0]];
-  const showPos = n < 2 ? 0 : reduceMotion ? 1 : pos;
-  const showNav = n > 1 && !paused;
+  const rawPos = n < 2 ? 0 : reduceMotion ? 1 : pos;
+  const showPos = n < 2 ? 0 : clampTrackPos(rawPos, n);
 
   return (
     <div className="absolute inset-0 z-[5]">
@@ -187,26 +185,6 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
       </div>
       {/* AMP-92: +20% — from/75→/55, via/20→/12 (의견서) */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/12 to-transparent" />
-      {showNav ? (
-        <>
-          <button
-            type="button"
-            className={cn(navBtn, "left-2 sm:left-4")}
-            aria-label={t("home.slidePrev")}
-            onClick={() => go(-1)}
-          >
-            <ChevronLeft className="size-6 sm:size-7" aria-hidden />
-          </button>
-          <button
-            type="button"
-            className={cn(navBtn, "right-2 sm:right-4")}
-            aria-label={t("home.slideNext")}
-            onClick={() => go(1)}
-          >
-            <ChevronRight className="size-6 sm:size-7" aria-hidden />
-          </button>
-        </>
-      ) : null}
     </div>
   );
 }
