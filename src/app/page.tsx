@@ -2,12 +2,15 @@ import { preload } from "react-dom";
 import { HomeIntro } from "@/components/home-intro";
 import { SiteAnnouncements } from "@/components/site-announcements";
 import { getHomeHeroSettings } from "@/lib/home-hero";
-import { INTRO_VIEW_SLIDES } from "@/lib/intro-slides";
+import { getHomeIntroSlidesForPublic } from "@/lib/home-intro-slides";
 
 export default async function HomePage() {
-  const heroMedia = await getHomeHeroSettings();
+  const [heroMedia, viewPhotos] = await Promise.all([
+    getHomeHeroSettings(),
+    getHomeIntroSlidesForPublic(),
+  ]);
 
-  for (const slide of INTRO_VIEW_SLIDES) {
+  for (const slide of viewPhotos) {
     preload(slide.src, { as: "image" });
   }
 
@@ -19,7 +22,7 @@ export default async function HomePage() {
         videoSrc={heroMedia.videoSrc}
         audioSrc={heroMedia.audioSrc}
         posterSrc={heroMedia.posterSrc}
-        viewPhotos={INTRO_VIEW_SLIDES}
+        viewPhotos={viewPhotos}
       />
     </>
   );

@@ -17,6 +17,7 @@ function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
 export function manageNavItems(): ManageNavItem[] {
   return [
     // 메인 전용 (공개 GNB에는 없음)
+    { href: "/manage/home-slides", i18n: "manage.homeSlides" },
     { href: "/manage/home-hero", i18n: "manage.homeHero" },
     { href: "/manage/announcements", i18n: "manage.announcements" },
     // 공원소개: 인사말 → 공원 특징 → 공지사항 → 오시는 길

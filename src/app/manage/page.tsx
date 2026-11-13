@@ -6,6 +6,10 @@ import { requireCmsStaff } from "@/lib/auth";
 import { manageNavItems } from "@/lib/manage-nav";
 
 const CARD_COPY: Record<string, { title: string; lead: string }> = {
+  "manage.homeSlides": {
+    title: "메인 이미지 등록",
+    lead: "홈 전경 슬라이드 사진을 올립니다. 없으면 05.jpg 한 장이 보입니다.",
+  },
   "manage.homeHero": {
     title: "메인 영상·음악",
     lead: "메인 배경 동영상·BGM을 올리거나 목록에서 골라 공개합니다.",
