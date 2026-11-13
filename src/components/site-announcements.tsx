@@ -26,13 +26,13 @@ function AnnouncementCard({ item, onDismiss }: { item: SiteAnnouncement; onDismi
           src={uploadOriginalUrl(item.imageSrc)}
           alt=""
           fill
-          className="object-cover"
+          className="guest-photo-bright object-cover"
           sizes="(max-width:768px) 168px, 272px"
           quality={90}
           unoptimized
         />
       ) : null}
-      <h3 className="absolute inset-x-0 top-0 z-[1] line-clamp-2 bg-gradient-to-b from-black/75 via-black/45 to-transparent px-8 pb-6 pt-2 text-center text-sm font-semibold leading-snug tracking-tight text-white md:text-[15px]">
+      <h3 className="absolute inset-x-0 top-0 z-[1] line-clamp-2 bg-gradient-to-b from-black/55 via-black/36 to-transparent px-8 pb-6 pt-2 text-center text-sm font-semibold leading-snug tracking-tight text-white md:text-[15px]">
         {item.title}
       </h3>
     </div>

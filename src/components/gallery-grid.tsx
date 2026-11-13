@@ -135,7 +135,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   src={uploadOriginalUrl(item.src)}
                   alt={item.alt}
                   fill
-                  className="object-cover"
+                  className="guest-photo-bright object-cover"
                   sizes="33vw"
                   quality={90}
                   unoptimized
@@ -181,7 +181,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                     {near ? (
                       <OriginalPhoto
                         src={item.src}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className="guest-photo-bright absolute inset-0 h-full w-full object-cover"
                         loading={i === safeIndex ? "eager" : "lazy"}
                         onFail={onFail}
                       />
@@ -235,7 +235,7 @@ export function GalleryGrid({ preview, items = GALLERY }: { preview?: number; it
                   <span className="relative h-[4.75rem] w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-muted sm:h-[5.5rem] sm:w-[7.5rem]">
                     <OriginalPhoto
                       src={item.src}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="guest-photo-bright absolute inset-0 h-full w-full object-cover"
                       loading="lazy"
                       onFail={onFail}
                     />

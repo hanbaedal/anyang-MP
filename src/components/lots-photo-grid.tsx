@@ -83,7 +83,7 @@ export function LotsPhotoGrid({
           src={uploadOriginalUrl(item.image)}
           alt={item.title}
           fill
-          className="object-contain object-center"
+          className="guest-photo-bright object-contain object-center"
           sizes={
             detail
               ? "(max-width: 767px) 100vw, 70vw"

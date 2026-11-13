@@ -210,7 +210,7 @@ export function GallerySlideModal({
             alt={current.alt}
             draggable={false}
             className={cn(
-              "pointer-events-none absolute inset-0 h-full w-full object-center",
+              "guest-photo-bright pointer-events-none absolute inset-0 h-full w-full object-center",
               large ? "object-contain p-2 sm:p-4" : fit === "contain" ? "object-contain" : "object-cover",
             )}
           />

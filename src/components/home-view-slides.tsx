@@ -185,7 +185,8 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
           ))}
         </div>
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+      {/* AMP-92: +20% — from/75→/55, via/20→/12 (의견서) */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/12 to-transparent" />
       {showNav ? (
         <>
           <button

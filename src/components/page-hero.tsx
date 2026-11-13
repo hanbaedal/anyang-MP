@@ -31,7 +31,7 @@ export function PageHero({
         alt={alt}
         fill
         priority
-        className="object-cover object-[center_28%] opacity-55"
+        className="object-cover object-[center_28%] opacity-65"
         quality={90}
         sizes="100vw"
       />
@@ -104,7 +104,7 @@ export function Photo({
         src={uploadOriginalUrl(src)}
         alt={alt}
         fill
-        className="object-cover"
+        className="guest-photo-bright object-cover"
         sizes={sizes}
         quality={90}
         unoptimized

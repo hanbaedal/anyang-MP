@@ -236,7 +236,7 @@ export function HomeHeroMedia({ videoSrc, audioSrc, posterSrc, paused = false, h
           key={playSrc}
           ref={videoRef}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover object-[center_32%] transition-opacity duration-500",
+            "guest-photo-bright absolute inset-0 h-full w-full object-cover object-[center_32%] transition-opacity duration-500",
             videoReady ? "opacity-100" : "opacity-0",
           )}
           src={playSrc}

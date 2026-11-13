@@ -65,7 +65,7 @@ export default async function IntroHubPage() {
                     src={imageSrc}
                     alt={greeting.title || t(locale, "greeting.title")}
                     fill
-                    className="object-cover"
+                    className="guest-photo-bright object-cover"
                     sizes="(max-width: 768px) 90vw, 22rem"
                     unoptimized
                   />

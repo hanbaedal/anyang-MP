@@ -100,7 +100,7 @@ export function ParkViewVideoModal({ open, onOpenChange, videoSrc, audioSrc = ""
             <video
               ref={videoRef}
               key={playSrc}
-              className="h-full w-full object-contain bg-black"
+              className="guest-photo-bright h-full w-full object-contain bg-black"
               src={playSrc}
               poster={posterSrc}
               autoPlay

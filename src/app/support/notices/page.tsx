@@ -29,7 +29,7 @@ export default async function NoticesPage() {
               src={src}
               alt=""
               fill
-              className="object-cover object-center"
+              className="guest-photo-bright object-cover object-center"
               sizes="(max-width: 767px) 90vw, (min-width: 2560px) 48rem, 42rem"
               unoptimized={src.includes("/api/uploads/")}
               priority

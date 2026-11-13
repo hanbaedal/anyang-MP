@@ -148,6 +148,7 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
             width={fill ? undefined : MAP_W}
             height={fill ? undefined : MAP_H}
             className={cn(
+              "guest-photo-bright",
               fill ? "object-contain" : "h-auto w-full",
               compact && "object-cover object-center",
             )}

@@ -107,12 +107,13 @@ export function FeaturesPhotoGrid({
             )}
             {showCopy ? (
               <>
+                {/* AMP-92: 오버레이 ~20% 완화 — 흰 글씨 대비 유지 */}
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-[#001a33]/78 via-[#001a33]/45 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-r from-[#001a33]/62 via-[#001a33]/36 to-transparent"
                   aria-hidden
                 />
                 <div
-                  className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/35 to-transparent"
+                  className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/28 to-transparent"
                   aria-hidden
                 />
               </>

@@ -47,7 +47,7 @@ export function ImageLightboxDialog({
             sizes="100vw"
             onLoad={() => setLoaded(true)}
             className={cn(
-              "object-contain p-1 sm:p-2 transition-opacity duration-200",
+              "guest-photo-bright object-contain p-1 sm:p-2 transition-opacity duration-200",
               loaded ? "opacity-100" : "opacity-0",
             )}
           />

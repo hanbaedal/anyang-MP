@@ -44,7 +44,7 @@ export function ExpandablePhoto({
           src={uploadOriginalUrl(src)}
           alt={alt}
           fill
-          className="object-cover"
+          className="guest-photo-bright object-cover"
           sizes={sizes}
           quality={90}
           unoptimized

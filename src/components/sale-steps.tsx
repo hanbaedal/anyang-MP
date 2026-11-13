@@ -71,17 +71,18 @@ export function SaleSteps({
               src={src}
               alt=""
               fill
-              className="object-cover object-center opacity-90"
+              className="object-cover object-center"
               sizes="(max-width: 767px) 100vw, 50vw"
               priority={index < 2}
               unoptimized={src.includes("/api/uploads/")}
               aria-hidden
             />
+            {/* AMP-92: opacity-90 제거 + 오버레이 ~20% 완화 */}
             <div
-              className="absolute inset-0 bg-gradient-to-r from-[#001a33]/78 via-[#001a33]/45 to-transparent"
+              className="absolute inset-0 bg-gradient-to-r from-[#001a33]/62 via-[#001a33]/36 to-transparent"
               aria-hidden
             />
-            <div className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/35 to-transparent" aria-hidden />
+            <div className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/28 to-transparent" aria-hidden />
 
             <div
               className={cn(
