@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Phone, Trees } from "lucide-react";
-import { useT } from "@/components/locale-provider";
 import { SITE, socialHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -96,7 +94,14 @@ function SocialLink({
   );
 }
 
-export function SocialActions({ compact = false }: { compact?: boolean }) {
+export function SocialActions({
+  compact = false,
+  verticalFixed = false,
+}: {
+  compact?: boolean;
+  /** 화면 우측 세로 고정 레일 */
+  verticalFixed?: boolean;
+}) {
   const items = [
     { href: socialHref("FACEBOOK", SITE.phoneTel), label: "페이스북", icon: <FacebookMark /> },
     { href: socialHref("INSTAGRAM", "/intro/directions"), label: "인스타그램", icon: <InstagramMark /> },
@@ -108,8 +113,14 @@ export function SocialActions({ compact = false }: { compact?: boolean }) {
     <nav
       aria-label="소셜 바로 가기"
       className={cn(
-        "flex shrink-0 items-center",
-        compact ? "gap-1.5 [&_svg]:size-4 md:gap-2 md:[&_svg]:size-5" : "gap-2 sm:gap-2.5",
+        "flex shrink-0",
+        verticalFixed
+          ? "pointer-events-auto fixed right-2 top-1/2 z-40 -translate-y-1/2 flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5"
+          : cn(
+              "items-center",
+              compact ? "gap-1.5 [&_svg]:size-4 md:gap-2 md:[&_svg]:size-5" : "gap-2 sm:gap-2.5",
+            ),
+        verticalFixed && compact && "[&_svg]:size-4 md:[&_svg]:size-5",
       )}
     >
       {items.map((item) => (
@@ -117,38 +128,6 @@ export function SocialActions({ compact = false }: { compact?: boolean }) {
           {item.icon}
         </SocialLink>
       ))}
-    </nav>
-  );
-}
-
-export function HeroCallActions({ onParkView }: { onParkView?: () => void }) {
-  const t = useT();
-  return (
-    <nav aria-label={t("home.call")} className="flex flex-wrap justify-center gap-2 sm:gap-3 md:justify-end">
-      <a
-        href={SITE.phoneTel}
-        className="inline-flex items-center gap-2 rounded-2xl bg-secondary px-4 py-2.5 text-sm font-medium text-secondary-foreground shadow-sm hover:bg-[#dce8e0] sm:px-5"
-      >
-        <Phone className="size-4" aria-hidden />
-        {SITE.phone}
-      </a>
-      <Link
-        href="/intro/directions"
-        className="inline-flex items-center gap-2 rounded-2xl border border-white/40 bg-white/10 px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-white hover:text-primary sm:px-5"
-      >
-        <MapPin className="size-4" aria-hidden />
-        {t("directions")}
-      </Link>
-      {onParkView ? (
-        <button
-          type="button"
-          onClick={onParkView}
-          className="inline-flex items-center gap-2 rounded-2xl border border-white/40 bg-white/10 px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-white hover:text-primary sm:px-5"
-        >
-          <Trees className="size-4" aria-hidden />
-          {t("home.parkView")}
-        </button>
-      ) : null}
     </nav>
   );
 }

@@ -80,13 +80,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           >
             <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
               {/* PC: h-full로 잔여 뷰포트 전달(공지 한 화면 등). 긴 페이지는 이 스크롤 영역이 담당. */}
+              {/* 푸터는 스크롤 안에 두어 고정/스티키 없이 본문과 함께 흐름 (AMP-95). */}
               <div className="flex min-h-full flex-col md:h-full md:min-h-0">
                 <NavSwipe>
                   <div className="flex min-h-0 flex-1 flex-col md:h-full">{children}</div>
                 </NavSwipe>
               </div>
+              <SiteFooter />
             </div>
-            <SiteFooter />
           </div>
         </LocaleProvider>
       </body>
