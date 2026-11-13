@@ -13,10 +13,17 @@ const TRANSITION_MS = 700;
 const navBtn =
   "pointer-events-auto absolute top-1/2 z-[6] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 backdrop-blur-sm hover:bg-black/60 sm:size-12";
 
+function clampRealPos(pos: number, n: number) {
+  if (n < 2) return 0;
+  if (pos <= 0) return n;
+  if (pos >= n + 1) return 1;
+  return pos;
+}
+
 /**
  * 홈 인트로 정적 전경 슬라이드 — 3초마다 왼쪽 전환.
  * 끝↔처음은 클론 트랙으로 끊김 없이 루프.
- * 호버·reduced-motion·모달 pause 시 정지.
+ * AMP-91: 탭 복귀 시 스냅·타이머·이미지 재도장. 호버 정지 없음. reduced-motion·모달 pause만.
  */
 export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]; paused?: boolean }) {
   const t = useT();
@@ -25,8 +32,9 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   const [pos, setPos] = useState(1);
   const [animating, setAnimating] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [hoverPaused, setHoverPaused] = useState(false);
   const [resumeKey, setResumeKey] = useState(0);
+  /** 복귀 시 img 리마운트 — GPU/디코드 공백(남색) 복구 */
+  const [paintKey, setPaintKey] = useState(0);
   const jumping = useRef(false);
 
   const go = useCallback(
@@ -47,17 +55,55 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  const autoPaused = reduceMotion || paused || hoverPaused;
+  const autoPaused = reduceMotion || paused;
 
   useEffect(() => {
     if (autoPaused || n < 2) return;
+    if (typeof document !== "undefined" && document.hidden) return;
     const timer = window.setInterval(() => {
-      if (jumping.current) return;
+      if (jumping.current || document.hidden) return;
       setAnimating(true);
       setPos((prev) => prev + 1);
     }, INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [autoPaused, n, resumeKey]);
+
+  /** AMP-91: 숨김 시 즉시 스냅 · 복귀 시 스냅 + 타이머·이미지 재도장 */
+  useEffect(() => {
+    if (n < 2) return;
+
+    function onHidden() {
+      jumping.current = false;
+      setAnimating(false);
+      setPos((prev) => clampRealPos(prev, n));
+    }
+
+    function onVisible() {
+      jumping.current = false;
+      setAnimating(false);
+      setPos((prev) => clampRealPos(prev, n));
+      setPaintKey((k) => k + 1);
+      setResumeKey((k) => k + 1);
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "hidden" || document.hidden) onHidden();
+      else onVisible();
+    }
+
+    function onPageShow(e: PageTransitionEvent) {
+      if (e.persisted || document.visibilityState === "visible") onVisible();
+    }
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onVisible);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onVisible);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [n]);
 
   useEffect(() => {
     if (paused || n < 2) return;
@@ -77,7 +123,6 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   function onTransitionEnd() {
     if (n < 2) return;
     if (pos === n + 1) {
-      // landed on clone of first after last → snap to real first
       jumping.current = true;
       setAnimating(false);
       setPos(1);
@@ -87,7 +132,6 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
         });
       });
     } else if (pos === 0) {
-      // landed on clone of last before first → snap to real last
       jumping.current = true;
       setAnimating(false);
       setPos(n);
@@ -107,13 +151,10 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   const showNav = n > 1 && !paused;
 
   return (
-    <div
-      className="absolute inset-0 z-[5]"
-      onMouseEnter={() => setHoverPaused(true)}
-      onMouseLeave={() => setHoverPaused(false)}
-    >
+    <div className="absolute inset-0 z-[5]">
       <div className="absolute inset-0 overflow-hidden bg-primary" aria-hidden>
         <div
+          key={`track-${paintKey}`}
           className={cn(
             "flex h-full ease-out motion-reduce:transition-none",
             animating && !reduceMotion && "transition-transform",
@@ -126,7 +167,11 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
           onTransitionEnd={onTransitionEnd}
         >
           {track.map((photo, i) => (
-            <div key={`${photo.src}-t${i}`} className="relative h-full shrink-0" style={{ width: `${100 / trackCount}%` }}>
+            <div
+              key={`${photo.src}-t${i}-p${paintKey}`}
+              className="relative h-full shrink-0"
+              style={{ width: `${100 / trackCount}%` }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.src}
