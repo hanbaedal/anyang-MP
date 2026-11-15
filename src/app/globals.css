@@ -28,8 +28,17 @@
 
 .cms-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(260px, 320px);
+  grid-template-columns: 1fr minmax(280px, 340px);
   align-items: start;
+}
+.cms-preview-toolbar {
+  flex-shrink: 0;
+}
+.cms-frame {
+  display: block;
+  width: 100%;
+  min-height: min(75vh, 900px);
+  border: 0;
 }
 @media (max-width: 900px) {
   .cms-layout {

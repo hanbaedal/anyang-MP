@@ -21,13 +21,7 @@ const PUBLIC_PATH: Record<string, string> = {
   funeral: "/guide/funeral",
 };
 
-export function ManageCmsShell({
-  homeInitial,
-  heroMedia,
-}: {
-  homeInitial: HomeIntroSlidesSettings;
-  heroMedia: { videoSrc: string; audioSrc: string; posterSrc: string };
-}) {
+export function ManageCmsShell({ homeInitial }: { homeInitial: HomeIntroSlidesSettings }) {
   const [tab, setTab] = useState<"home" | "pages">("home");
 
   const pageRows = MANAGE_VISUAL_CMS_SLUGS.map((slug) => {
@@ -37,10 +31,10 @@ export function ManageCmsShell({
 
   return (
     <div className="min-h-full bg-background">
-      <header className="border-b bg-[#fffcf7] px-4 py-3">
+      <header className="shrink-0 border-b bg-[#fffcf7] px-4 py-3">
         <h1 className="text-lg font-medium text-foreground">홈페이지 CMS</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          인천 장례식장 관리 콘솔의 「홈페이지 CMS」처럼, 공개와 같은 화면에서 고칩니다.
+          메인 홈은 공개 URL을 iframe으로 그대로 보여 주고, 소메뉴는 각 페이지 미러 편집으로 연결합니다.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <button
@@ -66,7 +60,7 @@ export function ManageCmsShell({
         </div>
       </header>
       {tab === "home" ? (
-        <ManageHomeCms initial={homeInitial} heroMedia={heroMedia} />
+        <ManageHomeCms initial={homeInitial} />
       ) : (
         <div className="mx-auto max-w-4xl space-y-4 p-4 md:p-6">
           <p className="text-sm text-muted-foreground">
