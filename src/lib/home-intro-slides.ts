@@ -2,17 +2,22 @@ import { randomUUID } from "node:crypto";
 import type { ViewSlide } from "@/components/home-view-slides";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import {
+  defaultHomeIntroHeroCopy,
+  HOME_INTRO_HERO_COPY_LIMITS,
   HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
+  type HomeIntroHeroCopy,
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "./home-intro-slides-types";
 import { getDb, hasMongo } from "./mongo";
 import { deleteUploadObject } from "./upload-store";
 
-export type { HomeIntroSlide, HomeIntroSlidesSettings } from "./home-intro-slides-types";
+export type { HomeIntroHeroCopy, HomeIntroSlide, HomeIntroSlidesSettings } from "./home-intro-slides-types";
 export {
+  defaultHomeIntroHeroCopy,
+  HOME_INTRO_HERO_COPY_LIMITS,
   HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
@@ -23,7 +28,25 @@ const SETTINGS_KEY = "home_intro_slides";
 const READ_MS = 2_500;
 
 export function defaultHomeIntroSlidesSettings(): HomeIntroSlidesSettings {
-  return { slides: [], updatedAt: new Date().toISOString() };
+  return { slides: [], heroCopy: defaultHomeIntroHeroCopy(), updatedAt: new Date().toISOString() };
+}
+
+function trimHeroField(value: unknown, max: number): string {
+  return String(value ?? "")
+    .trim()
+    .slice(0, max);
+}
+
+export function normalizeHomeIntroHeroCopy(raw: unknown): HomeIntroHeroCopy {
+  const base = defaultHomeIntroHeroCopy();
+  if (!raw || typeof raw !== "object") return base;
+  const row = raw as Record<string, unknown>;
+  return {
+    kicker: trimHeroField(row.kicker, HOME_INTRO_HERO_COPY_LIMITS.kicker) || base.kicker,
+    heroLine1: trimHeroField(row.heroLine1, HOME_INTRO_HERO_COPY_LIMITS.heroLine1) || base.heroLine1,
+    heroLine2: trimHeroField(row.heroLine2, HOME_INTRO_HERO_COPY_LIMITS.heroLine2) || base.heroLine2,
+    lead: trimHeroField(row.lead, HOME_INTRO_HERO_COPY_LIMITS.lead) || base.lead,
+  };
 }
 
 export function isSafeHomeIntroSlideSrc(src: string): boolean {
@@ -65,6 +88,7 @@ function fromDoc(doc: Record<string, unknown>): HomeIntroSlidesSettings {
     .map((s, i) => ({ ...s, sort: i }));
   return {
     slides,
+    heroCopy: normalizeHomeIntroHeroCopy(doc.heroCopy),
     updatedAt:
       doc.updatedAt instanceof Date
         ? doc.updatedAt.toISOString()
@@ -122,6 +146,7 @@ export async function saveHomeIntroSlidesSettings(
 ): Promise<HomeIntroSlidesSettings> {
   const settings = fromDoc({
     slides: input.slides,
+    heroCopy: normalizeHomeIntroHeroCopy(input.heroCopy),
     updatedAt: new Date().toISOString(),
   });
 
@@ -134,6 +159,7 @@ export async function saveHomeIntroSlidesSettings(
         $set: {
           key: SETTINGS_KEY,
           slides: settings.slides,
+          heroCopy: settings.heroCopy,
           updatedAt: new Date(settings.updatedAt),
         },
       },

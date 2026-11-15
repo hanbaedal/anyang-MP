@@ -1,6 +1,5 @@
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
-import { FEATURES } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -28,9 +27,9 @@ export default async function ServicesPage() {
         text: row.bodyKeys.map((key) => t(locale, key)).join("\n\n"),
         image: "",
       }))
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   return (

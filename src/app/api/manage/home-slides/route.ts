@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   getHomeIntroSlidesSettingsForWrite,
   HOME_INTRO_SLIDES_MAX,
+  normalizeHomeIntroHeroCopy,
   saveHomeIntroSlidesSettings,
   type HomeIntroSlide,
 } from "@/lib/home-intro-slides";
@@ -45,9 +46,9 @@ export async function PUT(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
 
-  let body: { slides?: unknown };
+  let body: { slides?: unknown; heroCopy?: unknown };
   try {
-    body = (await request.json()) as { slides?: unknown };
+    body = (await request.json()) as { slides?: unknown; heroCopy?: unknown };
   } catch {
     return NextResponse.json({ ok: false, error: "요청 본문이 올바르지 않습니다." }, { status: 400 });
   }
@@ -56,8 +57,9 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: false, error: "slides 배열이 필요합니다." }, { status: 400 });
   }
 
+  let current;
   try {
-    await getHomeIntroSlidesSettingsForWrite();
+    current = await getHomeIntroSlidesSettingsForWrite();
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "설정을 읽지 못했습니다." },
@@ -87,8 +89,11 @@ export async function PUT(request: Request) {
 
   try {
     // 갤러리 공유 자산 — 선택 해제 시 파일을 지우지 않음
+    const heroCopy =
+      body.heroCopy !== undefined ? normalizeHomeIntroHeroCopy(body.heroCopy) : current.heroCopy;
     const settings = await saveHomeIntroSlidesSettings({
       slides: nextSlides,
+      heroCopy,
       updatedAt: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true, settings });

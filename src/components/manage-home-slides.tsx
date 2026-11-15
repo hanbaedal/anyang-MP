@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  defaultHomeIntroHeroCopy,
+  HOME_INTRO_HERO_COPY_LIMITS,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
+  type HomeIntroHeroCopy,
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "@/lib/home-intro-slides-types";
@@ -19,8 +22,14 @@ function slideIdForPhoto(photo: GalleryPhoto) {
   return `gallery:${photo.id}`;
 }
 
+const fieldClass =
+  "h-9 w-full min-w-0 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const areaClass =
+  "min-h-[4.5rem] w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings }) {
   const [slides, setSlides] = useState<HomeIntroSlide[]>(initial.slides);
+  const [heroCopy, setHeroCopy] = useState<HomeIntroHeroCopy>(initial.heroCopy ?? defaultHomeIntroHeroCopy());
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
   const [filter, setFilter] = useState<Filter>("전경");
   const [loadingGallery, setLoadingGallery] = useState(true);
@@ -99,6 +108,12 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
     setStatus("idle");
   }
 
+  function patchHeroCopy(patch: Partial<HomeIntroHeroCopy>) {
+    setHeroCopy((prev) => ({ ...prev, ...patch }));
+    setDirty(true);
+    setStatus("idle");
+  }
+
   async function save() {
     setStatus("busy");
     setMessage("");
@@ -106,7 +121,7 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
       const res = await fetch("/api/manage/home-slides", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slides }),
+        body: JSON.stringify({ slides, heroCopy }),
       });
       const json = (await res.json()) as {
         ok?: boolean;
@@ -119,12 +134,9 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
         return;
       }
       setSlides(json.settings.slides);
+      setHeroCopy(json.settings.heroCopy);
       setDirty(false);
-      setMessage(
-        json.settings.slides.length
-          ? "저장했습니다. 홈 슬라이드에 반영됩니다."
-          : "선택을 비웠습니다. 홈에는 폴백 이미지(05)가 보입니다.",
-      );
+      setMessage("저장했습니다. 홈 메인 전경·문구에 반영됩니다.");
       setStatus("ok");
     } catch {
       setMessage("네트워크 오류입니다.");
@@ -152,6 +164,59 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
         <code className="rounded bg-muted px-1">{HOME_INTRO_SLIDE_FALLBACK_SRC}</code> 한 장이
         보입니다.
       </p>
+
+      <section className="space-y-3 rounded-lg border bg-card p-3 sm:p-4">
+        <h2 className="text-sm font-medium">메인 화면 문구</h2>
+        <p className="text-xs text-muted-foreground">
+          전경 슬라이드 위에 겹치는 한국어 카피입니다. 영어·중국어는 언어 메뉴 기본 문구를 씁니다.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block space-y-1 sm:col-span-2">
+            <span className="text-xs font-medium text-muted-foreground">상단 한 줄</span>
+            <input
+              className={fieldClass}
+              value={heroCopy.kicker}
+              maxLength={HOME_INTRO_HERO_COPY_LIMITS.kicker}
+              disabled={busy}
+              onChange={(e) => patchHeroCopy({ kicker: e.target.value })}
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-muted-foreground">제목 1줄</span>
+            <input
+              className={fieldClass}
+              value={heroCopy.heroLine1}
+              maxLength={HOME_INTRO_HERO_COPY_LIMITS.heroLine1}
+              disabled={busy}
+              onChange={(e) => patchHeroCopy({ heroLine1: e.target.value })}
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-muted-foreground">제목 2줄</span>
+            <input
+              className={fieldClass}
+              value={heroCopy.heroLine2}
+              maxLength={HOME_INTRO_HERO_COPY_LIMITS.heroLine2}
+              disabled={busy}
+              onChange={(e) => patchHeroCopy({ heroLine2: e.target.value })}
+            />
+          </label>
+          <label className="block space-y-1 sm:col-span-2">
+            <span className="text-xs font-medium text-muted-foreground">아래 설명</span>
+            <textarea
+              className={areaClass}
+              value={heroCopy.lead}
+              maxLength={HOME_INTRO_HERO_COPY_LIMITS.lead}
+              disabled={busy}
+              rows={3}
+              onChange={(e) => patchHeroCopy({ lead: e.target.value })}
+            />
+            <span className="text-[10px] text-muted-foreground">
+              줄바꿈(Enter)을 넣으면 좁은 화면에서 두 줄로 나뉩니다.
+            </span>
+          </label>
+        </div>
+      </section>
 
       <section className="space-y-3 rounded-lg border bg-card p-3 sm:p-4">
         <div className="flex flex-wrap items-center gap-2">

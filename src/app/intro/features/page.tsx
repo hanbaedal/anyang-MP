@@ -18,11 +18,11 @@ export default async function FeaturesPage() {
         id: feature.titleKey,
         title: t(locale, feature.titleKey),
         text: t(locale, feature.bodyKey),
-        image: feature.image,
+        image: "",
       }))
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   return (

@@ -9,7 +9,7 @@ import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { FEATURES, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -78,9 +78,9 @@ export default async function GuideHubPage() {
         text: t(locale, row.bodyKey),
         image: "",
       }))
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   const serviceCards = (services.items?.length
@@ -91,9 +91,9 @@ export default async function GuideHubPage() {
         text: service.bodies.map((key) => t(locale, key)).join("\n"),
         image: "",
       }))
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   const funeralCards = (funeral.items?.length
@@ -104,9 +104,9 @@ export default async function GuideHubPage() {
         { id: "3", title: t(locale, "fun.s3t"), text: t(locale, "fun.s3d"), image: "" },
         { id: "4", title: t(locale, "fun.s4t"), text: t(locale, "fun.s4d"), image: "" },
       ]
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   return (

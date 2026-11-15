@@ -1,7 +1,14 @@
 import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
+import {
+  cardHasGalleryImage,
+  guideCardBodyTextClass,
+  guideCardPastelSurface,
+  guideCardTitleClass,
+  GUIDE_CARD_SKY_OVERLAY_FULL,
+  GUIDE_CARD_SKY_OVERLAY_LEFT,
+} from "@/lib/guide-photo-card";
 import { uploadOriginalUrl } from "@/lib/media";
-import { FEATURES } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export type FeaturePhotoItem = {
@@ -10,9 +17,6 @@ export type FeaturePhotoItem = {
   text?: string;
   image?: string;
 };
-
-/** 갤러리 미연결 시에도 단색 슬라브가 아니라 공원 사진이 보이게 (AMP-87) */
-const GRID_FALLBACK_IMAGES = FEATURES.map((feature) => feature.image);
 
 /** CMS·복사본에 남을 수 있는 「모억」오기를 「묘역」으로 통일 */
 export function normalizeFeatureCopy(text: string) {
@@ -75,8 +79,8 @@ export function FeaturesPhotoGrid({
         const showTitle = !(hideTitle || captionFirstLine) && Boolean(title);
         const showText = Boolean(text);
         const showCopy = showTitle || showText;
-        const rawImage = item.image?.trim() || GRID_FALLBACK_IMAGES[index % GRID_FALLBACK_IMAGES.length] || "";
-        const src = rawImage ? uploadOriginalUrl(rawImage) : "";
+        const hasPhoto = cardHasGalleryImage(item.image);
+        const src = hasPhoto ? uploadOriginalUrl(item.image!.trim()) : "";
         const alt = title || text || "photo";
 
         return (
@@ -84,6 +88,7 @@ export function FeaturesPhotoGrid({
             key={item.id || item.title || String(index)}
             className={cn(
               "pc-viewport-card relative isolate overflow-hidden rounded-2xl shadow-sm",
+              !hasPhoto && guideCardPastelSurface(index),
               !dense && "pc-viewport-card--scale",
               dense
                 ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
@@ -92,7 +97,7 @@ export function FeaturesPhotoGrid({
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
             )}
           >
-            {src ? (
+            {hasPhoto ? (
               <Image
                 src={src}
                 alt={alt}
@@ -102,18 +107,15 @@ export function FeaturesPhotoGrid({
                 priority={index < 2}
                 unoptimized={src.includes("/api/uploads/")}
               />
-            ) : (
-              <div className="absolute inset-0 bg-[#002b50]/60" aria-hidden />
-            )}
-            {showCopy ? (
+            ) : null}
+            {hasPhoto && showCopy ? (
               <>
-                {/* AMP-92: 오버레이 ~20% 완화 — 흰 글씨 대비 유지 */}
+                <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-[#001a33]/62 via-[#001a33]/36 to-transparent"
-                  aria-hidden
-                />
-                <div
-                  className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/28 to-transparent"
+                  className={cn(
+                    "absolute inset-y-0 left-0 w-[78%] max-w-lg",
+                    GUIDE_CARD_SKY_OVERLAY_LEFT,
+                  )}
                   aria-hidden
                 />
               </>
@@ -131,24 +133,10 @@ export function FeaturesPhotoGrid({
                 )}
               >
                 {showTitle ? (
-                  <h3
-                    className={cn(
-                      "font-semibold leading-snug tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]",
-                      dense ? "text-base sm:text-lg" : "text-lg sm:text-xl md:text-[1.35rem]",
-                    )}
-                  >
-                    {title}
-                  </h3>
+                  <h3 className={guideCardTitleClass({ onPhoto: hasPhoto, dense })}>{title}</h3>
                 ) : null}
                 {showText ? (
-                  <div
-                    className={cn(
-                      "text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]",
-                      dense
-                        ? "space-y-1 text-[12px] leading-5 sm:text-[13px] sm:leading-6"
-                        : "space-y-1.5 text-[13px] leading-6 sm:text-sm sm:leading-7",
-                    )}
-                  >
+                  <div className={guideCardBodyTextClass({ onPhoto: hasPhoto, dense })}>
                     {captionFirstLine ? (
                       /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */
                       <p className="whitespace-normal break-words text-inherit">{text}</p>

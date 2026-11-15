@@ -4,7 +4,7 @@ import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
-import { FEATURES, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -33,9 +33,9 @@ export default async function FuneralPage() {
           row.bodyKey === "fun.s1d" ? t(locale, row.bodyKey, { phone: SITE.phone }) : t(locale, row.bodyKey),
         image: "",
       }))
-  ).map((item, index) => ({
+  ).map((item) => ({
     ...item,
-    image: item.image?.trim() || FEATURES[index % FEATURES.length]?.image,
+    image: item.image?.trim() || undefined,
   }));
 
   return (

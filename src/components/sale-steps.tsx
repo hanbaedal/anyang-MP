@@ -3,16 +3,21 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
-import { SALE_STEPS, FEATURES } from "@/lib/site";
+import {
+  cardHasGalleryImage,
+  guideCardBodyTextClass,
+  guideCardEyebrowClass,
+  guideCardPastelSurface,
+  guideCardTitleClass,
+  GUIDE_CARD_SKY_OVERLAY_FULL,
+  GUIDE_CARD_SKY_OVERLAY_LEFT,
+} from "@/lib/guide-photo-card";
 import { uploadOriginalUrl } from "@/lib/media";
+import { SALE_STEPS } from "@/lib/site";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
 export type SaleStepView = { n: string; title: string; text: string; image?: string };
-
-function fallbackImage(index: number) {
-  return FEATURES[index % FEATURES.length]?.image ?? "/images/park-overview.jpg";
-}
 
 /**
  * 분양 절차 — 2열·소프트 오버레이.
@@ -38,11 +43,10 @@ export function SaleSteps({
   const rows: SaleStepView[] =
     steps && steps.length
       ? steps
-      : SALE_STEPS.map((step, index) => ({
+      : SALE_STEPS.map((step) => ({
           n: step.n,
           title: t(step.titleKey),
           text: t(step.textKey),
-          image: fallbackImage(index),
         }));
 
   return (
@@ -54,35 +58,44 @@ export function SaleSteps({
       )}
     >
       {rows.map((step, index) => {
-        const raw = step.image?.trim() || fallbackImage(index);
-        const src = uploadOriginalUrl(raw);
+        const hasPhoto = cardHasGalleryImage(step.image);
+        const src = hasPhoto ? uploadOriginalUrl(step.image!.trim()) : "";
 
         return (
           <li
             key={`${step.n}-${step.title}`}
             className={cn(
               "pc-viewport-card pc-viewport-card--scale relative isolate overflow-hidden rounded-2xl shadow-sm",
+              !hasPhoto && guideCardPastelSurface(index),
               viewportFill
                 ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
                 : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
             )}
           >
-            <Image
-              src={src}
-              alt=""
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 767px) 100vw, 50vw"
-              priority={index < 2}
-              unoptimized={src.includes("/api/uploads/")}
-              aria-hidden
-            />
-            {/* AMP-92: opacity-90 제거 + 오버레이 ~20% 완화 */}
-            <div
-              className="absolute inset-0 bg-gradient-to-r from-[#001a33]/62 via-[#001a33]/36 to-transparent"
-              aria-hidden
-            />
-            <div className="absolute inset-y-0 left-0 w-[78%] max-w-lg bg-gradient-to-r from-black/28 to-transparent" aria-hidden />
+            {hasPhoto ? (
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 767px) 100vw, 50vw"
+                priority={index < 2}
+                unoptimized={src.includes("/api/uploads/")}
+                aria-hidden
+              />
+            ) : null}
+            {hasPhoto ? (
+              <>
+                <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
+                <div
+                  className={cn(
+                    "absolute inset-y-0 left-0 w-[78%] max-w-lg",
+                    GUIDE_CARD_SKY_OVERLAY_LEFT,
+                  )}
+                  aria-hidden
+                />
+              </>
+            ) : null}
 
             <div
               className={cn(
@@ -92,14 +105,10 @@ export function SaleSteps({
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
               )}
             >
-              <p className="font-serif text-sm tracking-wide text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)] sm:text-base">
-                {t("step.n", { n: step.n })}
-              </p>
-              <h3 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] sm:text-xl md:text-[1.35rem]">
-                {step.title}
-              </h3>
+              <p className={guideCardEyebrowClass(hasPhoto)}>{t("step.n", { n: step.n })}</p>
+              <h3 className={guideCardTitleClass({ onPhoto: hasPhoto })}>{step.title}</h3>
               {compact || !step.text ? null : (
-                <div className="space-y-1.5 overflow-auto text-[13px] leading-6 text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)] sm:text-sm sm:leading-7">
+                <div className={cn(guideCardBodyTextClass({ onPhoto: hasPhoto }), "overflow-auto")}>
                   <Paragraphs text={step.text} className="text-inherit" />
                 </div>
               )}
