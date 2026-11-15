@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   DEST_NAME,
@@ -76,9 +76,37 @@ function watchAppHandoff(ms: number): Promise<boolean> {
   });
 }
 
-export function DirectionsMap({ compact = false, fill = false }: { compact?: boolean; fill?: boolean }) {
+export function DirectionsMap({
+  compact = false,
+  fill = false,
+  /** fill 모드: 지도 figure 실측 폭(px) — 하단 카드 열 맞춤용 */
+  onFigureWidthChange,
+  /** 지도와 같은 폭으로 길찾기 버튼 줄 맞춤 */
+  contentColumnWidth,
+}: {
+  compact?: boolean;
+  fill?: boolean;
+  onFigureWidthChange?: (widthPx: number) => void;
+  contentColumnWidth?: number | null;
+}) {
   const t = useT();
   const [busy, setBusy] = useState<"naver" | "kakao" | null>(null);
+  const figureRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!fill || !onFigureWidthChange) return;
+    const el = figureRef.current;
+    if (!el) return;
+    const report = () => onFigureWidthChange(el.getBoundingClientRect().width);
+    report();
+    const ro = new ResizeObserver(report);
+    ro.observe(el);
+    window.addEventListener("resize", report);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", report);
+    };
+  }, [fill, onFigureWidthChange]);
 
   async function openRoute(kind: "naver" | "kakao") {
     setBusy(kind);
@@ -109,7 +137,17 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
 
   return (
     <div className={cn(fill ? "flex min-h-0 flex-1 flex-col gap-2 md:gap-3" : "space-y-4")}>
-      <div className="flex shrink-0 flex-wrap gap-2">
+      <div
+        className={cn(
+          "flex shrink-0 flex-wrap gap-2",
+          fill && contentColumnWidth != null && contentColumnWidth > 0 && "mx-auto max-w-full",
+        )}
+        style={
+          fill && contentColumnWidth != null && contentColumnWidth > 0
+            ? { width: contentColumnWidth, maxWidth: "100%" }
+            : undefined
+        }
+      >
         <Button type="button" disabled={busy !== null} onClick={() => void openRoute("naver")}>
           {t("map.naver")}
         </Button>
@@ -128,6 +166,7 @@ export function DirectionsMap({ compact = false, fill = false }: { compact?: boo
         )}
       >
         <figure
+          ref={figureRef}
           className={cn(
             "relative overflow-hidden rounded-xl border bg-muted",
             fill
