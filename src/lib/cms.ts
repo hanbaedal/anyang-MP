@@ -5,6 +5,7 @@ import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import { getDb, hasMongo } from "./mongo";
 import { FEATURES, SALE_STEPS, SITE } from "./site";
 import { PRICES, REMAINING } from "./facts";
+import { normalizeFuneralDocsKo } from "./funeral-docs-cms";
 import { type CmsItem, type CmsLocaleFields, type CmsPage, type CmsSlug } from "./cms-types";
 import { CONTENT_LOCALES, stillHasHangul, translateText, type ContentLocale } from "./translate-content";
 
@@ -350,11 +351,13 @@ function applyGalleryCardEnsures(page: CmsPage): CmsPage {
 
 /** Mongo·JSON에 null/누락 필드가 있어도 렌더가 깨지지 않도록 */
 export function normalizeCmsPage(page: CmsPage): CmsPage {
+  const funeralDocs = normalizeFuneralDocsKo(page.funeralDocs);
   return {
     ...page,
     title: String(page.title ?? ""),
     lead: String(page.lead ?? ""),
     body: String(page.body ?? ""),
+    ...(funeralDocs ? { funeralDocs } : {}),
     items: (page.items ?? []).map((item, index) => ({
       id: String(item?.id ?? `item-${index}`),
       title: String(item?.title ?? ""),
@@ -370,6 +373,9 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
 function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
+  const funeralDocs = normalizeFuneralDocsKo(
+    doc.funeralDocs && typeof doc.funeralDocs === "object" ? (doc.funeralDocs as CmsPage["funeralDocs"]) : undefined,
+  );
   return normalizeCmsPage({
     slug,
     title: currentCmsTitle(slug, String(doc.title ?? "")),
@@ -378,6 +384,7 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
     items: Array.isArray(doc.items) ? (doc.items as CmsItem[]) : [],
     updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt ?? ""),
     ...(bodyImage ? { bodyImage } : {}),
+    ...(funeralDocs ? { funeralDocs } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   });
 }
@@ -497,6 +504,7 @@ export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage
 
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
   const bodyImage = String(input.bodyImage ?? "").trim();
+  const funeralDocs = normalizeFuneralDocsKo(input.funeralDocs);
   const rawItems = (input.items ?? []).map((item) => {
     const image = String(item.image ?? "").trim();
     const galleryId = String(item.galleryId ?? "").trim();
@@ -518,6 +526,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     items: rawItems,
     updatedAt: new Date().toISOString(),
     ...(bodyImage ? { bodyImage } : {}),
+    ...(funeralDocs ? { funeralDocs } : {}),
   });
   page.i18n = await fillCmsI18n(page, true);
 

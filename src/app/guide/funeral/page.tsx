@@ -8,6 +8,7 @@ import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
+import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
@@ -51,6 +52,7 @@ export default async function FuneralPage({
   }));
 
   const hero = resolveCmsPageHero(locale, cms);
+  const docLabels = resolveFuneralDocsDisplay(locale, cms.funeralDocs);
 
   return (
     <>
@@ -59,7 +61,7 @@ export default async function FuneralPage({
           <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
         </PastelBox>
         <FeaturesPhotoGrid items={items} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
-      <FuneralDocList locale={locale} docs={docs} />
+      <FuneralDocList locale={locale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
       <Prose>
         {cms.body?.trim() ? (
           <CmsBodyMark cmsSlug="funeral" cmsEditMarkers={cmsEdit} text={cms.body} />

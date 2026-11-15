@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCmsPageOrDefault, isCmsSlug, saveCmsPage, type CmsItem } from "@/lib/cms";
+import type { FuneralDocsKo } from "@/lib/cms-types";
 import { requireStaffApi } from "@/lib/manage-guard";
 
 export async function GET(request: Request) {
@@ -14,7 +15,15 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
-  let body: { slug?: string; title?: string; lead?: string; body?: string; bodyImage?: string; items?: CmsItem[] };
+  let body: {
+    slug?: string;
+    title?: string;
+    lead?: string;
+    body?: string;
+    bodyImage?: string;
+    items?: CmsItem[];
+    funeralDocs?: FuneralDocsKo;
+  };
   try {
     const raw = await request.text();
     if (!raw.trim()) {
@@ -35,6 +44,7 @@ export async function PUT(request: Request) {
       body: body.body ?? "",
       bodyImage: body.bodyImage ?? "",
       items: Array.isArray(body.items) ? body.items : [],
+      funeralDocs: body.funeralDocs,
     });
     return NextResponse.json({ ok: true, page });
   } catch (error) {

@@ -1,14 +1,32 @@
-import type { CmsPage } from "@/lib/cms-types";
+import type { CmsPage, FuneralDocsKoField } from "@/lib/cms-types";
 import { CMS_GALLERY_LINK_ITEM_SLUGS } from "@/lib/cms-types";
+import {
+  FUNERAL_DOCS_KO_FIELDS,
+  FUNERAL_DOCS_SLOT_LABELS,
+  pageSlotFuneralDocPdf,
+  pageSlotFuneralDocsField,
+} from "@/lib/funeral-docs-cms";
+import { FUNERAL_DOC_IDS, FUNERAL_DOC_META, type FuneralDocId } from "@/lib/funeral-docs-types";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 
-export type PageCmsSlotKind = "title" | "lead" | "body" | "bodyImage" | "itemTitle" | "itemText" | "itemImage";
+export type PageCmsSlotKind =
+  | "title"
+  | "lead"
+  | "body"
+  | "bodyImage"
+  | "itemTitle"
+  | "itemText"
+  | "itemImage"
+  | "funeralDocText"
+  | "funeralDocPdf";
 
 export type PageCmsSlotMeta = {
   label: string;
   kind: PageCmsSlotKind;
   slug: ManageVisualCmsSlug;
   itemId?: string;
+  funeralDocField?: FuneralDocsKoField;
+  funeralDocId?: FuneralDocId;
 };
 
 export function pageSlotTitle(slug: string) {
@@ -53,6 +71,25 @@ export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotM
   const galleryLink = CMS_GALLERY_LINK_ITEM_SLUGS.includes(slug);
   const directions = slug === "directions";
 
+  if (slug === "funeral") {
+    for (const field of FUNERAL_DOCS_KO_FIELDS) {
+      meta[pageSlotFuneralDocsField(slug, field)] = {
+        label: FUNERAL_DOCS_SLOT_LABELS[field],
+        kind: "funeralDocText",
+        slug,
+        funeralDocField: field,
+      };
+    }
+    for (const docId of FUNERAL_DOC_IDS) {
+      meta[pageSlotFuneralDocPdf(docId)] = {
+        label: `${FUNERAL_DOC_META[docId].manageLabel} · PDF`,
+        kind: "funeralDocPdf",
+        slug,
+        funeralDocId: docId,
+      };
+    }
+  }
+
   page.items.forEach((item, index) => {
     meta[pageSlotItemTitle(slug, item.id)] = {
       label: directions ? `교통 ${index + 1} 제목` : `항목 ${index + 1} 제목`,
@@ -92,6 +129,28 @@ export function parsePageCmsSlotKey(key: string): PageCmsSlotMeta | null {
 
   const imgM = /^page\.([a-z]+)\.bodyImage$/.exec(key);
   if (imgM) return { label: "", kind: "bodyImage", slug: imgM[1] as ManageVisualCmsSlug };
+
+  const funeralPdfM = /^page\.funeral\.docs\.pdf\.(death|family|police|cremation)$/.exec(key);
+  if (funeralPdfM) {
+    return {
+      label: "",
+      kind: "funeralDocPdf",
+      slug: "funeral",
+      funeralDocId: funeralPdfM[1] as FuneralDocId,
+    };
+  }
+
+  const funeralTextM = /^page\.funeral\.docs\.(burialTitle|cremationTitle|hint|death|family|idLine|police|cremation)$/.exec(
+    key,
+  );
+  if (funeralTextM) {
+    return {
+      label: "",
+      kind: "funeralDocText",
+      slug: "funeral",
+      funeralDocField: funeralTextM[1] as FuneralDocsKoField,
+    };
+  }
 
   const itemM = /^page\.([a-z]+)\.item\.(.+)\.(title|text|image)$/.exec(key);
   if (!itemM) return null;

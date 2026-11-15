@@ -18,7 +18,10 @@ import {
   pageSlotItemText,
   pageSlotItemTitle,
 } from "@/lib/page-cms-slots";
+import { ManageFuneralDocPdfPanel } from "@/components/manage/manage-funeral-doc-pdf-panel";
+import { FUNERAL_DOCS_I18N } from "@/lib/funeral-docs-cms";
 import { PAGE_CMS_PUBLIC_PATH } from "@/lib/page-cms-path";
+import { t } from "@/lib/i18n";
 import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +85,9 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
       if (parsed.kind === "title") next.title = text;
       else if (parsed.kind === "lead") next.lead = text;
       else if (parsed.kind === "body") next.body = text;
-      else if (parsed.itemId) {
+      else if (parsed.kind === "funeralDocText" && parsed.funeralDocField) {
+        next.funeralDocs = { ...prev.funeralDocs, [parsed.funeralDocField]: text };
+      } else if (parsed.itemId) {
         next.items = prev.items.map((item) => {
           if (item.id !== parsed.itemId) return item;
           if (parsed.kind === "itemTitle") return { ...item, title: text };
@@ -156,6 +161,7 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
           body: page.body,
           bodyImage: page.bodyImage ?? "",
           items: page.items ?? [],
+          funeralDocs: page.funeralDocs,
         }),
       });
       const json = (await res.json()) as { ok?: boolean; error?: string; page?: CmsPage };
@@ -194,6 +200,10 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     if (parsed.kind === "title") return page.title;
     if (parsed.kind === "lead") return page.lead;
     if (parsed.kind === "body") return page.body;
+    if (parsed.kind === "funeralDocText" && parsed.funeralDocField) {
+      const custom = page.funeralDocs?.[parsed.funeralDocField];
+      return custom ?? t("ko", FUNERAL_DOCS_I18N[parsed.funeralDocField]);
+    }
     const item = findCmsItemBySlotKey(page, key);
     if (!item) return "";
     if (parsed.kind === "itemTitle") return item.title;
@@ -259,9 +269,21 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     if (isItemCard && editingItem) {
       return renderItemCardPanel(editingItem.id);
     }
+    if (parsedSlot?.kind === "funeralDocPdf" && parsedSlot.funeralDocId) {
+      return (
+        <ManageFuneralDocPdfPanel
+          docId={parsedSlot.funeralDocId}
+          disabled={busy}
+          onChanged={() => setFrameRev((n) => n + 1)}
+        />
+      );
+    }
     if (!activeMeta) return null;
     const multiline =
-      activeMeta.kind === "lead" || activeMeta.kind === "body" || activeMeta.kind === "itemText";
+      activeMeta.kind === "lead" ||
+      activeMeta.kind === "body" ||
+      activeMeta.kind === "itemText" ||
+      (activeMeta.kind === "funeralDocText" && activeMeta.funeralDocField === "hint");
     if (activeMeta.kind === "bodyImage") {
       return (
         <ManageImagePicker

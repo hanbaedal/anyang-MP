@@ -7,6 +7,7 @@ import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -99,6 +100,8 @@ export default async function GuideHubPage() {
     image: item.image?.trim() || undefined,
   }));
 
+  const docLabels = resolveFuneralDocsDisplay(locale, funeral.funeralDocs);
+
   const funeralCards = (funeral.items?.length
     ? funeral.items
     : [
@@ -150,7 +153,7 @@ export default async function GuideHubPage() {
         >
           <div className="space-y-10">
             <FeaturesPhotoGrid items={funeralCards} />
-            <FuneralDocList locale={locale} docs={docs} />
+            <FuneralDocList locale={locale} docs={docs} labels={docLabels} />
             <Prose>
               {funeral.body?.trim() ? <Paragraphs text={funeral.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
               <p>

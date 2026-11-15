@@ -11,10 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CmsFuneralDocPdfSlot } from "@/components/cms-edit/cms-funeral-doc-pdf-slot";
+import { pageSlotFuneralDocsField } from "@/lib/funeral-docs-cms";
+import type { FuneralDocsKoField } from "@/lib/cms-types";
 import {
   FUNERAL_BURIAL_ROWS,
   FUNERAL_CREMATION_ROWS,
-  FUNERAL_DOC_META,
   type FuneralDocFile,
   type FuneralDocId,
   type FuneralDocRow,
@@ -31,15 +33,26 @@ type PreviewDoc = {
   fileName: string;
 };
 
+const DOC_ROW_LABEL_FIELD: Record<FuneralDocId, FuneralDocsKoField> = {
+  death: "death",
+  family: "family",
+  police: "police",
+  cremation: "cremation",
+};
+
 function DocItems({
   rows,
   docs,
   locale,
+  labels,
+  cmsEditMarkers = false,
   onOpen,
 }: {
   rows: FuneralDocRow[];
   docs: Partial<Record<FuneralDocId, FuneralDocFile>>;
   locale: Locale;
+  labels: Record<FuneralDocsKoField, string>;
+  cmsEditMarkers?: boolean;
   onOpen: (doc: PreviewDoc) => void;
 }) {
   return (
@@ -47,33 +60,43 @@ function DocItems({
       {rows.map((row) => {
         if (row.type === "text") {
           return (
-            <li key={row.i18n} className="text-[15px] leading-7 text-foreground/90">
-              {t(locale, row.i18n)}
+            <li
+              key={row.i18n}
+              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "idLine") } : {})}
+              className="text-[15px] leading-7 text-foreground/90"
+            >
+              {labels.idLine}
             </li>
           );
         }
-        const label = t(locale, FUNERAL_DOC_META[row.docId].i18n);
+        const field = DOC_ROW_LABEL_FIELD[row.docId];
+        const label = labels[field];
         const file = docs[row.docId];
+        const labelKey = cmsEditMarkers ? pageSlotFuneralDocsField("funeral", field) : undefined;
         if (file) {
           const href = mediaUrl(file.filePath);
           return (
-            <li key={row.docId}>
+            <li key={row.docId} className="flex flex-wrap items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => onOpen({ label, href, fileName: file.fileName })}
                 className="inline-flex flex-wrap items-center gap-1.5 text-left text-[15px] text-primary underline-offset-4 hover:underline"
               >
-                <span>{label}</span>
+                <span {...(labelKey ? { "data-cms-key": labelKey } : {})}>{label}</span>
                 <FileText className="size-4 shrink-0 opacity-80" aria-hidden />
                 <span className="sr-only">{t(locale, "fun.docView")}</span>
               </button>
+              {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
             </li>
           );
         }
         return (
-          <li key={row.docId} className="text-[15px] leading-7">
-            <span className="text-foreground/90">{label}</span>
-            <span className="ml-2 text-sm text-muted-foreground">({t(locale, "fun.docPreparing")})</span>
+          <li key={row.docId} className="flex flex-wrap items-center gap-0.5 text-[15px] leading-7">
+            <span {...(labelKey ? { "data-cms-key": labelKey } : {})} className="text-foreground/90">
+              {label}
+            </span>
+            <span className="ml-1 text-sm text-muted-foreground">({t(locale, "fun.docPreparing")})</span>
+            {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
           </li>
         );
       })}
@@ -84,9 +107,13 @@ function DocItems({
 export function FuneralDocList({
   locale,
   docs,
+  labels,
+  cmsEditMarkers = false,
 }: {
   locale: Locale;
   docs: Partial<Record<FuneralDocId, FuneralDocFile>>;
+  labels: Record<FuneralDocsKoField, string>;
+  cmsEditMarkers?: boolean;
 }) {
   const [preview, setPreview] = useState<PreviewDoc | null>(null);
 
@@ -95,16 +122,50 @@ export function FuneralDocList({
       <div className="grid gap-4 md:grid-cols-2 md:gap-6">
         <PastelBox>
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <h2 className="text-xl text-[color:var(--pastel-chrome-fg)]">{t(locale, "fun.burialDocs")}</h2>
-            <p className="text-sm text-[color:var(--pastel-chrome-fg)]/75">{t(locale, "fun.docsPublicHint")}</p>
-            <DocItems rows={FUNERAL_BURIAL_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
+            <h2
+              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "burialTitle") } : {})}
+              className="text-xl text-[color:var(--pastel-chrome-fg)]"
+            >
+              {labels.burialTitle}
+            </h2>
+            <p
+              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "hint") } : {})}
+              className="text-sm text-[color:var(--pastel-chrome-fg)]/75"
+            >
+              {labels.hint}
+            </p>
+            <DocItems
+              rows={FUNERAL_BURIAL_ROWS}
+              docs={docs}
+              locale={locale}
+              labels={labels}
+              cmsEditMarkers={cmsEditMarkers}
+              onOpen={setPreview}
+            />
           </Prose>
         </PastelBox>
         <PastelBox>
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <h2 className="text-xl text-[color:var(--pastel-chrome-fg)]">{t(locale, "fun.cremationDocs")}</h2>
-            <p className="text-sm text-[color:var(--pastel-chrome-fg)]/75">{t(locale, "fun.docsPublicHint")}</p>
-            <DocItems rows={FUNERAL_CREMATION_ROWS} docs={docs} locale={locale} onOpen={setPreview} />
+            <h2
+              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "cremationTitle") } : {})}
+              className="text-xl text-[color:var(--pastel-chrome-fg)]"
+            >
+              {labels.cremationTitle}
+            </h2>
+            <p
+              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "hint") } : {})}
+              className="text-sm text-[color:var(--pastel-chrome-fg)]/75"
+            >
+              {labels.hint}
+            </p>
+            <DocItems
+              rows={FUNERAL_CREMATION_ROWS}
+              docs={docs}
+              locale={locale}
+              labels={labels}
+              cmsEditMarkers={cmsEditMarkers}
+              onOpen={setPreview}
+            />
           </Prose>
         </PastelBox>
       </div>
