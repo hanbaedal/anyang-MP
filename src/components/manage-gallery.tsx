@@ -177,6 +177,41 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     setViewIndex((prev) => (prev + delta + total) % total);
   }
 
+  function downloadFilename(item: GalleryPhoto, url: string) {
+    const extMatch = url.split("?")[0]?.match(/\.(jpe?g|png|webp|gif)$/i);
+    const ext = extMatch ? extMatch[1]!.toLowerCase().replace("jpeg", "jpg") : "jpg";
+    const base = (item.alt || `gallery-${item.id}`).replace(/[\\/:*?"<>|]/g, "_").trim() || item.id;
+    return `${base}.${ext}`;
+  }
+
+  async function onDownload(item: GalleryPhoto) {
+    const url = uploadOriginalUrl(item.src);
+    const filename = downloadFilename(item, url);
+    try {
+      const res = await fetch(url, { credentials: "same-origin" });
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  }
+
   function itemEditor(item: GalleryPhoto) {
     return (
       <>
@@ -210,6 +245,9 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
           </Button>
           <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void onDelete(item.id)}>
             삭제
+          </Button>
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void onDownload(item)}>
+            다운로드
           </Button>
         </div>
       </>
