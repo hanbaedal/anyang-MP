@@ -1,13 +1,6 @@
-import { ManageHomeSlides } from "@/components/manage-home-slides";
-import { getHomeHeroSettings } from "@/lib/home-hero";
-import { getHomeIntroSlidesSettingsForWrite } from "@/lib/home-intro-slides";
+import { redirect } from "next/navigation";
 
-export default async function ManageHomeSlidesPage() {
-  const [settings, hero] = await Promise.all([getHomeIntroSlidesSettingsForWrite(), getHomeHeroSettings()]);
-  return (
-    <ManageHomeSlides
-      initial={settings}
-      heroMedia={{ videoSrc: hero.videoSrc, audioSrc: hero.audioSrc, posterSrc: hero.posterSrc }}
-    />
-  );
+/** @deprecated → /manage/cms 메인 탭 */
+export default function ManageHomeSlidesPage() {
+  redirect("/manage/cms");
 }

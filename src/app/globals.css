@@ -9,6 +9,37 @@
   filter: brightness(1.2);
 }
 
+/* 홈페이지 CMS — incheon homeCms 스타일 슬롯 선택 */
+.cms-editable-slot {
+  cursor: pointer;
+  outline: 2px dashed transparent;
+  outline-offset: 2px;
+  border-radius: 4px;
+  transition: outline-color 0.15s, background-color 0.15s;
+}
+.cms-editable-slot:hover {
+  outline-color: #b99247;
+  background: rgba(185, 146, 71, 0.12);
+}
+.cms-slot-active {
+  outline: 2px solid #002b50;
+  background: rgba(0, 43, 80, 0.1);
+}
+
+.cms-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .cms-layout {
+    grid-template-columns: 1fr;
+  }
+  .cms-panel {
+    position: static;
+  }
+}
+
 :root {
   --background: #f4f1ea;
   --foreground: #1c1915;

@@ -6,6 +6,7 @@ import type { SessionUser } from "@/lib/auth-types";
 
 const LABELS: Record<string, string> = {
   "manage.homeSlides": "메인 이미지 등록",
+  "manage.homeCms": "홈페이지 CMS",
   "manage.homeHero": "메인 영상·음악",
   "manage.announcements": "메인 이벤트·팝업",
   "manage.gallery": "갤러리",

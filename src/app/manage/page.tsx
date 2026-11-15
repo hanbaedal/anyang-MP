@@ -6,9 +6,13 @@ import { requireCmsStaff } from "@/lib/auth";
 import { manageNavItems } from "@/lib/manage-nav";
 
 const CARD_COPY: Record<string, { title: string; lead: string }> = {
+  "manage.homeCms": {
+    title: "홈페이지 CMS",
+    lead: "메인·소메뉴를 공개 화면과 같이 보고 클릭해 편집합니다.",
+  },
   "manage.homeSlides": {
     title: "메인 이미지 등록",
-    lead: "갤러리에서 고른 순서대로 홈 슬라이드. 없으면 05.jpg.",
+    lead: "→ 홈페이지 CMS로 통합되었습니다.",
   },
   "manage.homeHero": {
     title: "메인 영상·음악",
