@@ -25,9 +25,9 @@ export function manageNavItems(): ManageNavItem[] {
     cmsPage("features"),
     { href: "/manage/notices", i18n: "manage.noticesPage" },
     cmsPage("directions"),
-    // 분양안내: 매장묘 → 평장묘 → 봉안묘
-    cmsPage("burial"),
+    // 분양안내: 평장묘 → 매장묘 → 봉안묘
     cmsPage("lawn"),
+    cmsPage("burial"),
     cmsPage("columbarium"),
     // 이용안내: 분양 절차 → 관리비 → 이용안내 → 이용절차
     cmsPage("procedure"),

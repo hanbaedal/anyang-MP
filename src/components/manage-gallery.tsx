@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DecadePager } from "@/components/decade-pager";
 import { ensureImageWithinMaxBytes } from "@/lib/compress-image-client";
 import type { GalleryTag } from "@/lib/content";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import { MANAGE_IMAGE_MAX_BYTES, MANAGE_IMAGE_MAX_MB } from "@/lib/image-upload-limits";
-import { thumbUrl } from "@/lib/media";
+import { thumbUrl, uploadOriginalUrl } from "@/lib/media";
 
 const field =
-  "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "h-9 w-full min-w-0 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const area =
-  "min-h-20 w-full rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "min-h-20 w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function formatMb(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1);
@@ -27,6 +29,7 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState<"전체" | GalleryTag>("전체");
+  const [viewIndex, setViewIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -152,21 +155,102 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     return current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag];
   }
 
+  function patchItem(id: string, patch: Partial<GalleryPhoto>) {
+    setItems((rows) => rows.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+  }
+
   const visible = filter === "전체" ? items : items.filter((item) => item.tags.includes(filter));
+  const total = visible.length;
+  const safeIndex = total ? Math.min(viewIndex, total - 1) : 0;
+  const current = total ? visible[safeIndex] : null;
+
+  useEffect(() => {
+    setViewIndex(0);
+  }, [filter]);
+
+  useEffect(() => {
+    if (viewIndex >= total && total > 0) setViewIndex(total - 1);
+  }, [total, viewIndex]);
+
+  function go(delta: number) {
+    if (total < 2) return;
+    setViewIndex((prev) => (prev + delta + total) % total);
+  }
+
+  function itemEditor(item: GalleryPhoto) {
+    return (
+      <>
+        <input
+          className={field}
+          placeholder="제목"
+          value={item.alt}
+          onChange={(e) => patchItem(item.id, { alt: e.target.value })}
+        />
+        <textarea
+          className={area}
+          placeholder="설명 (분양안내 카드 본문)"
+          value={item.description ?? ""}
+          onChange={(e) => patchItem(item.id, { description: e.target.value })}
+        />
+        <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+          {GALLERY_TAGS.map((tag) => (
+            <label key={tag} className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                checked={item.tags.includes(tag)}
+                onChange={() => patchItem(item.id, { tags: toggleTag(item.tags, tag) })}
+              />
+              {tag}
+            </label>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" size="sm" disabled={busy} onClick={() => void onSave(item)}>
+            저장
+          </Button>
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void onDelete(item.id)}>
+            삭제
+          </Button>
+        </div>
+      </>
+    );
+  }
+
+  const filterBar = (
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <h2 className="font-medium">등록된 사진 ({items.length})</h2>
+      <div className="flex max-w-full flex-wrap gap-1.5">
+        {(["전체", ...GALLERY_TAGS] as Array<"전체" | GalleryTag>).map((tag) => (
+          <Button
+            key={tag}
+            type="button"
+            size="sm"
+            variant={filter === tag ? "default" : "outline"}
+            className="h-7 px-2 text-xs"
+            onClick={() => setFilter(tag)}
+          >
+            {tag}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-      <form onSubmit={onUpload} className="space-y-3 rounded-xl border bg-card p-5">
-        <h2 className="font-medium">사진 올리기</h2>
-        <p className="text-sm text-muted-foreground">
-          「매장묘·평장묘·봉안묘」 태그는 분양안내 해당 페이지 사진을 구동합니다. 「일반」은 공개 갤러리·홈페이지
-          관리에서 함께 씁니다.
-        </p>
-        <div className="flex flex-wrap items-start gap-4">
-          <div className="relative h-28 w-40 shrink-0 overflow-hidden rounded-md border bg-muted">
+    <div className="mx-auto min-w-0 max-w-6xl space-y-8 overflow-x-hidden px-4 py-8 md:py-10">
+      {/* 1. 사진 올리기 */}
+      <form
+        onSubmit={onUpload}
+        className="rounded-xl border bg-card p-4 sm:p-5 md:grid md:grid-cols-2 md:items-start md:gap-x-8 md:gap-y-3"
+      >
+        <h2 className="font-medium md:col-span-2">사진 올리기</h2>
+
+        {/* PC·노트북: 좌 미리보기 / 우 입력·버튼 — 모바일: 세로 순서 유지 */}
+        <div className="mt-3 min-w-0 space-y-2 md:mt-0">
+          <div className="relative mx-auto aspect-[4/3] w-full max-w-[16rem] overflow-hidden rounded-md border bg-muted sm:max-w-xs md:mx-0 md:max-w-none">
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="" className="h-full w-full object-cover" />
+              <img src={preview} alt="" className="h-full w-full object-contain object-center" />
             ) : (
               <span className="flex h-full items-center justify-center px-2 text-center text-[11px] leading-tight text-muted-foreground">
                 선택한 파일
@@ -175,7 +259,33 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
               </span>
             )}
           </div>
-          <div className="min-w-0 flex-1 space-y-2">
+          <p className="text-center text-[11px] text-muted-foreground md:text-left">
+            JPG · PNG · WebP · GIF · {MANAGE_IMAGE_MAX_MB}MB 이하 (초과 시 자동 압축)
+          </p>
+        </div>
+
+        <div className="mt-3 min-w-0 space-y-2 md:mt-0">
+          <input
+            className={field}
+            placeholder="제목 (갤러리·분양안내 카드 제목)"
+            value={alt}
+            onChange={(e) => setAlt(e.target.value)}
+          />
+          <textarea
+            className={`${area} md:min-h-16`}
+            placeholder="설명 (분양안내 카드 본문·캡션, Enter=줄바꿈)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
+            {GALLERY_TAGS.map((tag) => (
+              <label key={tag} className="flex items-center gap-1">
+                <input type="checkbox" checked={tags.includes(tag)} onChange={() => setTags(toggleTag(tags, tag))} />
+                {tag}
+              </label>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
             <Button type="button" variant="outline" size="sm" className="w-fit" asChild>
               <label className={`cursor-pointer ${busy ? "pointer-events-none opacity-60" : ""}`}>
                 {file ? "다른 파일 선택" : "파일 선택"}
@@ -190,106 +300,95 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
               </label>
             </Button>
             {file ? (
-              <p className="truncate text-xs text-muted-foreground">
-                {file.name} · {formatMb(file.size)}MB
+              <p className="min-w-0 truncate text-xs text-muted-foreground">
+                {file.name}
+                <span className="hidden sm:inline"> · {formatMb(file.size)}MB</span>
               </p>
             ) : null}
-            <p className="text-[11px] text-muted-foreground">
-              JPG · PNG · WebP · GIF · {MANAGE_IMAGE_MAX_MB}MB 이하 (초과 시 자동 압축)
-            </p>
           </div>
+          <Button type="submit" disabled={busy} className="w-full sm:w-fit">
+            {busy ? "올리는 중…" : "올리기"}
+          </Button>
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
         </div>
-        <input
-          className={field}
-          placeholder="제목 (갤러리·분양안내 카드 제목)"
-          value={alt}
-          onChange={(e) => setAlt(e.target.value)}
-        />
-        <textarea
-          className={area}
-          placeholder="설명 (분양안내 카드 본문·캡션, Enter=줄바꿈)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="flex flex-wrap gap-2 text-sm">
-          {GALLERY_TAGS.map((tag) => (
-            <label key={tag} className="flex items-center gap-1">
-              <input type="checkbox" checked={tags.includes(tag)} onChange={() => setTags(toggleTag(tags, tag))} />
-              {tag}
-            </label>
-          ))}
-        </div>
-        <Button type="submit" disabled={busy}>
-          {busy ? "올리는 중…" : "올리기"}
-        </Button>
-        {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
       </form>
 
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-medium">등록된 사진 ({items.length})</h2>
-          <div className="flex flex-wrap gap-1.5">
-            {(["전체", ...GALLERY_TAGS] as Array<"전체" | GalleryTag>).map((tag) => (
-              <Button
-                key={tag}
-                type="button"
-                size="sm"
-                variant={filter === tag ? "default" : "outline"}
-                className="h-7 px-2 text-xs"
-                onClick={() => setFilter(tag)}
-              >
-                {tag}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((item) => (
-            <li key={item.id} className="space-y-2 rounded-xl border bg-card p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbUrl(item.src)} alt={item.alt} className="aspect-[4/3] w-full rounded-md object-cover" />
-              <input
-                className={field}
-                placeholder="제목"
-                value={item.alt}
-                onChange={(e) => setItems(items.map((row) => (row.id === item.id ? { ...row, alt: e.target.value } : row)))}
-              />
-              <textarea
-                className={area}
-                placeholder="설명 (분양안내 카드 본문)"
-                value={item.description ?? ""}
-                onChange={(e) =>
-                  setItems(
-                    items.map((row) => (row.id === item.id ? { ...row, description: e.target.value } : row)),
-                  )
-                }
-              />
-              <div className="flex flex-wrap gap-2 text-xs">
-                {GALLERY_TAGS.map((tag) => (
-                  <label key={tag} className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      checked={item.tags.includes(tag)}
-                      onChange={() =>
-                        setItems(items.map((row) => (row.id === item.id ? { ...row, tags: toggleTag(row.tags, tag) } : row)))
-                      }
+      {/* 2. 등록된 사진 */}
+      <div className="min-w-0 space-y-4">
+        {filterBar}
+
+        {visible.length === 0 ? (
+          <p className="text-sm text-muted-foreground">이 태그에 사진이 없습니다.</p>
+        ) : (
+          <>
+            {/* PC·노트북: 한 장 뷰어 + 번호 줄 (가로 스크롤 없음, 줄바꿈) */}
+            <section
+              className="hidden min-w-0 space-y-3 md:block"
+              aria-label="등록된 사진 미리보기"
+            >
+              <p className="text-center text-sm text-muted-foreground">
+                {safeIndex + 1} / {total}
+                {current?.alt ? ` · ${current.alt}` : ""}
+              </p>
+              <div className="relative w-full max-w-full overflow-hidden rounded-xl border border-[#ead7b4] bg-[#f8eedd] p-2">
+                <div className="relative flex h-[min(32vh,17.5rem)] w-full items-center justify-center overflow-hidden rounded-lg bg-[#ead7b4]/40 lg:h-[min(36vh,20rem)]">
+                  {current ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={current.id}
+                      src={uploadOriginalUrl(current.src)}
+                      alt={current.alt}
+                      className="max-h-full max-w-full object-contain object-center"
                     />
-                    {tag}
-                  </label>
-                ))}
+                  ) : null}
+                  {total > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="absolute left-2 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60"
+                        aria-label="이전 사진"
+                        onClick={() => go(-1)}
+                      >
+                        <ChevronLeft className="size-5" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60"
+                        aria-label="다음 사진"
+                        onClick={() => go(1)}
+                      >
+                        <ChevronRight className="size-5" aria-hidden />
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button type="button" size="sm" disabled={busy} onClick={() => void onSave(item)}>
-                  저장
-                </Button>
-                <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void onDelete(item.id)}>
-                  삭제
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {visible.length === 0 ? <p className="text-sm text-muted-foreground">이 태그에 사진이 없습니다.</p> : null}
+
+              <DecadePager
+                total={total}
+                index={safeIndex}
+                onGo={setViewIndex}
+                itemLabel={(n) => `${n}번 사진`}
+                label="등록된 사진"
+              />
+
+              {current ? (
+                <div className="space-y-2 rounded-xl border bg-card p-4">{itemEditor(current)}</div>
+              ) : null}
+            </section>
+
+            {/* 모바일: 기존 카드 격자 */}
+            <ul className="grid gap-4 sm:grid-cols-2 md:hidden">
+              {visible.map((item) => (
+                <li key={item.id} className="min-w-0 space-y-2 rounded-xl border bg-card p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={thumbUrl(item.src)} alt={item.alt} className="aspect-[4/3] w-full rounded-md object-cover" />
+                  {itemEditor(item)}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </div>
   );

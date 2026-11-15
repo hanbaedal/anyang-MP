@@ -304,8 +304,8 @@ export const NAV: NavItem[] = [
     tone: "lots",
     image: "/images/plots.jpg",
     children: [
-      { href: "/lots/burial", label: "매장묘", i18n: "nav.burial" },
       { href: "/lots/lawn", label: "평장묘", i18n: "nav.lawn" },
+      { href: "/lots/burial", label: "매장묘", i18n: "nav.burial" },
       { href: "/lots/columbarium", label: "봉안묘", i18n: "nav.columbarium" },
     ],
   },

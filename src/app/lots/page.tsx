@@ -38,22 +38,22 @@ async function lotsSection(
 export default async function LotsHubPage() {
   const locale = await readLocale();
   const emptyLabel = t(locale, "lots.galleryEmpty");
-  const [burial, lawn, col] = await Promise.all([
-    lotsSection(locale, "burial", "burial", "burial.body"),
+  const [lawn, burial, col] = await Promise.all([
     lotsSection(locale, "lawn", "lawn", "lawn.body"),
+    lotsSection(locale, "burial", "burial", "burial.body"),
     lotsSection(locale, "columbarium", "columbarium", "col.body"),
   ]);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-16 px-4 py-12">
       <h1 className="sr-only">{t(locale, "nav.lots")}</h1>
-        <MenuHubSection id="burial" title={burial.title} href="/lots/burial" moreLabel={t(locale, "more.detail")}>
-          <Prose>{burial.body}</Prose>
-          <LotsPhotoGrid items={burial.items} emptyLabel={emptyLabel} />
-        </MenuHubSection>
         <MenuHubSection id="lawn" title={lawn.title} href="/lots/lawn" moreLabel={t(locale, "more.detail")}>
           <Prose>{lawn.body}</Prose>
           <LotsPhotoGrid items={lawn.items} emptyLabel={emptyLabel} />
+        </MenuHubSection>
+        <MenuHubSection id="burial" title={burial.title} href="/lots/burial" moreLabel={t(locale, "more.detail")}>
+          <Prose>{burial.body}</Prose>
+          <LotsPhotoGrid items={burial.items} emptyLabel={emptyLabel} />
         </MenuHubSection>
         <MenuHubSection
           id="columbarium"
