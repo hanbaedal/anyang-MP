@@ -1,4 +1,3 @@
-import { CmsPageHero } from "@/components/cms-page-hero";
 import { CmsPageIntro } from "@/components/cms-page-intro";
 import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
@@ -27,7 +26,6 @@ export default async function BurialPage() {
 
   return (
     <>
-      <CmsPageHero kicker={hero.kicker} />
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
           <CmsPageIntro title={hero.title} lead={hero.lead} />

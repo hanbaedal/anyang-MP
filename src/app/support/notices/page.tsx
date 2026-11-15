@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { CmsPageHero } from "@/components/cms-page-hero";
 import { CmsPageIntro } from "@/components/cms-page-intro";
 import { PastelBox } from "@/components/pastel-box";
 import { NoticesList } from "@/components/notices-list";
@@ -24,7 +23,6 @@ export default async function NoticesPage() {
 
   return (
   <>
-      <CmsPageHero kicker={t(locale, "nav.guide")} />
       <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
         <PastelBox className="mb-4 p-4 md:mb-5 md:p-5">
           <CmsPageIntro title={t(locale, "notices.title")} lead={t(locale, "notices.lead")} />

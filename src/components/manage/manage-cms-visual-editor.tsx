@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CmsPageHero } from "@/components/cms-page-hero";
 import { DirectionsMap } from "@/components/directions-map";
 import { FeaturesPhotoGrid, type FeaturePhotoItem } from "@/components/features-photo-grid";
 import { LotsPhotoGrid, type LotsPhotoItem } from "@/components/lots-photo-grid";
@@ -15,7 +14,6 @@ import { PastelBox } from "@/components/pastel-box";
 import { Prose } from "@/components/page-hero";
 import { SaleSteps } from "@/components/sale-steps";
 import type { CmsItem, CmsPage } from "@/lib/cms-types";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { uploadOriginalUrl } from "@/lib/media";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 
@@ -40,7 +38,6 @@ export function ManageCmsVisualEditor({
   const [message, setMessage] = useState("");
   const pageRef = useRef(page);
   const slug = page.slug as ManageVisualCmsSlug;
-  const hero = resolveCmsPageHero("ko", page);
   const directionsPage = slug === "directions";
   const galleryDriven = slug === "burial" || slug === "lawn" || slug === "columbarium";
 
@@ -149,7 +146,6 @@ export function ManageCmsVisualEditor({
               : undefined
         }
       />
-      <CmsPageHero kicker={hero.kicker} compact={directionsPage} />
       <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 md:max-w-7xl md:py-10">
         {slug === "directions" ? (
           <div className="space-y-4">

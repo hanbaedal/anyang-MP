@@ -1,4 +1,3 @@
-import { CmsPageHero } from "@/components/cms-page-hero";
 import { CmsPageIntro } from "@/components/cms-page-intro";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
@@ -66,7 +65,6 @@ export default async function ProcedurePage() {
 
   return (
     <>
-      <CmsPageHero kicker={hero.kicker} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
           <CmsPageIntro title={hero.title} lead={hero.lead} />

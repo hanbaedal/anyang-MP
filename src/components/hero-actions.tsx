@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE, socialHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -102,6 +103,8 @@ export function SocialActions({
   /** 화면 우측 세로 고정 레일 */
   verticalFixed?: boolean;
 }) {
+  const pathname = usePathname();
+  const onHome = pathname === "/";
   const items = [
     { href: socialHref("FACEBOOK", SITE.phoneTel), label: "페이스북", icon: <FacebookMark /> },
     { href: socialHref("INSTAGRAM", "/intro/directions"), label: "인스타그램", icon: <InstagramMark /> },
@@ -115,7 +118,12 @@ export function SocialActions({
       className={cn(
         "flex shrink-0",
         verticalFixed
-          ? "pointer-events-auto fixed right-2 top-1/2 z-40 -translate-y-1/2 flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5"
+          ? cn(
+              "pointer-events-auto fixed right-2 z-40 flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5",
+              onHome
+                ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
+            )
           : cn(
               "items-center",
               compact ? "gap-1.5 [&_svg]:size-4 md:gap-2 md:[&_svg]:size-5" : "gap-2 sm:gap-2.5",
