@@ -56,7 +56,7 @@ export function ManageHomeCms({
   const [socialLinks, setSocialLinks] = useState<SiteSocialLink[]>(
     initial.socialLinks?.length ? initial.socialLinks : defaultSiteSocialLinks(),
   );
-  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<string | null>("home.slides");
   const [draftIcon, setDraftIcon] = useState<SiteSocialIcon>("facebook");
   const [draftHref, setDraftHref] = useState("");
   const [draftLabel, setDraftLabel] = useState("");
@@ -476,26 +476,28 @@ export function ManageHomeCms({
     ) : null;
 
   const panelHint =
-    activeKey === "home.slides" || isHomeSocialSlotKey(activeKey ?? "")
-      ? isHomeSocialSlotKey(activeKey ?? "")
+    activeKey === "home.slides"
+      ? "갤러리 썸네일을 눌러 순서대로 선택하세요. 또는 미리보기에서 「전경 슬라이드」·배경을 클릭합니다."
+      : isHomeSocialSlotKey(activeKey ?? "")
         ? "SNS 아이콘은 우측 세로 막대입니다. + 로 추가, 아이콘 클릭으로 URL을 편집합니다."
-        : undefined
-      : activeKey
-        ? "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개 페이지에서 자동 처리됩니다."
-        : undefined;
+        : activeKey
+          ? "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개 페이지에서 자동 처리됩니다."
+          : undefined;
 
   const slotLabel =
-    activeKey === HOME_SOCIAL_ADD_SLOT
-      ? "SNS 아이콘 추가"
-      : editingSocial
-        ? `SNS · ${editingSocial.label}`
-        : slotMeta?.label;
+    activeKey === "home.slides"
+      ? HOME_CMS_SLOT_META["home.slides"].label
+      : activeKey === HOME_SOCIAL_ADD_SLOT
+        ? "SNS 아이콘 추가"
+        : editingSocial
+          ? `SNS · ${editingSocial.label}`
+          : slotMeta?.label;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <p className="cms-orders-lead">
-        실제 홈페이지(<code>/</code>)와 동일한 배치입니다. 문구·전경·<strong>우측 SNS</strong>를 클릭해 오른쪽에서
-        수정하세요. 영상·음악은{" "}
+        실제 홈페이지(<code>/</code>)와 동일한 배치입니다. 오른쪽 패널에서 <strong>갤러리 사진</strong>을 고르거나
+        전경·문구·<strong>우측 SNS</strong>를 클릭해 수정하세요. 영상·음악은{" "}
         <Link href="/manage/home-hero" className="text-primary underline-offset-2 hover:underline">
           메인 영상·음악
         </Link>
@@ -513,6 +515,15 @@ export function ManageHomeCms({
             >
               <option value="ko">한국어</option>
             </select>
+            <Button
+              type="button"
+              size="sm"
+              variant={activeKey === "home.slides" ? "default" : "outline"}
+              className="h-8 text-xs"
+              onClick={() => setActiveKey("home.slides")}
+            >
+              전경 슬라이드·갤러리
+            </Button>
             <Link
               href="/"
               target="_blank"

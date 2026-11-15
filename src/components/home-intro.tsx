@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { CmsHomeSlidesSlot } from "@/components/cms-edit/cms-home-slides-slot";
 import { HomeHeroMedia } from "@/components/home-hero-media";
 import { HomeViewSlides, type ViewSlide } from "@/components/home-view-slides";
 import { useLocale, useT } from "@/components/locale-provider";
@@ -128,21 +129,31 @@ export function HomeIntro({
           posterSrc={posterSrc}
           hideVideo={useSlides}
         />
-        {cmsSlot || cmsEditMarkers ? (
+        <HomeViewSlides photos={viewPhotos} paused={false} cmsEdit={cmsEditMarkers} />
+        {cmsSlot ? (
           <button
             type="button"
             data-cms-key="home.slides"
             className={cn(
-              "absolute inset-0 z-[5] border-0 bg-transparent p-0",
-              cmsSlot && "cursor-pointer cms-editable-slot",
-              cmsSlot?.activeKey === "home.slides" && "cms-slot-active",
+              "absolute inset-0 z-[8] border-0 bg-transparent p-0",
+              "cursor-pointer cms-editable-slot",
+              cmsSlot.activeKey === "home.slides" && "cms-slot-active",
             )}
             aria-label="메인 전경 슬라이드 편집"
-            onClick={cmsSlot ? () => cmsSlot.onSelect("home.slides") : undefined}
-            tabIndex={cmsEditMarkers && !cmsSlot ? -1 : undefined}
+            onClick={() => cmsSlot.onSelect("home.slides")}
           />
         ) : null}
-        <HomeViewSlides photos={viewPhotos} paused={false} />
+        {cmsEditMarkers ? (
+          <>
+            <button
+              type="button"
+              data-cms-key="home.slides"
+              className="absolute inset-0 z-[8] cursor-pointer border-0 bg-transparent p-0"
+              aria-label="메인 전경 슬라이드 편집"
+            />
+            <CmsHomeSlidesSlot />
+          </>
+        ) : null}
       </div>
       <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pb-5 pt-0 sm:px-6 sm:pb-7 md:px-10 md:pb-8">
         <div className="pointer-events-auto w-full min-w-0 text-center md:max-w-[min(100%,40rem)] md:text-left">

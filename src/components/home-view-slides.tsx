@@ -28,7 +28,16 @@ function clampRealPos(pos: number, n: number) {
  * 끝↔처음은 클론 트랙으로 끊김 없이 루프.
  * AMP-91: 탭 복귀 스냅·재도장. AMP-94: 화살표 제거 · pos 가드로 남색 공백 방지.
  */
-export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]; paused?: boolean }) {
+export function HomeViewSlides({
+  photos,
+  paused = false,
+  /** CMS 편집 — 클릭이 슬라이드 슬롯으로 전달되도록 */
+  cmsEdit = false,
+}: {
+  photos: ViewSlide[];
+  paused?: boolean;
+  cmsEdit?: boolean;
+}) {
   const n = photos.length;
   // track: [clone last, ...photos, clone first] → real slides at positions 1..n
   const [pos, setPos] = useState(1);
@@ -149,7 +158,7 @@ export function HomeViewSlides({ photos, paused = false }: { photos: ViewSlide[]
   const showPos = n < 2 ? 0 : clampTrackPos(rawPos, n);
 
   return (
-    <div className="absolute inset-0 z-[5]">
+    <div className={cn("absolute inset-0 z-[5]", cmsEdit && "pointer-events-none")}>
       <div className="absolute inset-0 overflow-hidden bg-primary" aria-hidden>
         <div
           key={`track-${paintKey}`}
