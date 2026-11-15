@@ -1,5 +1,25 @@
 import type { NextConfig } from "next";
 
+function selfUploadPatterns() {
+  const hosts = new Set<string>(["www.anyangmp.com", "anyangmp.com", "mp-anyang.onrender.com", "localhost"]);
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "";
+  if (fromEnv) {
+    try {
+      hosts.add(new URL(fromEnv).hostname);
+    } catch {
+      /* ignore */
+    }
+  }
+  const patterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [];
+  for (const hostname of hosts) {
+    patterns.push(
+      { protocol: "https", hostname, pathname: "/api/uploads/**" },
+      { protocol: "http", hostname, pathname: "/api/uploads/**" },
+    );
+  }
+  return patterns;
+}
+
 function cdnPatterns() {
   const raw = process.env.NEXT_PUBLIC_IMAGE_CDN_BASE || process.env.IMAGE_CDN_BASE;
   if (!raw) return [];
@@ -27,7 +47,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: cdnPatterns(),
+    remotePatterns: [...cdnPatterns(), ...selfUploadPatterns()],
   },
   async headers() {
     // 정적 히어로 MP4·나레이션 — 캐시버스트(?v=)와 함께 장기 캐시 안전

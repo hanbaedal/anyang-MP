@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
+import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
   guideCardBodyTextClass,
@@ -11,7 +11,6 @@ import {
 } from "@/lib/guide-photo-card";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
-import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 export type FeaturePhotoItem = {
@@ -92,7 +91,6 @@ export function FeaturesPhotoGrid({
         const showText = Boolean(text);
         const showCopy = showTitle || showText;
         const hasPhoto = cardHasGalleryImage(item.image);
-        const src = hasPhoto ? uploadOriginalUrl(item.image!.trim()) : "";
         const alt = title || text || "photo";
         const itemId = item.id || item.title || String(index);
         const cmsTitleKey =
@@ -120,15 +118,7 @@ export function FeaturesPhotoGrid({
             )}
           >
             {hasPhoto ? (
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover object-center"
-                sizes={dense ? "(max-width: 767px) 100vw, 33vw" : "(max-width: 767px) 100vw, 50vw"}
-                priority={index < 2}
-                unoptimized={src.includes("/api/uploads/")}
-              />
+              <GuideCardCoverImage imagePath={item.image!.trim()} alt={alt} index={index} dense={dense} />
             ) : null}
             {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={itemId} /> : null}
             {hasPhoto && showCopy && !transit ? (

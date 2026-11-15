@@ -1,3 +1,5 @@
+"use client";
+
 import { pageSlotItemImage } from "@/lib/page-cms-slots";
 import { cn } from "@/lib/utils";
 

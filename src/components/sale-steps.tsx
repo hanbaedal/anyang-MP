@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Image from "next/image";
 import { Paragraphs } from "@/components/paragraphs";
+import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
   guideCardBodyTextClass,
@@ -13,7 +13,6 @@ import {
   guideCardPhotoCopyWrap,
   guideCardPhotoTextHighlight,
 } from "@/lib/guide-photo-card";
-import { uploadOriginalUrl } from "@/lib/media";
 import { SALE_STEPS } from "@/lib/site";
 import { useT } from "@/components/locale-provider";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
@@ -66,7 +65,6 @@ export function SaleSteps({
     >
       {rows.map((step, index) => {
         const hasPhoto = cardHasGalleryImage(step.image);
-        const src = hasPhoto ? uploadOriginalUrl(step.image!.trim()) : "";
         const stepId = step.id || `step-${step.n}`;
         const cmsTitleKey = cmsSlug && cmsEditMarkers ? pageSlotItemTitle(cmsSlug, stepId) : undefined;
         const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, stepId) : undefined;
@@ -84,16 +82,9 @@ export function SaleSteps({
             )}
           >
             {hasPhoto ? (
-              <Image
-                src={src}
-                alt=""
-                fill
-                className="object-cover object-center"
-                sizes="(max-width: 767px) 100vw, 50vw"
-                priority={index < 2}
-                unoptimized={src.includes("/api/uploads/")}
-                aria-hidden
-              />
+              <div className="absolute inset-0" aria-hidden>
+                <GuideCardCoverImage imagePath={step.image!.trim()} alt="" index={index} />
+              </div>
             ) : null}
             {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={stepId} /> : null}
             {hasPhoto ? <div className={GUIDE_CARD_PHOTO_FOOT_SCRIM} aria-hidden /> : null}
