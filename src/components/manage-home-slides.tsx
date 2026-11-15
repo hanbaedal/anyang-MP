@@ -1,10 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { HomeIntro } from "@/components/home-intro";
+import { ManageEditToolbar } from "@/components/manage/manage-edit-toolbar";
 import { Button } from "@/components/ui/button";
 import {
   defaultHomeIntroHeroCopy,
   HOME_INTRO_HERO_COPY_LIMITS,
+  HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
   type HomeIntroHeroCopy,
@@ -22,12 +26,13 @@ function slideIdForPhoto(photo: GalleryPhoto) {
   return `gallery:${photo.id}`;
 }
 
-const fieldClass =
-  "h-9 w-full min-w-0 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
-const areaClass =
-  "min-h-[4.5rem] w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
-export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings }) {
+export function ManageHomeSlides({
+  initial,
+  heroMedia,
+}: {
+  initial: HomeIntroSlidesSettings;
+  heroMedia: { videoSrc: string; audioSrc: string; posterSrc: string };
+}) {
   const [slides, setSlides] = useState<HomeIntroSlide[]>(initial.slides);
   const [heroCopy, setHeroCopy] = useState<HomeIntroHeroCopy>(initial.heroCopy ?? defaultHomeIntroHeroCopy());
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
@@ -38,6 +43,14 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
   const [message, setMessage] = useState("");
   const [dirty, setDirty] = useState(false);
   const busy = status === "busy";
+
+  const viewPhotos = useMemo(
+    () =>
+      slides.length > 0
+        ? slides.map((s) => ({ src: s.src, alt: s.alt }))
+        : [{ src: HOME_INTRO_SLIDE_FALLBACK_SRC, alt: HOME_INTRO_SLIDE_FALLBACK_ALT }],
+    [slides],
+  );
 
   const orderBySrc = useMemo(() => {
     const map = new Map<string, number>();
@@ -153,70 +166,46 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 px-3 py-6 sm:px-4">
+    <div className="flex min-h-full flex-col bg-background">
+      <ManageEditToolbar
+        busy={busy}
+        message={message}
+        status={status === "busy" ? "busy" : dirty ? "idle" : status === "ok" ? "ok" : status === "error" ? "error" : "idle"}
+        onSave={() => void save()}
+        hint={
+          <>
+            홈(/)과 동일 레이아웃 · 전경 슬라이드는 아래 갤러리에서 순서대로 고름 · 영상·음악은{" "}
+            <Link href="/manage/home-hero" className="underline-offset-2 hover:underline">
+              메인 영상·음악
+            </Link>
+          </>
+        }
+      />
+      <div className="relative min-h-[min(72dvh,40rem)] w-full shrink-0 overflow-hidden border-b">
+        <HomeIntro
+          videoSrc={heroMedia.videoSrc}
+          audioSrc={heroMedia.audioSrc}
+          posterSrc={heroMedia.posterSrc}
+          viewPhotos={viewPhotos}
+          heroCopy={heroCopy}
+          manageCopy={{
+            busy,
+            limits: HOME_INTRO_HERO_COPY_LIMITS,
+            onPatch: patchHeroCopy,
+          }}
+        />
+      </div>
+      <div className="mx-auto max-w-4xl space-y-5 px-3 py-6 sm:px-4">
       <p className="text-xs leading-relaxed text-muted-foreground">
         갤러리에 올린 사진을 카드로 고릅니다. <strong className="font-medium">클릭한 순서</strong>가
         홈(/) 전경 슬라이드 순서입니다(최대 {HOME_INTRO_SLIDES_MAX}장). 새 사진은{" "}
-        <a href="/manage/gallery" className="underline-offset-2 hover:underline">
+        <Link href="/manage/gallery" className="underline-offset-2 hover:underline">
           갤러리 관리
-        </a>
+        </Link>
         에서 올리세요. 선택이 없으면 홈에{" "}
         <code className="rounded bg-muted px-1">{HOME_INTRO_SLIDE_FALLBACK_SRC}</code> 한 장이
         보입니다.
       </p>
-
-      <section className="space-y-3 rounded-lg border bg-card p-3 sm:p-4">
-        <h2 className="text-sm font-medium">메인 화면 문구</h2>
-        <p className="text-xs text-muted-foreground">
-          전경 슬라이드 위에 겹치는 한국어 카피입니다. 영어·중국어는 언어 메뉴 기본 문구를 씁니다.
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block space-y-1 sm:col-span-2">
-            <span className="text-xs font-medium text-muted-foreground">상단 한 줄</span>
-            <input
-              className={fieldClass}
-              value={heroCopy.kicker}
-              maxLength={HOME_INTRO_HERO_COPY_LIMITS.kicker}
-              disabled={busy}
-              onChange={(e) => patchHeroCopy({ kicker: e.target.value })}
-            />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-muted-foreground">제목 1줄</span>
-            <input
-              className={fieldClass}
-              value={heroCopy.heroLine1}
-              maxLength={HOME_INTRO_HERO_COPY_LIMITS.heroLine1}
-              disabled={busy}
-              onChange={(e) => patchHeroCopy({ heroLine1: e.target.value })}
-            />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-muted-foreground">제목 2줄</span>
-            <input
-              className={fieldClass}
-              value={heroCopy.heroLine2}
-              maxLength={HOME_INTRO_HERO_COPY_LIMITS.heroLine2}
-              disabled={busy}
-              onChange={(e) => patchHeroCopy({ heroLine2: e.target.value })}
-            />
-          </label>
-          <label className="block space-y-1 sm:col-span-2">
-            <span className="text-xs font-medium text-muted-foreground">아래 설명</span>
-            <textarea
-              className={areaClass}
-              value={heroCopy.lead}
-              maxLength={HOME_INTRO_HERO_COPY_LIMITS.lead}
-              disabled={busy}
-              rows={3}
-              onChange={(e) => patchHeroCopy({ lead: e.target.value })}
-            />
-            <span className="text-[10px] text-muted-foreground">
-              줄바꿈(Enter)을 넣으면 좁은 화면에서 두 줄로 나뉩니다.
-            </span>
-          </label>
-        </div>
-      </section>
 
       <section className="space-y-3 rounded-lg border bg-card p-3 sm:p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -346,6 +335,7 @@ export function ManageHomeSlides({ initial }: { initial: HomeIntroSlidesSettings
           })}
         </ul>
       </section>
+      </div>
     </div>
   );
 }

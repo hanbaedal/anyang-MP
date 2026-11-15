@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
-import { PageHero } from "@/components/page-hero";
 import { CmsEditor } from "@/components/cms-editor";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
+import { ManageCmsVisualEditor } from "@/components/manage/manage-cms-visual-editor";
+import { PageHero } from "@/components/page-hero";
 import { ManageFuneralDocs } from "@/components/manage-funeral-docs";
 import { CMS_SLUGS, getCmsPageOrDefault, isCmsSlug } from "@/lib/cms";
 import { listFuneralDocs } from "@/lib/funeral-docs";
+import { listLotsPhotosFromGallery, type LotsGallerySlug } from "@/lib/gallery";
+import { isManageVisualCmsSlug } from "@/lib/manage-visual-pages";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 
 export default async function ManageCmsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -25,6 +28,29 @@ export default async function ManageCmsPage({ params }: { params: Promise<{ slug
             : slug === "remodeling"
               ? "갤러리와 같이 사진을 올리고, 격자에서 제목·설명을 수정합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
               : "한글 제목·본문·항목을 저장하면 Enter는 줄바꿈, 빈 줄은 문단으로 공개됩니다. 영어·중국어는 자동 번역됩니다. 분양가 원을 비우면 ‘확인 필요’로 보입니다.";
+
+  const visual = isManageVisualCmsSlug(slug);
+  const lotsPreview =
+    slug === "burial" || slug === "lawn" || slug === "columbarium"
+      ? await listLotsPhotosFromGallery(slug as LotsGallerySlug, "ko")
+      : [];
+
+  if (visual) {
+    return (
+      <>
+        <ManageCmsVisualEditor initial={page} lotsPreviewItems={lotsPreview} />
+        {funeralDocs ? (
+          <div className="mx-auto max-w-6xl space-y-3 border-t bg-background px-4 py-10">
+            <h2 className="text-lg font-medium text-foreground">공공서류 PDF (4종)</h2>
+            <p className="text-sm text-muted-foreground">
+              이용절차 카드 아래에 공개됩니다. PDF 등록은 이 영역에서만 수정합니다.
+            </p>
+            <ManageFuneralDocs initial={funeralDocs} />
+          </div>
+        ) : null}
+      </>
+    );
+  }
 
   const publicCopy = resolveCmsPageHero("ko", { ...page, slug });
 

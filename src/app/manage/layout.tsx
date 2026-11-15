@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic";
 export default async function ManageLayout({ children }: { children: React.ReactNode }) {
   await ensureAuthSeed();
   await requireCmsStaff();
-  return <div className="min-h-full bg-muted/40">{children}</div>;
+  return <div className="min-h-full">{children}</div>;
 }
