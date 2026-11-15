@@ -60,9 +60,9 @@ export default async function ProcedurePage() {
   );
 
   return (
-    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
+    <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
       <h1 className="sr-only">{cms.title || t(locale, "proc.title")}</h1>
-      <SaleSteps viewportFill steps={steps.length ? steps : undefined} aside={noteAside} />
+      <SaleSteps steps={steps.length ? steps : undefined} aside={noteAside} />
     </div>
   );
 }

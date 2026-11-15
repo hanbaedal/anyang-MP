@@ -7,6 +7,7 @@ import { StaffActivityBeacon } from "@/components/staff-activity-beacon";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { LocaleProvider } from "@/components/locale-provider";
+import { ContentScrollTop } from "@/components/content-scroll-top";
 import { NavSwipe } from "@/components/nav-swipe";
 import { SITE, metadataBase } from "@/lib/site";
 import { LOCALE_HTML, t } from "@/lib/i18n";
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="flex h-dvh flex-col overflow-hidden antialiased">
         <LocaleProvider locale={locale}>
+          <ContentScrollTop />
           <PageViewTracker />
           {session ? <StaffActivityBeacon limited={false} /> : null}
           <a
@@ -78,7 +80,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             id="content"
             className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
           >
-            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
+            <div
+              id="content-scroll"
+              className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain"
+            >
               {/* 본문+푸터를 한 컬럼으로: 긴 페이지에서 푸터가 뷰포트 중간에 겹치지 않고 문서 맨 아래. */}
               <div className="flex min-h-full flex-col">
                 <NavSwipe>

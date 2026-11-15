@@ -34,9 +34,9 @@ export default async function ServicesPage() {
   }));
 
   return (
-    <div className="pc-soft-card-fill pc-onepage-shell mx-auto px-4 py-8 md:py-0">
+    <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
       <h1 className="sr-only">{cms.title || t(locale, "svc.title")}</h1>
-      <FeaturesPhotoGrid viewportFill items={items} />
+      <FeaturesPhotoGrid items={items} />
     </div>
   );
 }
