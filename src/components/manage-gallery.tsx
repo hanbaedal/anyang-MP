@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DecadePager } from "@/components/decade-pager";
+import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ensureImageWithinMaxBytes } from "@/lib/compress-image-client";
 import type { GalleryTag } from "@/lib/content";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
@@ -19,6 +20,8 @@ function formatMb(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1);
 }
 
+const STRIP_SIZE = 5;
+
 export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [items, setItems] = useState(initial);
   const [alt, setAlt] = useState("");
@@ -30,6 +33,8 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState<"전체" | GalleryTag>("전체");
   const [viewIndex, setViewIndex] = useState(0);
+  const [stripStart, setStripStart] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -166,15 +171,38 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
 
   useEffect(() => {
     setViewIndex(0);
+    setStripStart(0);
   }, [filter]);
 
   useEffect(() => {
     if (viewIndex >= total && total > 0) setViewIndex(total - 1);
   }, [total, viewIndex]);
 
-  function go(delta: number) {
-    if (total < 2) return;
-    setViewIndex((prev) => (prev + delta + total) % total);
+  useEffect(() => {
+    setStripStart((start) => {
+      if (safeIndex < start || safeIndex >= start + STRIP_SIZE) {
+        return Math.floor(safeIndex / STRIP_SIZE) * STRIP_SIZE;
+      }
+      return start;
+    });
+  }, [safeIndex]);
+
+  const maxStripStart = total > STRIP_SIZE ? total - STRIP_SIZE : 0;
+  const stripItems = visible.slice(stripStart, stripStart + STRIP_SIZE);
+  const canStripPrev = stripStart > 0;
+  const canStripNext = stripStart < maxStripStart;
+
+  function openModalAt(index: number) {
+    setViewIndex(index);
+    setModalOpen(true);
+  }
+
+  function stripPrev() {
+    setStripStart((s) => Math.max(0, s - STRIP_SIZE));
+  }
+
+  function stripNext() {
+    setStripStart((s) => Math.min(maxStripStart, s + STRIP_SIZE));
   }
 
   function downloadFilename(item: GalleryPhoto, url: string) {
@@ -359,47 +387,64 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
           <p className="text-sm text-muted-foreground">이 태그에 사진이 없습니다.</p>
         ) : (
           <>
-            {/* PC·노트북: 한 장 뷰어 + 번호 줄 (가로 스크롤 없음, 줄바꿈) */}
-            <section
-              className="hidden min-w-0 space-y-3 md:block"
-              aria-label="등록된 사진 미리보기"
-            >
+            {/* PC·노트북: 5장 스트립 + 번호 줄 · 클릭 시 풀페이지 모달 */}
+            <section className="hidden min-w-0 space-y-3 md:block" aria-label="등록된 사진 미리보기">
               <p className="text-center text-sm text-muted-foreground">
                 {safeIndex + 1} / {total}
                 {current?.alt ? ` · ${current.alt}` : ""}
+                <span className="hidden lg:inline"> · 사진을 클릭하면 크게 볼 수 있습니다</span>
               </p>
               <div className="relative w-full max-w-full overflow-hidden rounded-xl border border-[#ead7b4] bg-[#f8eedd] p-2">
-                <div className="relative flex h-[min(32vh,17.5rem)] w-full items-center justify-center overflow-hidden rounded-lg bg-[#ead7b4]/40 lg:h-[min(36vh,20rem)]">
-                  {current ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={current.id}
-                      src={uploadOriginalUrl(current.src)}
-                      alt={current.alt}
-                      className="max-h-full max-w-full object-contain object-center"
-                    />
-                  ) : null}
-                  {total > 1 ? (
-                    <>
+                <div className="relative grid grid-cols-5 gap-2">
+                  {stripItems.map((item, i) => {
+                    const itemIndex = stripStart + i;
+                    const selected = itemIndex === safeIndex;
+                    return (
                       <button
+                        key={item.id}
                         type="button"
-                        className="absolute left-2 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60"
-                        aria-label="이전 사진"
-                        onClick={() => go(-1)}
+                        className={`relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-lg bg-[#ead7b4]/40 ring-offset-2 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          selected ? "ring-2 ring-primary" : "ring-1 ring-[#ead7b4]"
+                        }`}
+                        aria-label={`${itemIndex + 1}번 사진 크게 보기`}
+                        aria-current={selected ? "true" : undefined}
+                        onClick={() => openModalAt(itemIndex)}
                       >
-                        <ChevronLeft className="size-5" aria-hidden />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={thumbUrl(item.src)}
+                          alt={item.alt}
+                          className="h-full w-full object-cover object-center"
+                        />
+                        <span className="absolute bottom-1 right-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                          {itemIndex + 1}
+                        </span>
                       </button>
-                      <button
-                        type="button"
-                        className="absolute right-2 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60"
-                        aria-label="다음 사진"
-                        onClick={() => go(1)}
-                      >
-                        <ChevronRight className="size-5" aria-hidden />
-                      </button>
-                    </>
-                  ) : null}
+                    );
+                  })}
                 </div>
+                {total > STRIP_SIZE ? (
+                  <>
+                    <button
+                      type="button"
+                      className="absolute left-3 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60 disabled:pointer-events-none disabled:opacity-30"
+                      aria-label="이전 5장"
+                      disabled={!canStripPrev}
+                      onClick={stripPrev}
+                    >
+                      <ChevronLeft className="size-5" aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 z-[1] flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-md ring-1 ring-white/35 hover:bg-black/60 disabled:pointer-events-none disabled:opacity-30"
+                      aria-label="다음 5장"
+                      disabled={!canStripNext}
+                      onClick={stripNext}
+                    >
+                      <ChevronRight className="size-5" aria-hidden />
+                    </button>
+                  </>
+                ) : null}
               </div>
 
               <DecadePager
@@ -413,6 +458,16 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
               {current ? (
                 <div className="space-y-2 rounded-xl border bg-card p-4">{itemEditor(current)}</div>
               ) : null}
+
+              <GallerySlideModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                items={visible.map((item) => ({ src: item.src, alt: item.alt }))}
+                index={safeIndex}
+                onIndexChange={setViewIndex}
+                fullPage
+                imageFit="contain"
+              />
             </section>
 
             {/* 모바일: 기존 카드 격자 */}
