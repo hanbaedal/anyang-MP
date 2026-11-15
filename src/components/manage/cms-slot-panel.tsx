@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -24,12 +25,18 @@ export function CmsSlotPanel({
   hint?: string;
   footer?: ReactNode;
 }) {
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [slotKey]);
+
   return (
     <aside className="cms-panel sticky top-3">
       <div className="cms-panel-head">
         <strong>슬롯 편집</strong>
       </div>
-      <div className="cms-panel-body space-y-3">
+      <div ref={bodyRef} className="cms-panel-body space-y-3">
         {!slotKey ? (
           <p className="cms-panel-lead text-sm text-muted-foreground">
             홈페이지와 동일한 화면에서 <strong>문구·전경</strong>을 클릭하세요.
@@ -46,15 +53,22 @@ export function CmsSlotPanel({
             {hint ? <p className="text-[11px] leading-relaxed text-muted-foreground">{hint}</p> : null}
           </>
         )}
-        <Button
-          type="button"
-          className={cn("w-full", saving && "opacity-80")}
-          disabled={saveDisabled || saving}
-          onClick={onSave}
-        >
-          {saving ? "저장 중…" : "저장"}
-        </Button>
-        {footer}
+        <div className="space-y-2 border-t border-border pt-3">
+          {slotKey ? (
+            <p className="text-[10px] text-muted-foreground">
+              갤러리에서 고른 것·입력한 내용은 아래 「저장」 한 번으로 DB에 반영됩니다. (갤러리 팝업에는 저장 버튼 없음)
+            </p>
+          ) : null}
+          <Button
+            type="button"
+            className={cn("w-full", saving && "opacity-80")}
+            disabled={saveDisabled || saving}
+            onClick={onSave}
+          >
+            {saving ? "저장 중…" : "저장"}
+          </Button>
+          {footer}
+        </div>
       </div>
     </aside>
   );

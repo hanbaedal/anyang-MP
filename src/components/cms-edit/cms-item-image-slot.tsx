@@ -12,14 +12,16 @@ export function CmsItemImageSlot({
   className?: string;
 }) {
   return (
-    <span
+    <button
+      type="button"
       data-cms-key={pageSlotItemImage(cmsSlug, itemId)}
       className={cn(
         "pointer-events-auto absolute right-2 top-2 z-[35] cursor-pointer rounded-md border border-[#b99247]/70 bg-[#fffcf7]/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#1f2a44] shadow-sm",
         className,
       )}
+      onClick={(e) => e.stopPropagation()}
     >
       사진
-    </span>
+    </button>
   );
 }

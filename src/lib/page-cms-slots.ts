@@ -54,14 +54,12 @@ export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotM
   const directions = slug === "directions";
 
   page.items.forEach((item, index) => {
-    if (!directions) {
-      meta[pageSlotItemTitle(slug, item.id)] = {
-        label: `항목 ${index + 1} 제목`,
-        kind: "itemTitle",
-        slug,
-        itemId: item.id,
-      };
-    }
+    meta[pageSlotItemTitle(slug, item.id)] = {
+      label: directions ? `교통 ${index + 1} 제목` : `항목 ${index + 1} 제목`,
+      kind: "itemTitle",
+      slug,
+      itemId: item.id,
+    };
     meta[pageSlotItemText(slug, item.id)] = {
       label: directions ? `교통 ${index + 1} 설명` : `항목 ${index + 1} 설명`,
       kind: "itemText",
@@ -70,7 +68,7 @@ export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotM
     };
     if (galleryLink || slug === "procedure") {
       meta[pageSlotItemImage(slug, item.id)] = {
-        label: `항목 ${index + 1} 사진`,
+        label: directions ? `교통 ${index + 1} 사진` : `항목 ${index + 1} 사진`,
         kind: "itemImage",
         slug,
         itemId: item.id,
@@ -81,6 +79,7 @@ export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotM
   return meta;
 }
 
+/** item id에 점(.)이 있어도 파싱 — 예: dir.car */
 export function parsePageCmsSlotKey(key: string): PageCmsSlotMeta | null {
   const titleM = /^page\.([a-z]+)\.title$/.exec(key);
   if (titleM) return { label: "", kind: "title", slug: titleM[1] as ManageVisualCmsSlug };
@@ -94,15 +93,24 @@ export function parsePageCmsSlotKey(key: string): PageCmsSlotMeta | null {
   const imgM = /^page\.([a-z]+)\.bodyImage$/.exec(key);
   if (imgM) return { label: "", kind: "bodyImage", slug: imgM[1] as ManageVisualCmsSlug };
 
-  const itTitle = /^page\.([a-z]+)\.item\.([^.\s]+)\.title$/.exec(key);
-  if (itTitle)
-    return { label: "", kind: "itemTitle", slug: itTitle[1] as ManageVisualCmsSlug, itemId: itTitle[2] };
+  const itemM = /^page\.([a-z]+)\.item\.(.+)\.(title|text|image)$/.exec(key);
+  if (!itemM) return null;
+  const kind: PageCmsSlotKind =
+    itemM[3] === "title" ? "itemTitle" : itemM[3] === "text" ? "itemText" : "itemImage";
+  return {
+    label: "",
+    kind,
+    slug: itemM[1] as ManageVisualCmsSlug,
+    itemId: itemM[2],
+  };
+}
 
-  const itText = /^page\.([a-z]+)\.item\.([^.\s]+)\.text$/.exec(key);
-  if (itText) return { label: "", kind: "itemText", slug: itText[1] as ManageVisualCmsSlug, itemId: itText[2] };
+export function findCmsItemBySlotKey(page: CmsPage, key: string) {
+  const parsed = parsePageCmsSlotKey(key);
+  if (!parsed?.itemId) return null;
+  return page.items.find((row) => row.id === parsed.itemId) ?? null;
+}
 
-  const itImg = /^page\.([a-z]+)\.item\.([^.\s]+)\.image$/.exec(key);
-  if (itImg) return { label: "", kind: "itemImage", slug: itImg[1] as ManageVisualCmsSlug, itemId: itImg[2] };
-
-  return null;
+export function isItemCardSlotKind(kind: PageCmsSlotKind) {
+  return kind === "itemTitle" || kind === "itemText" || kind === "itemImage";
 }

@@ -10,12 +10,13 @@ import { CMS_GALLERY_LINK_ITEM_SLUGS } from "@/lib/cms-types";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 import {
   buildPageCmsSlotMeta,
+  findCmsItemBySlotKey,
+  isItemCardSlotKind,
   parsePageCmsSlotKey,
   pageSlotBodyImage,
   pageSlotItemImage,
   pageSlotItemText,
   pageSlotItemTitle,
-  type PageCmsSlotMeta,
 } from "@/lib/page-cms-slots";
 import { PAGE_CMS_PUBLIC_PATH } from "@/lib/page-cms-path";
 import { uploadOriginalUrl } from "@/lib/media";
@@ -174,9 +175,18 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     }
   }
 
-  const activeMeta: PageCmsSlotMeta | undefined = activeKey ? slotMetaMap[activeKey] : undefined;
+  const parsedSlot = activeKey ? parsePageCmsSlotKey(activeKey) : null;
+  const activeMeta = activeKey ? slotMetaMap[activeKey] : undefined;
+  const editingItem = activeKey ? findCmsItemBySlotKey(page, activeKey) : null;
+  const isItemCard =
+    Boolean(parsedSlot && editingItem && isItemCardSlotKind(parsedSlot.kind));
 
-  const activeItemId = activeKey ? parsePageCmsSlotKey(activeKey)?.itemId : undefined;
+  const itemCardLabel = (() => {
+    if (!editingItem) return undefined;
+    const index = page.items.findIndex((row) => row.id === editingItem.id);
+    if (index < 0) return "카드 편집";
+    return slug === "directions" ? `교통 카드 ${index + 1}` : `카드 ${index + 1}`;
+  })();
 
   function readTextValue(key: string) {
     const parsed = parsePageCmsSlotKey(key);
@@ -184,39 +194,34 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     if (parsed.kind === "title") return page.title;
     if (parsed.kind === "lead") return page.lead;
     if (parsed.kind === "body") return page.body;
-    if (parsed.itemId) {
-      const item = page.items.find((row) => row.id === parsed.itemId);
-      if (!item) return "";
-      if (parsed.kind === "itemTitle") return item.title;
-      if (parsed.kind === "itemText") return item.text ?? "";
-    }
+    const item = findCmsItemBySlotKey(page, key);
+    if (!item) return "";
+    if (parsed.kind === "itemTitle") return item.title;
+    if (parsed.kind === "itemText") return item.text ?? "";
     return "";
   }
 
   function renderItemCardPanel(itemId: string) {
     const item = page.items.find((row) => row.id === itemId);
     if (!item) {
-      return <p className="text-xs text-destructive">카드 데이터를 찾을 수 없습니다. 저장 후 새로고침하세요.</p>;
+      return <p className="text-xs text-destructive">카드 데이터를 찾을 수 없습니다. 페이지를 새로고침하세요.</p>;
     }
     const galleryLink = CMS_GALLERY_LINK_ITEM_SLUGS.includes(slug) || slug === "procedure";
-    const directions = slug === "directions";
     const titleKey = pageSlotItemTitle(slug, itemId);
     const textKey = pageSlotItemText(slug, itemId);
-  return (
+    return (
       <div className="space-y-3">
-        {!directions ? (
-          <label className="block space-y-1.5 text-sm">
-            <span className="font-medium text-foreground">카드 제목 (ko)</span>
-            <input
-              className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              disabled={busy}
-              value={item.title}
-              onChange={(e) => patchText(titleKey, e.target.value)}
-            />
-          </label>
-        ) : (
-          <p className="text-[11px] text-muted-foreground">오시는 길 카드는 제목 없이 설명만 표시됩니다.</p>
-        )}
+        <label className="block space-y-1.5 text-sm">
+          <span className="font-medium text-foreground">
+            {slug === "directions" ? "교통 수단 이름 (ko)" : "카드 제목 (ko)"}
+          </span>
+          <input
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            disabled={busy}
+            value={item.title}
+            onChange={(e) => patchText(titleKey, e.target.value)}
+          />
+        </label>
         <CmsFieldKo
           multiline
           disabled={busy}
@@ -251,8 +256,8 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
 
   const panelChildren = (() => {
     if (!activeKey) return null;
-    if (activeItemId && activeMeta && (activeMeta.kind === "itemTitle" || activeMeta.kind === "itemText" || activeMeta.kind === "itemImage")) {
-      return renderItemCardPanel(activeItemId);
+    if (isItemCard && editingItem) {
+      return renderItemCardPanel(editingItem.id);
     }
     if (!activeMeta) return null;
     const multiline =
@@ -284,15 +289,14 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
       ? `사진 격자는 갤러리 「${GALLERY_TAG[slug]}」 태그로 자동 표시됩니다. /manage/gallery 에서 관리하세요.`
       : undefined;
 
-  const itemSlot =
-    activeMeta && (activeMeta.kind === "itemTitle" || activeMeta.kind === "itemText" || activeMeta.kind === "itemImage");
-
   const panelHint = activeMeta
     ? lotsHint ??
-      (itemSlot
+      (isItemCard
         ? "카드 제목·설명을 클릭하거나 우측 상단 「사진」으로 갤러리를 연결하세요."
         : "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개에서 자동 처리됩니다.")
-    : undefined;
+    : isItemCard
+      ? "카드 제목·설명을 클릭하거나 우측 상단 「사진」으로 갤러리를 연결하세요."
+      : undefined;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
@@ -325,11 +329,7 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
-          slotLabel={
-            itemSlot && activeItemId
-              ? activeMeta?.label?.replace(/ 제목$| 설명$| 사진$/, "") ?? "카드 편집"
-              : activeMeta?.label
-          }
+          slotLabel={isItemCard ? itemCardLabel : activeMeta?.label}
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}
