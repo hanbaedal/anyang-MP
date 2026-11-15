@@ -84,7 +84,7 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       if (data?.type === "anyang-cms-patch" && data.key) {
         const el = document.querySelector(`[data-cms-key="${CSS.escape(data.key)}"]`);
         if (!el || !(el instanceof HTMLElement)) return;
-        if (typeof data.text === "string" && !key.startsWith("home.social.")) {
+        if (typeof data.text === "string" && !data.key.startsWith("home.social.")) {
           applyTextPatch(el, data.key, data.text);
         }
         if (typeof data.imageSrc === "string") {
@@ -93,7 +93,7 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
             img.src = data.imageSrc;
           }
         }
-        if (key.startsWith("home.social.") && key !== "home.social.add") {
+        if (data.key.startsWith("home.social.") && data.key !== "home.social.add") {
           if (typeof data.href === "string") {
             el.setAttribute("data-social-href", data.href);
           }
