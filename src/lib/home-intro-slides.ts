@@ -13,6 +13,7 @@ import {
 } from "./home-intro-slides-types";
 import { getDb, hasMongo } from "./mongo";
 import { deleteUploadObject } from "./upload-store";
+import { defaultSiteSocialLinks, normalizeSiteSocialLinks } from "./site-social";
 
 export type { HomeIntroHeroCopy, HomeIntroSlide, HomeIntroSlidesSettings } from "./home-intro-slides-types";
 export {
@@ -28,7 +29,12 @@ const SETTINGS_KEY = "home_intro_slides";
 const READ_MS = 2_500;
 
 export function defaultHomeIntroSlidesSettings(): HomeIntroSlidesSettings {
-  return { slides: [], heroCopy: defaultHomeIntroHeroCopy(), updatedAt: new Date().toISOString() };
+  return {
+    slides: [],
+    heroCopy: defaultHomeIntroHeroCopy(),
+    socialLinks: defaultSiteSocialLinks(),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 function trimHeroField(value: unknown, max: number): string {
@@ -89,6 +95,7 @@ function fromDoc(doc: Record<string, unknown>): HomeIntroSlidesSettings {
   return {
     slides,
     heroCopy: normalizeHomeIntroHeroCopy(doc.heroCopy),
+    socialLinks: normalizeSiteSocialLinks(doc.socialLinks),
     updatedAt:
       doc.updatedAt instanceof Date
         ? doc.updatedAt.toISOString()
@@ -147,6 +154,7 @@ export async function saveHomeIntroSlidesSettings(
   const settings = fromDoc({
     slides: input.slides,
     heroCopy: normalizeHomeIntroHeroCopy(input.heroCopy),
+    socialLinks: normalizeSiteSocialLinks(input.socialLinks),
     updatedAt: new Date().toISOString(),
   });
 
@@ -160,6 +168,7 @@ export async function saveHomeIntroSlidesSettings(
           key: SETTINGS_KEY,
           slides: settings.slides,
           heroCopy: settings.heroCopy,
+          socialLinks: settings.socialLinks,
           updatedAt: new Date(settings.updatedAt),
         },
       },

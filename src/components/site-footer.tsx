@@ -1,15 +1,25 @@
 import { HeroCallActions } from "@/components/hero-call-actions";
 import { SocialActions } from "@/components/hero-actions";
+import { readSession } from "@/lib/auth";
+import { isCmsStaff } from "@/lib/auth-types";
 import { getHomeHeroSettings } from "@/lib/home-hero";
+import { getHomeIntroSlidesSettings } from "@/lib/home-intro-slides";
 import { isGuestLocalePath, t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
+import { defaultSiteSocialLinks } from "@/lib/site-social";
 import { headers } from "next/headers";
 
 export async function SiteFooter() {
   const locale = await readLocale();
-  const pathname = (await headers()).get("x-pathname") ?? "/";
+  const h = await headers();
+  const pathname = h.get("x-pathname") ?? "/";
   const uiLocale = isGuestLocalePath(pathname) ? locale : "ko";
   const heroMedia = await getHomeHeroSettings();
+  const session = await readSession();
+  const homeCmsEdit =
+    pathname === "/" && h.get("x-home-cms-edit") === "1" && Boolean(session && isCmsStaff(session.role));
+  const homeSettings = await getHomeIntroSlidesSettings();
+  const socialLinks = homeSettings.socialLinks?.length ? homeSettings.socialLinks : defaultSiteSocialLinks();
 
   return (
     <>
@@ -27,7 +37,7 @@ export async function SiteFooter() {
           />
         </div>
       </footer>
-      <SocialActions compact verticalFixed />
+      <SocialActions links={socialLinks} compact verticalFixed cmsEditMarkers={homeCmsEdit} />
     </>
   );
 }

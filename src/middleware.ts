@@ -8,6 +8,9 @@ const STAFF_COOKIE = "anyang_sid";
 export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.get("cmsEdit") === "1") {
+    requestHeaders.set("x-home-cms-edit", "1");
+  }
 
   let visitorId = request.cookies.get(ANON_VISITOR_COOKIE)?.value;
   const needsCookie = !isValidVisitorId(visitorId);

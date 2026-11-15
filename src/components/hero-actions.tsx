@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SITE, socialHref } from "@/lib/site";
+import { CmsSocialAddSlot } from "@/components/cms-edit/cms-social-add-slot";
+import { homeSocialSlotKey, type SiteSocialIcon, type SiteSocialLink } from "@/lib/site-social";
 import { cn } from "@/lib/utils";
 
 const logoBtn =
@@ -10,7 +11,7 @@ const logoBtn =
 const logoBtnSm =
   "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/10 transition hover:scale-[1.04] hover:bg-white md:size-11";
 
-function FacebookMark() {
+export function FacebookMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
       <circle cx="12" cy="12" r="12" fill="#1877F2" />
@@ -22,7 +23,7 @@ function FacebookMark() {
   );
 }
 
-function InstagramMark() {
+export function InstagramMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
       <defs>
@@ -40,7 +41,7 @@ function InstagramMark() {
   );
 }
 
-function YoutubeMark() {
+export function YoutubeMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
       <rect width="24" height="24" rx="6" fill="#FF0000" />
@@ -49,7 +50,7 @@ function YoutubeMark() {
   );
 }
 
-function NaverBlogMark() {
+export function NaverBlogMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
       <rect width="24" height="24" rx="6" fill="#03C75A" />
@@ -62,19 +63,51 @@ function NaverBlogMark() {
   );
 }
 
+function socialIconNode(icon: SiteSocialIcon) {
+  switch (icon) {
+    case "facebook":
+      return <FacebookMark />;
+    case "instagram":
+      return <InstagramMark />;
+    case "youtube":
+      return <YoutubeMark />;
+    case "blog":
+      return <NaverBlogMark />;
+  }
+}
+
 function SocialLink({
   href,
   label,
   compact,
+  cmsEdit,
+  slotKey,
   children,
 }: {
   href: string;
   label: string;
   compact?: boolean;
+  cmsEdit?: boolean;
+  slotKey?: string;
   children: React.ReactNode;
 }) {
-  const external = href.startsWith("http") || href.startsWith("tel:");
   const className = compact ? logoBtnSm : logoBtn;
+  if (cmsEdit && slotKey) {
+    return (
+      <button
+        type="button"
+        data-cms-key={slotKey}
+        data-social-href={href}
+        aria-label={label}
+        title={`${label} — ${href}`}
+        className={cn(className, "cursor-pointer")}
+        onClick={(e) => e.preventDefault()}
+      >
+        {children}
+      </button>
+    );
+  }
+  const external = href.startsWith("http") || href.startsWith("tel:");
   if (external) {
     return (
       <a
@@ -96,21 +129,19 @@ function SocialLink({
 }
 
 export function SocialActions({
+  links,
   compact = false,
   verticalFixed = false,
+  cmsEditMarkers = false,
 }: {
+  links: SiteSocialLink[];
   compact?: boolean;
-  /** 화면 우측 세로 고정 레일 */
   verticalFixed?: boolean;
+  cmsEditMarkers?: boolean;
 }) {
   const pathname = usePathname();
   const onHome = pathname === "/";
-  const items = [
-    { href: socialHref("FACEBOOK", SITE.phoneTel), label: "페이스북", icon: <FacebookMark /> },
-    { href: socialHref("INSTAGRAM", "/intro/directions"), label: "인스타그램", icon: <InstagramMark /> },
-    { href: socialHref("YOUTUBE", "/lots/prices"), label: "유튜브", icon: <YoutubeMark /> },
-    { href: socialHref("BLOG", "/support/notices"), label: "네이버 블로그", icon: <NaverBlogMark /> },
-  ];
+  const sorted = [...links].sort((a, b) => a.sort - b.sort);
 
   return (
     <nav
@@ -131,11 +162,19 @@ export function SocialActions({
         verticalFixed && compact && "[&_svg]:size-4 md:[&_svg]:size-5",
       )}
     >
-      {items.map((item) => (
-        <SocialLink key={item.label} href={item.href} label={item.label} compact={compact}>
-          {item.icon}
+      {sorted.map((item) => (
+        <SocialLink
+          key={item.id}
+          href={item.href}
+          label={item.label}
+          compact={compact}
+          cmsEdit={cmsEditMarkers}
+          slotKey={homeSocialSlotKey(item.id)}
+        >
+          {socialIconNode(item.icon)}
         </SocialLink>
       ))}
+      {cmsEditMarkers && verticalFixed ? <CmsSocialAddSlot compact={compact} /> : null}
     </nav>
   );
 }

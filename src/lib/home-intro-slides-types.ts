@@ -1,3 +1,5 @@
+import type { SiteSocialLink } from "@/lib/site-social";
+
 /** 홈 전경 슬라이드 CMS 상한 */
 export const HOME_INTRO_SLIDES_MAX = 12;
 
@@ -40,5 +42,7 @@ export function defaultHomeIntroHeroCopy(): HomeIntroHeroCopy {
 export type HomeIntroSlidesSettings = {
   slides: HomeIntroSlide[];
   heroCopy: HomeIntroHeroCopy;
+  /** 우측 고정 SNS 아이콘 링크 */
+  socialLinks?: SiteSocialLink[];
   updatedAt: string;
 };

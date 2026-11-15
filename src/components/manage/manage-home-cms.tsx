@@ -12,10 +12,23 @@ import {
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "@/lib/home-intro-slides-types";
-import { HOME_CMS_SLOT_META, type HomeCmsSlotKey } from "@/lib/home-cms-slots";
+import { HOME_CMS_SLOT_META } from "@/lib/home-cms-slots";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import { thumbUrl } from "@/lib/media";
+import {
+  HOME_SOCIAL_ADD_SLOT,
+  SITE_SOCIAL_ICON_LABELS,
+  SITE_SOCIAL_ICONS,
+  SITE_SOCIAL_MAX,
+  defaultHrefForSocialIcon,
+  defaultSiteSocialLinks,
+  homeSocialSlotKey,
+  isHomeSocialSlotKey,
+  socialIdFromHomeSlotKey,
+  type SiteSocialIcon,
+  type SiteSocialLink,
+} from "@/lib/site-social";
 import { cn } from "@/lib/utils";
 
 type Filter = "전체" | GalleryTag;
@@ -40,7 +53,13 @@ export function ManageHomeCms({
 }) {
   const [slides, setSlides] = useState<HomeIntroSlide[]>(initial.slides);
   const [heroCopy, setHeroCopy] = useState<HomeIntroHeroCopy>(initial.heroCopy ?? defaultHomeIntroHeroCopy());
-  const [activeKey, setActiveKey] = useState<HomeCmsSlotKey | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SiteSocialLink[]>(
+    initial.socialLinks?.length ? initial.socialLinks : defaultSiteSocialLinks(),
+  );
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [draftIcon, setDraftIcon] = useState<SiteSocialIcon>("facebook");
+  const [draftHref, setDraftHref] = useState("");
+  const [draftLabel, setDraftLabel] = useState("");
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
   const [filter, setFilter] = useState<Filter>("전경");
   const [loadingGallery, setLoadingGallery] = useState(true);
@@ -79,10 +98,28 @@ export function ManageHomeCms({
   useEffect(() => {
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
-      const data = event.data as { type?: string; key?: string };
+      const data = event.data as { type?: string; key?: string; href?: string; text?: string };
       if (data?.type === "anyang-cms-select" && data.key) {
-        const key = data.key as HomeCmsSlotKey;
-        if (key in HOME_CMS_SLOT_META) setActiveKey(key);
+        const key = data.key;
+        const socialId = socialIdFromHomeSlotKey(key);
+        if (socialId) {
+          const href = data.href?.trim();
+          const label = data.text?.trim();
+          if (href || label) {
+            setSocialLinks((prev) =>
+              prev.map((row) =>
+                row.id === socialId
+                  ? {
+                      ...row,
+                      ...(href ? { href } : {}),
+                      ...(label ? { label } : {}),
+                    }
+                  : row,
+              ),
+            );
+          }
+        }
+        if (key in HOME_CMS_SLOT_META || isHomeSocialSlotKey(key)) setActiveKey(key);
       }
     }
     window.addEventListener("message", onMessage);
@@ -111,8 +148,75 @@ export function ManageHomeCms({
     void loadGallery();
   }, [loadGallery]);
 
+  useEffect(() => {
+    if (activeKey !== HOME_SOCIAL_ADD_SLOT) return;
+    setDraftHref(defaultHrefForSocialIcon(draftIcon));
+    setDraftLabel((prev) => (prev.trim() ? prev : SITE_SOCIAL_ICON_LABELS[draftIcon]));
+  }, [activeKey, draftIcon]);
+
   const visible =
     filter === "전체" ? gallery : gallery.filter((item) => item.tags.includes(filter));
+
+  function bumpFrame() {
+    setFrameRev((n) => n + 1);
+  }
+
+  const editingSocialId = socialIdFromHomeSlotKey(activeKey);
+  const editingSocial = editingSocialId ? socialLinks.find((row) => row.id === editingSocialId) : undefined;
+
+  function patchSocial(id: string, patch: Partial<Pick<SiteSocialLink, "href" | "label" | "icon">>) {
+    setSocialLinks((prev) => {
+      const next = prev.map((row) => (row.id === id ? { ...row, ...patch } : row));
+      const updated = next.find((row) => row.id === id);
+      if (updated) {
+        postToFrame({
+          type: "anyang-cms-patch",
+          key: homeSocialSlotKey(id),
+          href: updated.href,
+          text: updated.label,
+        });
+      }
+      return next;
+    });
+    setDirty(true);
+    setStatus("idle");
+  }
+
+  function removeSocial(id: string) {
+    setSocialLinks((prev) => prev.filter((row) => row.id !== id).map((row, index) => ({ ...row, sort: index })));
+    setActiveKey(null);
+    setDirty(true);
+    setMessage("SNS 아이콘을 삭제했습니다. 저장을 눌러 반영하세요.");
+    setStatus("idle");
+    bumpFrame();
+  }
+
+  function addSocialFromDraft() {
+    if (socialLinks.length >= SITE_SOCIAL_MAX) {
+      setMessage(`SNS는 최대 ${SITE_SOCIAL_MAX}개까지입니다.`);
+      setStatus("error");
+      return;
+    }
+    const href = draftHref.trim() || defaultHrefForSocialIcon(draftIcon);
+    if (!/^https?:\/\//i.test(href)) {
+      setMessage("URL은 https:// 로 시작해야 합니다.");
+      setStatus("error");
+      return;
+    }
+    const label = draftLabel.trim() || SITE_SOCIAL_ICON_LABELS[draftIcon];
+    const id = crypto.randomUUID();
+    setSocialLinks((prev) => [
+      ...prev,
+      { id, icon: draftIcon, href, label, sort: prev.length },
+    ]);
+    setDirty(true);
+    setActiveKey(homeSocialSlotKey(id));
+    setDraftHref(defaultHrefForSocialIcon(draftIcon));
+    setDraftLabel("");
+    setMessage("SNS를 추가했습니다. 저장을 눌러 반영하세요.");
+    setStatus("idle");
+    bumpFrame();
+  }
 
   function patchHeroField(field: keyof HomeIntroHeroCopy, value: string) {
     setHeroCopy((prev) => ({ ...prev, [field]: value }));
@@ -158,7 +262,7 @@ export function ManageHomeCms({
       const res = await fetch("/api/manage/home-slides", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slides, heroCopy }),
+        body: JSON.stringify({ slides, heroCopy, socialLinks }),
       });
       const json = (await res.json()) as {
         ok?: boolean;
@@ -172,6 +276,7 @@ export function ManageHomeCms({
       }
       setSlides(json.settings.slides);
       setHeroCopy(json.settings.heroCopy);
+      if (json.settings.socialLinks?.length) setSocialLinks(json.settings.socialLinks);
       setDirty(false);
       setMessage("저장했습니다. 공개 홈에 반영됩니다.");
       setStatus("ok");
@@ -190,10 +295,112 @@ export function ManageHomeCms({
     setStatus("idle");
   }
 
-  const slotMeta = activeKey ? HOME_CMS_SLOT_META[activeKey] : null;
+  const slotMeta =
+    activeKey && activeKey in HOME_CMS_SLOT_META
+      ? HOME_CMS_SLOT_META[activeKey as keyof typeof HOME_CMS_SLOT_META]
+      : null;
 
   const panelChildren =
-    activeKey === "home.slides" ? (
+    activeKey === HOME_SOCIAL_ADD_SLOT ? (
+      <div className="space-y-3 text-sm">
+        <p className="text-xs text-muted-foreground">우측 SNS 막대에 아이콘을 추가합니다 (최대 {SITE_SOCIAL_MAX}개).</p>
+        <label className="block space-y-1">
+          <span className="font-medium">아이콘</span>
+          <select
+            className="h-9 w-full rounded-md border border-input bg-card px-2"
+            value={draftIcon}
+            disabled={busy}
+            onChange={(e) => {
+              const icon = e.target.value as SiteSocialIcon;
+              setDraftIcon(icon);
+              setDraftHref(defaultHrefForSocialIcon(icon));
+            }}
+          >
+            {SITE_SOCIAL_ICONS.map((icon) => (
+              <option key={icon} value={icon}>
+                {SITE_SOCIAL_ICON_LABELS[icon]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block space-y-1">
+          <span className="font-medium">링크 URL</span>
+          <input
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
+            disabled={busy}
+            value={draftHref || defaultHrefForSocialIcon(draftIcon)}
+            onChange={(e) => setDraftHref(e.target.value)}
+            placeholder={defaultHrefForSocialIcon(draftIcon)}
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="font-medium">이름 (스크린리더)</span>
+          <input
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
+            disabled={busy}
+            value={draftLabel}
+            onChange={(e) => setDraftLabel(e.target.value)}
+            placeholder={SITE_SOCIAL_ICON_LABELS[draftIcon]}
+          />
+        </label>
+        <Button type="button" size="sm" disabled={busy} onClick={addSocialFromDraft}>
+          목록에 추가
+        </Button>
+      </div>
+    ) : editingSocial ? (
+      <div className="space-y-3 text-sm">
+        <p className="text-xs text-muted-foreground">미리보기에서는 이동하지 않습니다. 아래에 현재 연결 URL이 표시됩니다.</p>
+        <label className="block space-y-1">
+          <span className="font-medium">아이콘</span>
+          <select
+            className="h-9 w-full rounded-md border border-input bg-card px-2"
+            value={editingSocial.icon}
+            disabled={busy}
+            onChange={(e) => {
+              patchSocial(editingSocial.id, { icon: e.target.value as SiteSocialIcon });
+              bumpFrame();
+            }}
+          >
+            {SITE_SOCIAL_ICONS.map((icon) => (
+              <option key={icon} value={icon}>
+                {SITE_SOCIAL_ICON_LABELS[icon]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block space-y-1">
+          <span className="font-medium">링크 URL (현재 연결)</span>
+          <input
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
+            disabled={busy}
+            value={
+              editingSocial.href.trim() || defaultHrefForSocialIcon(editingSocial.icon)
+            }
+            onChange={(e) => patchSocial(editingSocial.id, { href: e.target.value })}
+            placeholder={defaultHrefForSocialIcon(editingSocial.icon)}
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="font-medium">이름 (스크린리더)</span>
+          <input
+            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
+            disabled={busy}
+            value={editingSocial.label}
+            onChange={(e) => patchSocial(editingSocial.id, { label: e.target.value })}
+          />
+        </label>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="text-destructive"
+          disabled={busy}
+          onClick={() => removeSocial(editingSocial.id)}
+        >
+          이 SNS 삭제
+        </Button>
+      </div>
+    ) : activeKey === "home.slides" ? (
       <>
         <p className="text-xs text-muted-foreground">
           클릭 순서 = 슬라이드 순서 (최대 {HOME_INTRO_SLIDES_MAX}장). 저장 후 iframe이 갱신됩니다.
@@ -269,16 +476,25 @@ export function ManageHomeCms({
     ) : null;
 
   const panelHint =
-    activeKey === "home.slides"
-      ? undefined
+    activeKey === "home.slides" || isHomeSocialSlotKey(activeKey ?? "")
+      ? isHomeSocialSlotKey(activeKey ?? "")
+        ? "SNS 아이콘은 우측 세로 막대입니다. + 로 추가, 아이콘 클릭으로 URL을 편집합니다."
+        : undefined
       : activeKey
         ? "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개 페이지에서 자동 처리됩니다."
         : undefined;
 
+  const slotLabel =
+    activeKey === HOME_SOCIAL_ADD_SLOT
+      ? "SNS 아이콘 추가"
+      : editingSocial
+        ? `SNS · ${editingSocial.label}`
+        : slotMeta?.label;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <p className="cms-orders-lead">
-        실제 홈페이지(<code>/</code>)와 동일한 배치입니다. 편집할 문구·전경을 <strong>클릭</strong>한 뒤 오른쪽에서
+        실제 홈페이지(<code>/</code>)와 동일한 배치입니다. 문구·전경·<strong>우측 SNS</strong>를 클릭해 오른쪽에서
         수정하세요. 영상·음악은{" "}
         <Link href="/manage/home-hero" className="text-primary underline-offset-2 hover:underline">
           메인 영상·음악
@@ -316,7 +532,7 @@ export function ManageHomeCms({
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
-          slotLabel={slotMeta?.label}
+          slotLabel={slotLabel}
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}

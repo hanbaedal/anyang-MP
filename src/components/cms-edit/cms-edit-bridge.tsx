@@ -55,7 +55,12 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       e.stopPropagation();
       const key = target.getAttribute("data-cms-key");
       if (!key) return;
-      window.parent.postMessage({ type: "anyang-cms-select", key }, window.location.origin);
+      const href = target.getAttribute("data-social-href")?.trim();
+      const text = target.getAttribute("aria-label")?.trim();
+      window.parent.postMessage(
+        { type: "anyang-cms-select", key, ...(href ? { href } : {}), ...(text ? { text } : {}) },
+        window.location.origin,
+      );
     }
 
     function onMessage(event: MessageEvent) {
@@ -66,6 +71,7 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
         active?: boolean;
         text?: string;
         imageSrc?: string;
+        href?: string;
       };
       if (data?.type === "anyang-cms-active") {
         document.querySelectorAll(".cms-slot-active").forEach((el) => el.classList.remove("cms-slot-active"));
@@ -78,13 +84,28 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       if (data?.type === "anyang-cms-patch" && data.key) {
         const el = document.querySelector(`[data-cms-key="${CSS.escape(data.key)}"]`);
         if (!el || !(el instanceof HTMLElement)) return;
-        if (typeof data.text === "string") {
+        if (typeof data.text === "string" && !key.startsWith("home.social.")) {
           applyTextPatch(el, data.key, data.text);
         }
         if (typeof data.imageSrc === "string") {
           const img = el.querySelector("img") ?? (el.tagName === "IMG" ? el : null);
           if (img instanceof HTMLImageElement) {
             img.src = data.imageSrc;
+          }
+        }
+        if (key.startsWith("home.social.") && key !== "home.social.add") {
+          if (typeof data.href === "string") {
+            el.setAttribute("data-social-href", data.href);
+          }
+          const label = (
+            typeof data.text === "string" ? data.text : el.getAttribute("aria-label")
+          )?.trim();
+          const href = el.getAttribute("data-social-href")?.trim() || "";
+          if (label) {
+            el.setAttribute("aria-label", label);
+            el.setAttribute("title", href ? `${label} — ${href}` : label);
+          } else if (href) {
+            el.setAttribute("title", href);
           }
         }
       }
