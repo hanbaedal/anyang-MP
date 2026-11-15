@@ -6,7 +6,8 @@ import {
   guideCardPastelSurface,
   guideCardTitleClass,
   GUIDE_CARD_PHOTO_FOOT_SCRIM,
-  guideCardPhotoCopyPanel,
+  guideCardPhotoCopyWrap,
+  guideCardPhotoTextHighlight,
 } from "@/lib/guide-photo-card";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
@@ -169,15 +170,18 @@ export function FeaturesPhotoGrid({
                 ) : null}
                 <div
                   className={cn(
-                    hasPhoto && !transit && guideCardPhotoCopyPanel({ dense }),
+                    hasPhoto && guideCardPhotoCopyWrap({ dense }),
+                    !hasPhoto && "flex w-full flex-col",
                     transit && hasPhoto && showText && "mx-3 mb-3 mt-0 sm:mx-4",
-                    transit && hasPhoto && showText && guideCardPhotoCopyPanel({ dense: true }),
                   )}
                 >
                   {showTitle && !transit ? (
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                      className={guideCardTitleClass({ onPhoto: false, dense })}
+                      className={cn(
+                        guideCardTitleClass({ onPhoto: false, dense }),
+                        hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                      )}
                     >
                       {title}
                     </h3>
@@ -188,14 +192,24 @@ export function FeaturesPhotoGrid({
                       className={cn(
                         guideCardBodyTextClass({ onPhoto: false, dense }),
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
-                        transit && hasPhoto && "flex-1",
+                        transit && hasPhoto && "w-fit max-w-full",
                       )}
                     >
                     {captionFirstLine ? (
                       /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */
-                      <p className="whitespace-normal break-words text-inherit">{text}</p>
+                      <p
+                        className={cn(
+                          "whitespace-normal break-words text-inherit",
+                          hasPhoto && guideCardPhotoTextHighlight(),
+                        )}
+                      >
+                        {text}
+                      </p>
                     ) : (
-                      <Paragraphs text={text} className="text-inherit" />
+                      <Paragraphs
+                        text={text}
+                        className={cn("text-inherit", hasPhoto && guideCardPhotoTextHighlight())}
+                      />
                     )}
                     </div>
                   ) : null}

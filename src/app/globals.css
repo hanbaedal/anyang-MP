@@ -87,6 +87,12 @@
 .cms-orders-lead code {
   font-size: 12px;
 }
+
+/* 갤러리 카드 — 글자·줄마다만 배경, 가장자리 블러 */
+.guide-card-photo-copy-wrap p {
+  display: inline;
+  line-height: 1.65;
+}
 @media (max-width: 900px) {
   .cms-layout {
     grid-template-columns: 1fr;

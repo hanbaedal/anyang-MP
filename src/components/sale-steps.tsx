@@ -10,7 +10,8 @@ import {
   guideCardPastelSurface,
   guideCardTitleClass,
   GUIDE_CARD_PHOTO_FOOT_SCRIM,
-  guideCardPhotoCopyPanel,
+  guideCardPhotoCopyWrap,
+  guideCardPhotoTextHighlight,
 } from "@/lib/guide-photo-card";
 import { uploadOriginalUrl } from "@/lib/media";
 import { SALE_STEPS } from "@/lib/site";
@@ -105,18 +106,32 @@ export function SaleSteps({
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
               )}
             >
-              <div className={cn(hasPhoto && guideCardPhotoCopyPanel())}>
-                <p className={guideCardEyebrowClass(false)}>{t("step.n", { n: step.n })}</p>
+              <div className={cn(hasPhoto && guideCardPhotoCopyWrap())}>
+                <p
+                  className={cn(
+                    guideCardEyebrowClass(false),
+                    hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit"),
+                  )}
+                >
+                  {t("step.n", { n: step.n })}
+                </p>
                 <h3
                   {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                  className={guideCardTitleClass({ onPhoto: false })}
+                  className={cn(
+                    guideCardTitleClass({ onPhoto: false }),
+                    hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                  )}
                 >
                   {step.title}
                 </h3>
                 {compact || !step.text ? null : (
                   <div
                     {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
-                    className={cn(guideCardBodyTextClass({ onPhoto: false }), "overflow-auto")}
+                    className={cn(
+                      guideCardBodyTextClass({ onPhoto: false }),
+                      hasPhoto && guideCardPhotoTextHighlight(),
+                      "overflow-auto",
+                    )}
                   >
                     <Paragraphs text={step.text} className="text-inherit" />
                   </div>

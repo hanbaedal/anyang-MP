@@ -12,18 +12,35 @@ export const GUIDE_CARD_SKY_OVERLAY_FULL =
 export const GUIDE_CARD_SKY_OVERLAY_LEFT =
   "bg-gradient-to-r from-sky-500/26 to-transparent";
 
-/** 갤러리 사진 위 제목·본문 — 불투명에 가까운 크림 패널 (가독성 우선) */
-export function guideCardPhotoCopyPanel({ dense }: { dense?: boolean } = {}) {
+/**
+ * 사진 위 텍스트 — 카드 전체가 아니라 **글·줄 단위** 배경 (box-decoration-break).
+ * 큰 사각 박스 대신 사진이 많이 보이도록.
+ */
+export function guideCardPhotoCopyWrap({ dense }: { dense?: boolean } = {}) {
   return cn(
-    "flex w-full flex-col border border-[color:var(--pastel-chrome-border)]",
-    "rounded-xl bg-[#fffcf7]/97 shadow-[0_8px_28px_rgba(0,43,80,0.18)] backdrop-blur-md",
-    dense ? "gap-1.5 p-3.5 sm:gap-2 sm:p-4" : "gap-2.5 p-4 sm:gap-3 sm:p-5 md:p-6",
+    "guide-card-photo-copy-wrap flex w-fit max-w-[min(100%,32rem)] flex-col",
+    dense ? "gap-1.5" : "gap-2",
   );
 }
 
-/** 사진 하단만 살짝 어둡게 — 패널과 분리용 */
+/** 제목·문단 한 덩어리용 — 블러·얇은 링·둥근 모서리 */
+export function guideCardPhotoTextHighlight() {
+  return cn(
+    "rounded-lg bg-[#fffcf7]/88 px-2.5 py-1.5",
+    "shadow-[0_4px_22px_rgba(0,43,80,0.14),0_0_0_1px_rgba(255,255,255,0.55)]",
+    "backdrop-blur-[12px] backdrop-saturate-150",
+    "[box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
+  );
+}
+
+/** @deprecated — `guideCardPhotoCopyWrap` + `guideCardPhotoTextHighlight` 사용 */
+export function guideCardPhotoCopyPanel(opts?: { dense?: boolean }) {
+  return guideCardPhotoCopyWrap(opts);
+}
+
+/** 사진 하단 은은한 비네팅 — 텍스트 가독 보조 */
 export const GUIDE_CARD_PHOTO_FOOT_SCRIM =
-  "pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[45%] bg-gradient-to-t from-black/30 via-black/8 to-transparent";
+  "pointer-events-none absolute inset-x-0 bottom-0 z-[8] h-[38%] bg-gradient-to-t from-black/22 via-black/5 to-transparent";
 
 export function guideCardPastelSurface(index: number) {
   return cn("border", pastelCardClass(index));
