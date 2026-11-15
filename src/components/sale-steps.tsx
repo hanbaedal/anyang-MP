@@ -9,8 +9,8 @@ import {
   guideCardEyebrowClass,
   guideCardPastelSurface,
   guideCardTitleClass,
-  GUIDE_CARD_SKY_OVERLAY_FULL,
-  GUIDE_CARD_SKY_OVERLAY_LEFT,
+  GUIDE_CARD_PHOTO_FOOT_SCRIM,
+  guideCardPhotoCopyPanel,
 } from "@/lib/guide-photo-card";
 import { uploadOriginalUrl } from "@/lib/media";
 import { SALE_STEPS } from "@/lib/site";
@@ -95,42 +95,33 @@ export function SaleSteps({
               />
             ) : null}
             {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={stepId} /> : null}
-            {hasPhoto ? (
-              <>
-                <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
-                <div
-                  className={cn(
-                    "absolute inset-y-0 left-0 w-[78%] max-w-lg",
-                    GUIDE_CARD_SKY_OVERLAY_LEFT,
-                  )}
-                  aria-hidden
-                />
-              </>
-            ) : null}
+            {hasPhoto ? <div className={GUIDE_CARD_PHOTO_FOOT_SCRIM} aria-hidden /> : null}
 
             <div
               className={cn(
-                "pc-viewport-card-body relative z-[25] flex flex-col justify-center gap-2.5 p-5 sm:p-6 md:max-w-[85%] md:p-7",
+                "pc-viewport-card-body relative z-[25] flex flex-col justify-end gap-2 p-5 sm:p-6 md:max-w-[92%] md:p-7",
                 viewportFill
                   ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
               )}
             >
-              <p className={guideCardEyebrowClass(hasPhoto)}>{t("step.n", { n: step.n })}</p>
-              <h3
-                {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                className={guideCardTitleClass({ onPhoto: hasPhoto })}
-              >
-                {step.title}
-              </h3>
-              {compact || !step.text ? null : (
-                <div
-                  {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
-                  className={cn(guideCardBodyTextClass({ onPhoto: hasPhoto }), "overflow-auto")}
+              <div className={cn(hasPhoto && guideCardPhotoCopyPanel())}>
+                <p className={guideCardEyebrowClass(false)}>{t("step.n", { n: step.n })}</p>
+                <h3
+                  {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
+                  className={guideCardTitleClass({ onPhoto: false })}
                 >
-                  <Paragraphs text={step.text} className="text-inherit" />
-                </div>
-              )}
+                  {step.title}
+                </h3>
+                {compact || !step.text ? null : (
+                  <div
+                    {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
+                    className={cn(guideCardBodyTextClass({ onPhoto: false }), "overflow-auto")}
+                  >
+                    <Paragraphs text={step.text} className="text-inherit" />
+                  </div>
+                )}
+              </div>
             </div>
           </li>
         );

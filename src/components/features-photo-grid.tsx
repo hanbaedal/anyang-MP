@@ -5,8 +5,8 @@ import {
   guideCardBodyTextClass,
   guideCardPastelSurface,
   guideCardTitleClass,
-  GUIDE_CARD_SKY_OVERLAY_FULL,
-  GUIDE_CARD_SKY_OVERLAY_LEFT,
+  GUIDE_CARD_PHOTO_FOOT_SCRIM,
+  guideCardPhotoCopyPanel,
 } from "@/lib/guide-photo-card";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
@@ -130,17 +130,8 @@ export function FeaturesPhotoGrid({
               />
             ) : null}
             {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={itemId} /> : null}
-            {hasPhoto && showCopy ? (
-              <>
-                <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
-                <div
-                  className={cn(
-                    "absolute inset-y-0 left-0 w-[78%] max-w-lg",
-                    GUIDE_CARD_SKY_OVERLAY_LEFT,
-                  )}
-                  aria-hidden
-                />
-              </>
+            {hasPhoto && showCopy && !transit ? (
+              <div className={GUIDE_CARD_PHOTO_FOOT_SCRIM} aria-hidden />
             ) : null}
 
             {showCopy ? (
@@ -149,14 +140,14 @@ export function FeaturesPhotoGrid({
                   "pc-viewport-card-body relative z-[25] flex w-full flex-col md:max-w-full",
                   transit
                     ? "min-h-0 flex-1 justify-start gap-0 p-0"
-                    : "justify-end md:max-w-[90%]",
+                    : "justify-end md:max-w-[92%]",
                   dense && !transit
                     ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
                     : transit
                       ? undefined
                       : fill
                       ? "min-h-[12rem] gap-2.5 p-5 sm:min-h-[13rem] sm:p-6 md:h-full md:min-h-0 md:justify-center md:p-7"
-                      : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-center",
+                      : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-end",
                 )}
               >
                 {showTitle && transit ? (
@@ -164,45 +155,51 @@ export function FeaturesPhotoGrid({
                     className={cn(
                       "border-b px-4 py-2.5 sm:px-4 sm:py-3",
                       hasPhoto
-                        ? "border-white/35 bg-white/92 backdrop-blur-sm"
+                        ? "border-[color:var(--pastel-chrome-border)] bg-[#fffcf7]/97 backdrop-blur-md"
                         : "border-[color:var(--pastel-chrome-border)] bg-[#fffcf7]/95",
                     )}
                   >
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                      className={cn(
-                        "text-base font-semibold tracking-tight text-[color:var(--pastel-chrome-fg)] sm:text-[1.05rem]",
-                        hasPhoto && "drop-shadow-none",
-                      )}
+                      className="text-base font-semibold tracking-tight text-[color:var(--pastel-chrome-fg)] sm:text-[1.05rem]"
                     >
                       {title}
                     </h3>
                   </div>
                 ) : null}
-                {showTitle && !transit ? (
-                  <h3
-                    {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                    className={guideCardTitleClass({ onPhoto: hasPhoto, dense })}
-                  >
-                    {title}
-                  </h3>
-                ) : null}
-                {showText ? (
-                  <div
-                    {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
-                    className={cn(
-                      guideCardBodyTextClass({ onPhoto: hasPhoto, dense }),
-                      transit && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
-                    )}
-                  >
+                <div
+                  className={cn(
+                    hasPhoto && !transit && guideCardPhotoCopyPanel({ dense }),
+                    transit && hasPhoto && showText && "mx-3 mb-3 mt-0 sm:mx-4",
+                    transit && hasPhoto && showText && guideCardPhotoCopyPanel({ dense: true }),
+                  )}
+                >
+                  {showTitle && !transit ? (
+                    <h3
+                      {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
+                      className={guideCardTitleClass({ onPhoto: false, dense })}
+                    >
+                      {title}
+                    </h3>
+                  ) : null}
+                  {showText ? (
+                    <div
+                      {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
+                      className={cn(
+                        guideCardBodyTextClass({ onPhoto: false, dense }),
+                        transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
+                        transit && hasPhoto && "flex-1",
+                      )}
+                    >
                     {captionFirstLine ? (
                       /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */
                       <p className="whitespace-normal break-words text-inherit">{text}</p>
                     ) : (
                       <Paragraphs text={text} className="text-inherit" />
                     )}
-                  </div>
-                ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ) : null}
           </article>
