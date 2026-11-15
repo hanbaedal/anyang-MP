@@ -140,7 +140,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
     <form onSubmit={onSave} className="mx-auto max-w-6xl space-y-5 px-4 py-10">
       {directionsPage ? (
         <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-          오시는 길: 위 제목·요약은 상단 히어로에 보입니다. 본문 칸은 쓰지 않아도 됩니다. 자가용·버스·택시 카드만
+          오시는 길: 제목·요약은 공개 본문 상단(파스텔 상자)에 보입니다. 본문 칸은 쓰지 않아도 됩니다. 자가용·버스·택시 카드만
           편집하세요(주소 항목 없음 — 공개 주소는 사이트 설정).
         </p>
       ) : null}

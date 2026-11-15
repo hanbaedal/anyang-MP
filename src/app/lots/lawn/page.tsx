@@ -1,4 +1,6 @@
 import { CmsPageHero } from "@/components/cms-page-hero";
+import { CmsPageIntro } from "@/components/cms-page-intro";
+import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
@@ -25,9 +27,14 @@ export default async function LawnPage() {
 
   return (
     <>
-      <CmsPageHero {...hero} />
+      <CmsPageHero kicker={hero.kicker} />
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
-        <Prose>{cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}</Prose>
+        <PastelBox className="p-5 md:p-6">
+          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
+            {cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "lawn.body")}</p>}
+          </Prose>
+        </PastelBox>
         <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
       </div>
     </>

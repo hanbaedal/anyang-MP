@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { CmsPageHero } from "@/components/cms-page-hero";
+import { CmsPageIntro } from "@/components/cms-page-intro";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
@@ -24,9 +25,10 @@ export default async function GreetingPage() {
 
   return (
     <>
-      <CmsPageHero {...hero} />
+      <CmsPageHero kicker={hero.kicker} />
       <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
         <PastelBox>
+        <CmsPageIntro title={hero.title} lead={hero.lead} />
         <div
           className={
             imageSrc

@@ -16,7 +16,8 @@ export function PageHero({
   children,
 }: {
   kicker: string;
-  title: string;
+  /** 비우면 히어로에는 kicker(배너)만 표시 — 제목·요약은 본문 `CmsPageIntro` 등에서 */
+  title?: string;
   lead?: string;
   /** alt만 쓰입니다. 배경은 메뉴 공통 파노라마로 통일합니다. */
   image?: { src?: string; alt: string };
@@ -24,6 +25,8 @@ export function PageHero({
   children?: ReactNode;
 }) {
   const alt = image?.alt || "안양공원묘원 테라스 묘역 전경";
+  const headline = title?.trim();
+  const kickerOnly = !headline && !lead?.trim() && !children;
   return (
     <section className="relative shrink-0 overflow-hidden border-b bg-[#0a3d66] text-primary-foreground">
       <Image
@@ -35,11 +38,23 @@ export function PageHero({
         quality={90}
         sizes="100vw"
       />
-      <div className={cn("relative mx-auto max-w-6xl px-4", compact ? "py-2 md:py-2.5" : "py-4 md:py-6")}>
-        <p className="text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]">
+      <div
+        className={cn(
+          "relative mx-auto max-w-6xl px-4",
+          kickerOnly ? "py-1.5 md:py-2" : compact ? "py-2 md:py-2.5" : "py-4 md:py-6",
+        )}
+      >
+        <p
+          className={cn(
+            "text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]",
+            kickerOnly && "md:text-[11px]",
+          )}
+        >
           {kicker}
         </p>
-        <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-1.5 md:text-2xl">{title}</h1>
+        {headline ? (
+          <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-1.5 md:text-2xl">{headline}</h1>
+        ) : null}
         {lead ? (
           <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-2 md:text-sm md:leading-6">
             {lead}

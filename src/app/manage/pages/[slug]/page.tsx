@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/page-hero";
 import { CmsEditor } from "@/components/cms-editor";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { ManageFuneralDocs } from "@/components/manage-funeral-docs";
 import { CMS_SLUGS, getCmsPageOrDefault, isCmsSlug } from "@/lib/cms";
 import { listFuneralDocs } from "@/lib/funeral-docs";
@@ -25,9 +26,14 @@ export default async function ManageCmsPage({ params }: { params: Promise<{ slug
               ? "갤러리와 같이 사진을 올리고, 격자에서 제목·설명을 수정합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
               : "한글 제목·본문·항목을 저장하면 Enter는 줄바꿈, 빈 줄은 문단으로 공개됩니다. 영어·중국어는 자동 번역됩니다. 분양가 원을 비우면 ‘확인 필요’로 보입니다.";
 
+  const publicCopy = resolveCmsPageHero("ko", { ...page, slug });
+
   return (
     <>
-      <PageHero kicker="관리" title={meta.label} lead={lead} />
+      <PageHero kicker={`관리 · ${meta.label}`} title={publicCopy.title} lead={publicCopy.lead} />
+      <p className="mx-auto max-w-6xl border-b border-border/80 bg-muted/30 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+        {lead}
+      </p>
       <CmsEditor initial={page} />
       {funeralDocs ? (
         <div className="mx-auto max-w-6xl space-y-3 border-t px-4 py-10">

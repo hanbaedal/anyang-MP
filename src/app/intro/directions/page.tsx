@@ -1,4 +1,6 @@
 import { CmsPageHero } from "@/components/cms-page-hero";
+import { CmsPageIntro } from "@/components/cms-page-intro";
+import { PastelBox } from "@/components/pastel-box";
 import { DirectionsPageBody } from "@/components/directions-page-body";
 import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
@@ -38,7 +40,12 @@ export default async function DirectionsPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <CmsPageHero {...hero} compact />
+      <CmsPageHero kicker={hero.kicker} compact />
+      <div className="shrink-0 px-2 pt-2 sm:px-3 md:px-4">
+        <PastelBox className="p-4 md:p-5">
+          <CmsPageIntro title={hero.title} lead={hero.lead} />
+        </PastelBox>
+      </div>
       <DirectionsPageBody items={items} />
     </div>
   );

@@ -1,4 +1,6 @@
 import { CmsPageHero } from "@/components/cms-page-hero";
+import { CmsPageIntro } from "@/components/cms-page-intro";
+import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
@@ -37,8 +39,11 @@ export default async function FeesPage() {
 
   return (
     <>
-      <CmsPageHero {...hero} />
+      <CmsPageHero kicker={hero.kicker} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
+        <PastelBox className="p-5 md:p-6">
+          <CmsPageIntro title={hero.title} lead={hero.lead} />
+        </PastelBox>
         <FeaturesPhotoGrid items={items} />
       </div>
     </>
