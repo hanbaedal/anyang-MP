@@ -3,7 +3,7 @@ import { CmsPageIntro } from "@/components/cms-page-intro";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { FEATURES } from "@/lib/site";
 import { t } from "@/lib/i18n";
@@ -21,7 +21,9 @@ export default async function FeaturesPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("features", locale);
+  const cms = cmsEdit
+    ? await getCmsPageOrDefault("features")
+    : await getCmsPageLocalized("features", locale);
   const items = (cms.items?.length
     ? cms.items
     : FEATURES.map((feature) => ({

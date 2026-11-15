@@ -5,7 +5,7 @@ import { CmsPageIntro } from "@/components/cms-page-intro";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
@@ -25,7 +25,9 @@ export default async function GreetingPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("greeting", locale);
+  const cms = cmsEdit
+    ? await getCmsPageOrDefault("greeting")
+    : await getCmsPageLocalized("greeting", locale);
   const bodyImage = cms.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
 

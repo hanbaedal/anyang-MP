@@ -15,7 +15,8 @@ import {
 import { uploadOriginalUrl } from "@/lib/media";
 import { SALE_STEPS } from "@/lib/site";
 import { useT } from "@/components/locale-provider";
-import { pageSlotItemImage, pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
+import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
+import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { cn } from "@/lib/utils";
 
 export type SaleStepView = { n: string; title: string; text: string; image?: string; id?: string };
@@ -68,7 +69,7 @@ export function SaleSteps({
         const stepId = step.id || `step-${step.n}`;
         const cmsTitleKey = cmsSlug && cmsEditMarkers ? pageSlotItemTitle(cmsSlug, stepId) : undefined;
         const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, stepId) : undefined;
-        const cmsImageKey = cmsSlug && cmsEditMarkers && hasPhoto ? pageSlotItemImage(cmsSlug, stepId) : undefined;
+        const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
 
         return (
           <li
@@ -82,23 +83,18 @@ export function SaleSteps({
             )}
           >
             {hasPhoto ? (
-              <>
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  className="object-cover object-center"
-                  sizes="(max-width: 767px) 100vw, 50vw"
-                  priority={index < 2}
-                  unoptimized={src.includes("/api/uploads/")}
-                  aria-hidden
-                />
-                {cmsImageKey ? <div data-cms-key={cmsImageKey} className="absolute inset-0 z-20" aria-hidden /> : null}
-              </>
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 767px) 100vw, 50vw"
+                priority={index < 2}
+                unoptimized={src.includes("/api/uploads/")}
+                aria-hidden
+              />
             ) : null}
-            {cmsSlug && cmsEditMarkers && !hasPhoto ? (
-              <div data-cms-key={pageSlotItemImage(cmsSlug, stepId)} className="absolute inset-0 z-20" aria-hidden />
-            ) : null}
+            {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={stepId} /> : null}
             {hasPhoto ? (
               <>
                 <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
@@ -114,7 +110,7 @@ export function SaleSteps({
 
             <div
               className={cn(
-                "pc-viewport-card-body relative z-10 flex flex-col justify-center gap-2.5 p-5 sm:p-6 md:max-w-[85%] md:p-7",
+                "pc-viewport-card-body relative z-[25] flex flex-col justify-center gap-2.5 p-5 sm:p-6 md:max-w-[85%] md:p-7",
                 viewportFill
                   ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
                   : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",

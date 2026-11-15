@@ -13,6 +13,8 @@ import {
   parsePageCmsSlotKey,
   pageSlotBodyImage,
   pageSlotItemImage,
+  pageSlotItemText,
+  pageSlotItemTitle,
   type PageCmsSlotMeta,
 } from "@/lib/page-cms-slots";
 import { PAGE_CMS_PUBLIC_PATH } from "@/lib/page-cms-path";
@@ -174,6 +176,8 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
 
   const activeMeta: PageCmsSlotMeta | undefined = activeKey ? slotMetaMap[activeKey] : undefined;
 
+  const activeItemId = activeKey ? parsePageCmsSlotKey(activeKey)?.itemId : undefined;
+
   function readTextValue(key: string) {
     const parsed = parsePageCmsSlotKey(key);
     if (!parsed) return "";
@@ -189,8 +193,68 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     return "";
   }
 
+  function renderItemCardPanel(itemId: string) {
+    const item = page.items.find((row) => row.id === itemId);
+    if (!item) {
+      return <p className="text-xs text-destructive">카드 데이터를 찾을 수 없습니다. 저장 후 새로고침하세요.</p>;
+    }
+    const galleryLink = CMS_GALLERY_LINK_ITEM_SLUGS.includes(slug) || slug === "procedure";
+    const directions = slug === "directions";
+    const titleKey = pageSlotItemTitle(slug, itemId);
+    const textKey = pageSlotItemText(slug, itemId);
+  return (
+      <div className="space-y-3">
+        {!directions ? (
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-medium text-foreground">카드 제목 (ko)</span>
+            <input
+              className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              disabled={busy}
+              value={item.title}
+              onChange={(e) => patchText(titleKey, e.target.value)}
+            />
+          </label>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">오시는 길 카드는 제목 없이 설명만 표시됩니다.</p>
+        )}
+        <CmsFieldKo
+          multiline
+          disabled={busy}
+          value={item.text ?? ""}
+          onChange={(value) => patchText(textKey, value)}
+        />
+        {galleryLink ? (
+          <div className="space-y-2 border-t pt-3">
+            <ManageImagePicker
+              src={item.image ?? ""}
+              disabled={busy}
+              libraryOnly
+              label="갤러리에서 사진 연결"
+              onPickSrc={(src, photo) => patchItemImage(itemId, src, photo?.id)}
+            />
+            {item.image ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => patchItemImage(itemId, "", "")}
+              >
+                연결 해제
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   const panelChildren = (() => {
-    if (!activeKey || !activeMeta) return null;
+    if (!activeKey) return null;
+    if (activeItemId && activeMeta && (activeMeta.kind === "itemTitle" || activeMeta.kind === "itemText" || activeMeta.kind === "itemImage")) {
+      return renderItemCardPanel(activeItemId);
+    }
+    if (!activeMeta) return null;
     const multiline =
       activeMeta.kind === "lead" || activeMeta.kind === "body" || activeMeta.kind === "itemText";
     if (activeMeta.kind === "bodyImage") {
@@ -203,36 +267,6 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
           onFile={(file) => void uploadBodyImage(file)}
           onPickSrc={patchBodyImage}
         />
-      );
-    }
-    if (activeMeta.kind === "itemImage" && activeMeta.itemId) {
-      const item = page.items.find((row) => row.id === activeMeta.itemId);
-      const galleryLink = CMS_GALLERY_LINK_ITEM_SLUGS.includes(slug) || slug === "procedure";
-      return (
-        <div className="space-y-2">
-          {galleryLink ? (
-            <ManageImagePicker
-              src={item?.image ?? ""}
-              disabled={busy}
-              libraryOnly
-              label="갤러리에서 사진 연결"
-              onPickSrc={(src, photo) => patchItemImage(activeMeta.itemId!, src, photo?.id)}
-            />
-          ) : (
-            <p className="text-xs text-muted-foreground">이 항목은 갤러리 연결이 없습니다.</p>
-          )}
-          {item?.image ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => patchItemImage(activeMeta.itemId!, "", "")}
-            >
-              연결 해제
-            </Button>
-          ) : null}
-        </div>
       );
     }
     return (
@@ -250,10 +284,13 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
       ? `사진 격자는 갤러리 「${GALLERY_TAG[slug]}」 태그로 자동 표시됩니다. /manage/gallery 에서 관리하세요.`
       : undefined;
 
+  const itemSlot =
+    activeMeta && (activeMeta.kind === "itemTitle" || activeMeta.kind === "itemText" || activeMeta.kind === "itemImage");
+
   const panelHint = activeMeta
     ? lotsHint ??
-      (activeMeta.kind === "itemImage"
-        ? "카드 사진을 클릭해 선택하거나 오른쪽에서 갤러리를 연결하세요."
+      (itemSlot
+        ? "카드 제목·설명을 클릭하거나 우측 상단 「사진」으로 갤러리를 연결하세요."
         : "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개에서 자동 처리됩니다.")
     : undefined;
 
@@ -288,7 +325,11 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
-          slotLabel={activeMeta?.label}
+          slotLabel={
+            itemSlot && activeItemId
+              ? activeMeta?.label?.replace(/ 제목$| 설명$| 사진$/, "") ?? "카드 편집"
+              : activeMeta?.label
+          }
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}

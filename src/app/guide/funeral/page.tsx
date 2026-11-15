@@ -6,7 +6,7 @@ import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { SITE } from "@/lib/site";
@@ -32,7 +32,9 @@ export default async function FuneralPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("funeral", locale);
+  const cms = cmsEdit
+    ? await getCmsPageOrDefault("funeral")
+    : await getCmsPageLocalized("funeral", locale);
   const docs = await funeralDocsById();
   const items = (cms.items?.length
     ? cms.items

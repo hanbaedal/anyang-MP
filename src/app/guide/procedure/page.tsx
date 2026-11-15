@@ -6,7 +6,7 @@ import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -55,7 +55,9 @@ export default async function ProcedurePage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("procedure", locale);
+  const cms = cmsEdit
+    ? await getCmsPageOrDefault("procedure")
+    : await getCmsPageLocalized("procedure", locale);
   const steps = (cms.items ?? []).map((item, index) => ({
     n: String(index + 1),
     id: item.id,

@@ -3,7 +3,7 @@ import { CmsPageIntro } from "@/components/cms-page-intro";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { DirectionsPageBody } from "@/components/directions-page-body";
-import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault, stripDirectionsAddressItems } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -26,7 +26,9 @@ export default async function DirectionsPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("directions", locale);
+  const cms = cmsEdit
+    ? await getCmsPageOrDefault("directions")
+    : await getCmsPageLocalized("directions", locale);
   const rawItems = stripDirectionsAddressItems(cms.items ?? []);
   const items = (rawItems.length
     ? rawItems

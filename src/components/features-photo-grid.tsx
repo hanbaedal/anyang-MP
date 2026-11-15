@@ -8,7 +8,8 @@ import {
   GUIDE_CARD_SKY_OVERLAY_FULL,
   GUIDE_CARD_SKY_OVERLAY_LEFT,
 } from "@/lib/guide-photo-card";
-import { pageSlotItemImage, pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
+import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
+import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -98,8 +99,7 @@ export function FeaturesPhotoGrid({
             ? pageSlotItemTitle(cmsSlug, itemId)
             : undefined;
         const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, itemId) : undefined;
-        const cmsImageKey =
-          cmsSlug && cmsEditMarkers && hasPhoto ? pageSlotItemImage(cmsSlug, itemId) : undefined;
+        const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
 
         return (
           <article
@@ -119,28 +119,17 @@ export function FeaturesPhotoGrid({
             )}
           >
             {hasPhoto ? (
-              <>
-                <Image
-                  src={src}
-                  alt={alt}
-                  fill
-                  className="object-cover object-center"
-                  sizes={dense ? "(max-width: 767px) 100vw, 33vw" : "(max-width: 767px) 100vw, 50vw"}
-                  priority={index < 2}
-                  unoptimized={src.includes("/api/uploads/")}
-                />
-                {cmsImageKey ? (
-                  <div data-cms-key={cmsImageKey} className="absolute inset-0 z-20" aria-hidden />
-                ) : null}
-              </>
-            ) : null}
-            {cmsSlug && cmsEditMarkers && !hasPhoto ? (
-              <div
-                data-cms-key={pageSlotItemImage(cmsSlug, itemId)}
-                className="absolute inset-0 z-20"
-                aria-label="사진 슬롯"
+              <Image
+                src={src}
+                alt={alt}
+                fill
+                className="object-cover object-center"
+                sizes={dense ? "(max-width: 767px) 100vw, 33vw" : "(max-width: 767px) 100vw, 50vw"}
+                priority={index < 2}
+                unoptimized={src.includes("/api/uploads/")}
               />
             ) : null}
+            {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={itemId} /> : null}
             {hasPhoto && showCopy ? (
               <>
                 <div className={cn("absolute inset-0", GUIDE_CARD_SKY_OVERLAY_FULL)} aria-hidden />
@@ -157,7 +146,7 @@ export function FeaturesPhotoGrid({
             {showCopy ? (
               <div
                 className={cn(
-                  "pc-viewport-card-body relative z-10 flex w-full flex-col md:max-w-full",
+                  "pc-viewport-card-body relative z-[25] flex w-full flex-col md:max-w-full",
                   transit
                     ? "min-h-0 flex-1 justify-start gap-0 p-0"
                     : "justify-end md:max-w-[90%]",

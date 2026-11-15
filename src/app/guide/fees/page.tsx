@@ -3,7 +3,7 @@ import { CmsPageIntro } from "@/components/cms-page-intro";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -27,7 +27,7 @@ export default async function FeesPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = await getCmsPageLocalized("fees", locale);
+  const cms = cmsEdit ? await getCmsPageOrDefault("fees") : await getCmsPageLocalized("fees", locale);
   const items = (cms.items?.length
     ? cms.items
     : FEE_FALLBACK.map((row) => ({
