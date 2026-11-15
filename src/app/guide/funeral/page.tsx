@@ -1,8 +1,10 @@
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
@@ -38,11 +40,13 @@ export default async function FuneralPage() {
     image: item.image?.trim() || undefined,
   }));
 
+  const hero = resolveCmsPageHero(locale, cms);
+
   return (
-    /* AMP-89: one-page shell/viewportFill 없음 — #content 자연 스크롤 */
-    <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
-      <h1 className="sr-only">{cms.title || t(locale, "fun.title")}</h1>
-      <FeaturesPhotoGrid items={items} />
+    <>
+      <CmsPageHero {...hero} />
+      <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
+        <FeaturesPhotoGrid items={items} />
       <FuneralDocList locale={locale} docs={docs} />
       <Prose>
         {cms.body?.trim() ? <Paragraphs text={cms.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
@@ -52,6 +56,7 @@ export default async function FuneralPage() {
           </a>
         </p>
       </Prose>
-    </div>
+      </div>
+    </>
   );
 }

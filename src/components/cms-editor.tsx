@@ -50,7 +50,6 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
   const directionsPage = page.slug === "directions";
   const feesPage = page.slug === "fees";
   const servicesPage = page.slug === "services";
-  const hidePageCopy = directionsPage;
   /** 이용절차는 카드 아래 안내 body·서류 유지 — body 칸 숨기지 않음 */
   const hideBodyField = feesPage || servicesPage;
 
@@ -139,14 +138,13 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
 
   return (
     <form onSubmit={onSave} className="mx-auto max-w-6xl space-y-5 px-4 py-10">
-      {hidePageCopy ? (
+      {directionsPage ? (
         <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-          오시는 길: 페이지 제목·요약·본문은 쓰지 않습니다. 자가용·버스·택시 카드만 편집하세요(주소 항목 없음 —
-          공개 주소는 사이트 설정). 공개 카드는 갤러리 사진 + 설명 첫 줄만 보입니다.
+          오시는 길: 위 제목·요약은 상단 히어로에 보입니다. 본문 칸은 쓰지 않아도 됩니다. 자가용·버스·택시 카드만
+          편집하세요(주소 항목 없음 — 공개 주소는 사이트 설정).
         </p>
-      ) : (
-        <>
-          <div className="grid gap-4 md:grid-cols-2">
+      ) : null}
+      <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-1 text-sm">
               <span className="font-medium">제목</span>
               <input className={field} value={page.title} onChange={(e) => setPage({ ...page, title: e.target.value })} />
@@ -156,9 +154,9 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
               <input className={field} value={page.lead} onChange={(e) => setPage({ ...page, lead: e.target.value })} />
             </label>
           </div>
-          {hideBodyField ? (
-            <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-              {servicesPage ? (
+      {hideBodyField ? (
+        <p className="rounded-md border border-dashed border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          {servicesPage ? (
                 <>
                   이용안내: 본문 한 칸 대신 아래 <strong>카드</strong>(제목·설명·갤러리 사진)를 편집하세요. 공개는 사진
                   격자 카드로 보입니다.
@@ -168,15 +166,13 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
                   관리비: 본문 한 칸 대신 아래 <strong>카드 4개</strong>(제목·설명·갤러리 사진)를 편집하세요. 공개는 2×2
                   이미지 카드로 보입니다.
                 </>
-              )}
-            </p>
-          ) : (
-            <label className="block space-y-1 text-sm">
-              <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
-              <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
-            </label>
           )}
-        </>
+        </p>
+      ) : directionsPage ? null : (
+        <label className="block space-y-1 text-sm">
+          <span className="font-medium">본문 (Enter=줄바꿈, 빈 줄=문단)</span>
+          <textarea className={area} value={page.body} onChange={(e) => setPage({ ...page, body: e.target.value })} />
+        </label>
       )}
       {showBodyImage ? (
         <div className="space-y-2 rounded-xl border bg-card p-4">

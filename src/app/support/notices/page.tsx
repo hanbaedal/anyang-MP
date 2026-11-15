@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { NoticesList } from "@/components/notices-list";
 import { listNoticesLocalized } from "@/lib/notices";
 import { getNoticesPageSettings } from "@/lib/notices-page";
@@ -20,9 +21,14 @@ export default async function NoticesPage() {
   const src = page.listImage?.trim() ? uploadOriginalUrl(page.listImage) : "";
 
   return (
-    <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
-      <h1 className="sr-only">{t(locale, "notices.title")}</h1>
-      <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
+  <>
+      <CmsPageHero
+        kicker={t(locale, "nav.guide")}
+        title={t(locale, "notices.title")}
+        lead={t(locale, "notices.lead")}
+      />
+      <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
+        <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
         <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm md:mx-0 md:max-w-none md:aspect-auto">
           {src ? (
             <Image
@@ -44,7 +50,8 @@ export default async function NoticesPage() {
         <div className="pc-notices-list min-w-0">
           <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} fill />
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

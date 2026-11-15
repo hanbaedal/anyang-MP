@@ -1,8 +1,10 @@
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -59,10 +61,14 @@ export default async function ProcedurePage() {
     </PastelBox>
   );
 
+  const hero = resolveCmsPageHero(locale, cms);
+
   return (
-    <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
-      <h1 className="sr-only">{cms.title || t(locale, "proc.title")}</h1>
-      <SaleSteps steps={steps.length ? steps : undefined} aside={noteAside} />
-    </div>
+    <>
+      <CmsPageHero {...hero} />
+      <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
+        <SaleSteps steps={steps.length ? steps : undefined} aside={noteAside} />
+      </div>
+    </>
   );
 }

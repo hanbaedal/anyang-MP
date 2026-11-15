@@ -1,5 +1,7 @@
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -31,10 +33,14 @@ export default async function FeesPage() {
     image: item.image?.trim() || undefined,
   }));
 
+  const hero = resolveCmsPageHero(locale, cms);
+
   return (
-    <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
-      <h1 className="sr-only">{cms.title || t(locale, "fees.title")}</h1>
-      <FeaturesPhotoGrid items={items} />
-    </div>
+    <>
+      <CmsPageHero {...hero} />
+      <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
+        <FeaturesPhotoGrid items={items} />
+      </div>
+    </>
   );
 }

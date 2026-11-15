@@ -1,8 +1,10 @@
 import Image from "next/image";
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import { uploadOriginalUrl } from "@/lib/media";
@@ -18,10 +20,13 @@ export default async function GreetingPage() {
   const bodyImage = cms.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
 
+  const hero = resolveCmsPageHero(locale, cms);
+
   return (
-    <article className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="sr-only">{cms.title || t(locale, "greeting.title")}</h1>
-      <PastelBox>
+    <>
+      <CmsPageHero {...hero} />
+      <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
+        <PastelBox>
         <div
           className={
             imageSrc
@@ -55,7 +60,8 @@ export default async function GreetingPage() {
             )}
           </Prose>
         </div>
-      </PastelBox>
-    </article>
+        </PastelBox>
+      </article>
+    </>
   );
 }

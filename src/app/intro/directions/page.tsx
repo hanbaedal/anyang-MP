@@ -1,5 +1,7 @@
+import { CmsPageHero } from "@/components/cms-page-hero";
 import { DirectionsPageBody } from "@/components/directions-page-body";
 import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
+import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -32,10 +34,11 @@ export default async function DirectionsPage() {
     image: item.image?.trim() || undefined,
   }));
 
+  const hero = resolveCmsPageHero(locale, cms);
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <h1 className="sr-only">{t(locale, "dir.title")}</h1>
-      {/* AMP-74: 지도 위 · 자가용/버스/택시 카드 아래 · 주소·전화(지도/푸터 중복) 숨김 */}
+      <CmsPageHero {...hero} compact />
       <DirectionsPageBody items={items} />
     </div>
   );
