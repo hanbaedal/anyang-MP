@@ -38,7 +38,7 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const busy = status === "busy";
 
-  const slotMetaMap = useMemo(() => buildPageCmsSlotMeta(page), [page]);
+  const slotMetaMap = useMemo(() => buildPageCmsSlotMeta({ ...page, slug }), [page, slug]);
   const publicPath = PAGE_CMS_PUBLIC_PATH[slug];
   const iframeSrc = useMemo(
     () => `${publicPath}?cmsEdit=1&_v=${frameRev}`,

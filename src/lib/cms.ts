@@ -234,13 +234,13 @@ function sanitizeDirectionsPage(page: CmsPage): CmsPage {
 /** AMP-86/87: body만 있는 옛 관리비 문서 → 4카드 마이그레이션 대상인지 */
 export function feesNeedsCardMigration(page: CmsPage): boolean {
   if (page.slug !== "fees") return false;
-  return !page.items?.some((item) => item.title.trim() || item.text?.trim());
+  return !page.items?.some((item) => String(item.title ?? "").trim() || String(item.text ?? "").trim());
 }
 
 /** AMP-88: 이용안내 — 빈 items이거나 galleryId 미정규화·잔여 body */
 export function servicesNeedsCardMigration(page: CmsPage): boolean {
   if (page.slug !== "services") return false;
-  if (!page.items?.some((item) => item.title.trim() || item.text?.trim())) return true;
+  if (!page.items?.some((item) => String(item.title ?? "").trim() || String(item.text ?? "").trim())) return true;
   if (page.body?.trim()) return true;
   return page.items.some((item) => item.galleryId === undefined);
 }
@@ -248,7 +248,7 @@ export function servicesNeedsCardMigration(page: CmsPage): boolean {
 /** AMP-89: 이용절차 — 빈 items이거나 galleryId 미정규화 (body는 안내문으로 유지) */
 export function funeralNeedsCardMigration(page: CmsPage): boolean {
   if (page.slug !== "funeral") return false;
-  if (!page.items?.some((item) => item.title.trim() || item.text?.trim())) return true;
+  if (!page.items?.some((item) => String(item.title ?? "").trim() || String(item.text ?? "").trim())) return true;
   return page.items.some((item) => item.galleryId === undefined);
 }
 
@@ -283,7 +283,7 @@ export function ensureFeesCardItems(page: CmsPage): CmsPage {
 /** AMP-88: 이용안내 → 5 items (갤러리 링크). 기존 제목·설명 유지. */
 export function ensureServicesCardItems(page: CmsPage): CmsPage {
   if (page.slug !== "services") return page;
-  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+  if (page.items?.some((item) => String(item.title ?? "").trim() || String(item.text ?? "").trim())) {
     return {
       ...page,
       body: "",
@@ -319,7 +319,7 @@ export function ensureServicesCardItems(page: CmsPage): CmsPage {
 /** AMP-89: 이용절차 → 4 items (갤러리 링크). 본문(추가 안내)은 유지. */
 export function ensureFuneralCardItems(page: CmsPage): CmsPage {
   if (page.slug !== "funeral") return page;
-  if (page.items?.some((item) => item.title.trim() || item.text?.trim())) {
+  if (page.items?.some((item) => String(item.title ?? "").trim() || String(item.text ?? "").trim())) {
     return {
       ...page,
       items: page.items.map((item) => ({
@@ -348,10 +348,29 @@ function applyGalleryCardEnsures(page: CmsPage): CmsPage {
   );
 }
 
+/** Mongo·JSON에 null/누락 필드가 있어도 렌더가 깨지지 않도록 */
+export function normalizeCmsPage(page: CmsPage): CmsPage {
+  return {
+    ...page,
+    title: String(page.title ?? ""),
+    lead: String(page.lead ?? ""),
+    body: String(page.body ?? ""),
+    items: (page.items ?? []).map((item, index) => ({
+      id: String(item?.id ?? `item-${index}`),
+      title: String(item?.title ?? ""),
+      text: item?.text != null ? String(item.text) : "",
+      image: item?.image != null ? String(item.image) : "",
+      galleryId: item?.galleryId != null ? String(item.galleryId) : "",
+      ...(item?.won != null ? { won: String(item.won) } : {}),
+      ...(item?.remaining != null ? { remaining: String(item.remaining) } : {}),
+    })),
+  };
+}
+
 function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
-  return {
+  return normalizeCmsPage({
     slug,
     title: currentCmsTitle(slug, String(doc.title ?? "")),
     lead: String(doc.lead ?? ""),
@@ -360,7 +379,7 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
     updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt ?? ""),
     ...(bodyImage ? { bodyImage } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
-  };
+  });
 }
 
 function fromDoc(doc: Record<string, unknown>): CmsPage {
@@ -407,8 +426,8 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
 }
 
 export async function getCmsPageOrDefault(slug: CmsSlug): Promise<CmsPage> {
-  const page = (await getCmsPage(slug)) ?? defaultCmsPage(slug);
-  return ensureGalleryLinkCardsPersisted(page);
+  const page = normalizeCmsPage((await getCmsPage(slug)) ?? defaultCmsPage(slug));
+  return normalizeCmsPage(await ensureGalleryLinkCardsPersisted(page));
 }
 
 function cmsLocaleIncomplete(page: CmsPage, locale: ContentLocale) {

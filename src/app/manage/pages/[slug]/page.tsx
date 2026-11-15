@@ -1,14 +1,20 @@
 import { notFound } from "next/navigation";
 import { ManageFuneralDocs } from "@/components/manage-funeral-docs";
 import { ManagePageCms } from "@/components/manage/manage-page-cms";
-import { CMS_SLUGS, getCmsPageOrDefault, isCmsSlug } from "@/lib/cms";
+import { CMS_SLUGS, defaultCmsPage, getCmsPageOrDefault, isCmsSlug, type CmsSlug } from "@/lib/cms";
 import { listFuneralDocs } from "@/lib/funeral-docs";
 import { isManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 
 export default async function ManageCmsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!isCmsSlug(slug)) notFound();
-  const page = await getCmsPageOrDefault(slug);
+  let page;
+  try {
+    page = await getCmsPageOrDefault(slug);
+  } catch (error) {
+    console.error("[manage/cms] page load failed", slug, error);
+    page = defaultCmsPage(slug as CmsSlug);
+  }
   const funeralDocs = slug === "funeral" ? await listFuneralDocs() : null;
 
   if (!isManageVisualCmsSlug(slug)) {

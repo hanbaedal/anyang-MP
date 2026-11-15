@@ -84,7 +84,7 @@ export function FeaturesPhotoGrid({
       )}
     >
       {items.map((item, index) => {
-        const title = normalizeFeatureCopy(item.title);
+        const title = normalizeFeatureCopy(item.title ?? "");
         const raw = item.text ? normalizeFeatureCopy(item.text) : "";
         const text = captionFirstLine ? firstBodyLine(raw) : raw;
         const showTitle = !(hideTitle || captionFirstLine) && Boolean(title);
