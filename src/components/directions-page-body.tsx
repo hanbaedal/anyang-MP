@@ -6,7 +6,15 @@ import { FeaturesPhotoGrid, type FeaturePhotoItem } from "@/components/features-
 import { cn } from "@/lib/utils";
 
 /** 오시는 길: 지도 figure 폭에 교통 카드 열 맞춤 */
-export function DirectionsPageBody({ items }: { items: FeaturePhotoItem[] }) {
+export function DirectionsPageBody({
+  items,
+  cmsSlug,
+  cmsEditMarkers = false,
+}: {
+  items: FeaturePhotoItem[];
+  cmsSlug?: string;
+  cmsEditMarkers?: boolean;
+}) {
   const [mapWidth, setMapWidth] = useState<number | null>(null);
   const alignWidth = mapWidth != null && mapWidth > 0;
 
@@ -19,7 +27,14 @@ export function DirectionsPageBody({ items }: { items: FeaturePhotoItem[] }) {
         className={cn("mx-auto w-full shrink-0", alignWidth && "max-w-full")}
         style={alignWidth ? { width: mapWidth, maxWidth: "100%" } : undefined}
       >
-        <FeaturesPhotoGrid className="w-full md:grid-cols-3" dense titleBar items={items} />
+        <FeaturesPhotoGrid
+          className="w-full md:grid-cols-3"
+          dense
+          titleBar
+          items={items}
+          cmsSlug={cmsSlug}
+          cmsEditMarkers={cmsEditMarkers}
+        />
       </div>
     </div>
   );

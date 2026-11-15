@@ -1,4 +1,6 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsPageIntro } from "@/components/cms-page-intro";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -18,8 +20,13 @@ const FEE_FALLBACK = [
   { titleKey: "fees.c4.title", bodyKey: "fees.p4" },
 ] as const;
 
-export default async function FeesPage() {
+export default async function FeesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const cms = await getCmsPageLocalized("fees", locale);
   const items = (cms.items?.length
     ? cms.items
@@ -40,10 +47,11 @@ export default async function FeesPage() {
     <>
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="fees" cmsEditMarkers={cmsEdit} />
         </PastelBox>
-        <FeaturesPhotoGrid items={items} />
+        <FeaturesPhotoGrid items={items} cmsSlug="fees" cmsEditMarkers={cmsEdit} />
       </div>
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>
   );
 }

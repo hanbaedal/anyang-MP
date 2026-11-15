@@ -1,9 +1,11 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
+import { CmsBodyMark } from "@/components/cms-body-mark";
 import { CmsPageIntro } from "@/components/cms-page-intro";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { funeralDocsById } from "@/lib/funeral-docs";
@@ -23,8 +25,13 @@ const FUNERAL_FALLBACK = [
   { id: "4", titleKey: "fun.s4t", bodyKey: "fun.s4d" },
 ] as const;
 
-export default async function FuneralPage() {
+export default async function FuneralPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const cms = await getCmsPageLocalized("funeral", locale);
   const docs = await funeralDocsById();
   const items = (cms.items?.length
@@ -47,12 +54,18 @@ export default async function FuneralPage() {
     <>
       <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
         </PastelBox>
-        <FeaturesPhotoGrid items={items} />
+        <FeaturesPhotoGrid items={items} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
       <FuneralDocList locale={locale} docs={docs} />
       <Prose>
-        {cms.body?.trim() ? <Paragraphs text={cms.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
+        {cms.body?.trim() ? (
+          <CmsBodyMark cmsSlug="funeral" cmsEditMarkers={cmsEdit} text={cms.body} />
+        ) : (
+          <CmsBodyMark cmsSlug="funeral" cmsEditMarkers={cmsEdit}>
+            <p className="break-keep">{t(locale, "fun.more")}</p>
+          </CmsBodyMark>
+        )}
         <p>
           <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
             {SITE.phone}
@@ -60,6 +73,7 @@ export default async function FuneralPage() {
         </p>
       </Prose>
       </div>
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>
   );
 }

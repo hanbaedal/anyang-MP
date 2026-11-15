@@ -1,4 +1,6 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsPageIntro } from "@/components/cms-page-intro";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -12,8 +14,13 @@ export async function generateMetadata() {
   return { title: t(locale, "features.title") };
 }
 
-export default async function FeaturesPage() {
+export default async function FeaturesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const cms = await getCmsPageLocalized("features", locale);
   const items = (cms.items?.length
     ? cms.items
@@ -34,10 +41,16 @@ export default async function FeaturesPage() {
     <>
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro
+            title={hero.title}
+            lead={hero.lead}
+            cmsSlug="features"
+            cmsEditMarkers={cmsEdit}
+          />
         </PastelBox>
-        <FeaturesPhotoGrid items={items} />
+        <FeaturesPhotoGrid items={items} cmsSlug="features" cmsEditMarkers={cmsEdit} />
       </div>
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>
   );
 }

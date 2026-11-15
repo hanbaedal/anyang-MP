@@ -1,4 +1,6 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsPageIntro } from "@/components/cms-page-intro";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { DirectionsPageBody } from "@/components/directions-page-body";
 import { getCmsPageLocalized, stripDirectionsAddressItems } from "@/lib/cms";
@@ -17,8 +19,13 @@ const TRANSIT_FALLBACK = [
   { titleKey: "dir.taxi", bodyKey: "dir.taxiBody" },
 ] as const;
 
-export default async function DirectionsPage() {
+export default async function DirectionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const cms = await getCmsPageLocalized("directions", locale);
   const rawItems = stripDirectionsAddressItems(cms.items ?? []);
   const items = (rawItems.length
@@ -41,10 +48,16 @@ export default async function DirectionsPage() {
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <div className="shrink-0 px-2 pt-2 sm:px-3 md:px-4">
         <PastelBox className="p-4 md:p-5">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro
+            title={hero.title}
+            lead={hero.lead}
+            cmsSlug="directions"
+            cmsEditMarkers={cmsEdit}
+          />
         </PastelBox>
       </div>
-      <DirectionsPageBody items={items} />
+      <DirectionsPageBody items={items} cmsSlug="directions" cmsEditMarkers={cmsEdit} />
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </div>
   );
 }

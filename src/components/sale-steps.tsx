@@ -15,9 +15,10 @@ import {
 import { uploadOriginalUrl } from "@/lib/media";
 import { SALE_STEPS } from "@/lib/site";
 import { useT } from "@/components/locale-provider";
+import { pageSlotItemImage, pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { cn } from "@/lib/utils";
 
-export type SaleStepView = { n: string; title: string; text: string; image?: string };
+export type SaleStepView = { n: string; title: string; text: string; image?: string; id?: string };
 
 /**
  * 분양 절차 — 2열·소프트 오버레이.
@@ -30,6 +31,8 @@ export function SaleSteps({
   viewportFill = false,
   /** PC: 5번째 카드 우측 칸 · 모바일: 카드 아래 스택 */
   aside = null,
+  cmsSlug,
+  cmsEditMarkers = false,
 }: {
   compact?: boolean;
   /** CMS에서 넘긴 단계. 없으면 i18n 기본 5단계 */
@@ -38,6 +41,8 @@ export function SaleSteps({
   /** PC 한 화면 fill (이용안내 하위) */
   viewportFill?: boolean;
   aside?: ReactNode;
+  cmsSlug?: string;
+  cmsEditMarkers?: boolean;
 }) {
   const t = useT();
   const rows: SaleStepView[] =
@@ -60,6 +65,10 @@ export function SaleSteps({
       {rows.map((step, index) => {
         const hasPhoto = cardHasGalleryImage(step.image);
         const src = hasPhoto ? uploadOriginalUrl(step.image!.trim()) : "";
+        const stepId = step.id || `step-${step.n}`;
+        const cmsTitleKey = cmsSlug && cmsEditMarkers ? pageSlotItemTitle(cmsSlug, stepId) : undefined;
+        const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, stepId) : undefined;
+        const cmsImageKey = cmsSlug && cmsEditMarkers && hasPhoto ? pageSlotItemImage(cmsSlug, stepId) : undefined;
 
         return (
           <li
@@ -73,16 +82,22 @@ export function SaleSteps({
             )}
           >
             {hasPhoto ? (
-              <Image
-                src={src}
-                alt=""
-                fill
-                className="object-cover object-center"
-                sizes="(max-width: 767px) 100vw, 50vw"
-                priority={index < 2}
-                unoptimized={src.includes("/api/uploads/")}
-                aria-hidden
-              />
+              <>
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 767px) 100vw, 50vw"
+                  priority={index < 2}
+                  unoptimized={src.includes("/api/uploads/")}
+                  aria-hidden
+                />
+                {cmsImageKey ? <div data-cms-key={cmsImageKey} className="absolute inset-0 z-20" aria-hidden /> : null}
+              </>
+            ) : null}
+            {cmsSlug && cmsEditMarkers && !hasPhoto ? (
+              <div data-cms-key={pageSlotItemImage(cmsSlug, stepId)} className="absolute inset-0 z-20" aria-hidden />
             ) : null}
             {hasPhoto ? (
               <>
@@ -106,9 +121,17 @@ export function SaleSteps({
               )}
             >
               <p className={guideCardEyebrowClass(hasPhoto)}>{t("step.n", { n: step.n })}</p>
-              <h3 className={guideCardTitleClass({ onPhoto: hasPhoto })}>{step.title}</h3>
+              <h3
+                {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
+                className={guideCardTitleClass({ onPhoto: hasPhoto })}
+              >
+                {step.title}
+              </h3>
               {compact || !step.text ? null : (
-                <div className={cn(guideCardBodyTextClass({ onPhoto: hasPhoto }), "overflow-auto")}>
+                <div
+                  {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
+                  className={cn(guideCardBodyTextClass({ onPhoto: hasPhoto }), "overflow-auto")}
+                >
                   <Paragraphs text={step.text} className="text-inherit" />
                 </div>
               )}

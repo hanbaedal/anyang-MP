@@ -1,0 +1,1 @@
+export { CmsEditBridge as PageCmsEditBridge } from "@/components/cms-edit/cms-edit-bridge";

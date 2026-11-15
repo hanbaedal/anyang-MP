@@ -1,9 +1,11 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
+import { CmsBodyMark } from "@/components/cms-body-mark";
 import { CmsPageIntro } from "@/components/cms-page-intro";
 import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized } from "@/lib/cms";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
 import { t } from "@/lib/i18n";
@@ -16,8 +18,13 @@ export async function generateMetadata() {
   return { title: t(locale, "col.title") };
 }
 
-export default async function ColumbariumPage() {
+export default async function ColumbariumPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const [cms, items] = await Promise.all([
     getCmsPageLocalized("columbarium", locale),
     listLotsPhotosFromGallery("columbarium", locale),
@@ -26,15 +33,22 @@ export default async function ColumbariumPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
+      <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-10 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="columbarium" cmsEditMarkers={cmsEdit} />
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            {cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, "col.body")}</p>}
+            {cms.body ? (
+              <CmsBodyMark cmsSlug="columbarium" cmsEditMarkers={cmsEdit} text={cms.body} />
+            ) : (
+              <CmsBodyMark cmsSlug="columbarium" cmsEditMarkers={cmsEdit}>
+                <p>{t(locale, "col.body")}</p>
+              </CmsBodyMark>
+            )}
           </Prose>
         </PastelBox>
         <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
       </div>
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>
   );
 }

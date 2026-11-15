@@ -1,72 +1,33 @@
 import { notFound } from "next/navigation";
-import { CmsEditor } from "@/components/cms-editor";
-import { ManageCmsVisualEditor } from "@/components/manage/manage-cms-visual-editor";
-import { PageHero } from "@/components/page-hero";
 import { ManageFuneralDocs } from "@/components/manage-funeral-docs";
+import { ManagePageCms } from "@/components/manage/manage-page-cms";
 import { CMS_SLUGS, getCmsPageOrDefault, isCmsSlug } from "@/lib/cms";
 import { listFuneralDocs } from "@/lib/funeral-docs";
-import { listLotsPhotosFromGallery, type LotsGallerySlug } from "@/lib/gallery";
 import { isManageVisualCmsSlug } from "@/lib/manage-visual-pages";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 
 export default async function ManageCmsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!isCmsSlug(slug)) notFound();
-  const meta = CMS_SLUGS.find((item) => item.slug === slug)!;
   const page = await getCmsPageOrDefault(slug);
   const funeralDocs = slug === "funeral" ? await listFuneralDocs() : null;
 
-  const lead =
-    slug === "funeral"
-      ? "단계 카드(제목·설명·갤러리 사진)와 안내 본문을 수정하고, 아래에서 공공서류 PDF를 등록합니다. 공개는 사진 카드 후 서류·본문이 이어지며 한 화면 강제 스크롤이 없습니다. Enter=줄바꿈·빈 줄=문단, 한글 저장 시 영어·중국어 자동 번역."
-      : slug === "greeting"
-        ? "제목·본문과 본문 좌측 이미지를 등록합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-        : slug === "features" || slug === "procedure" || slug === "fees" || slug === "services"
-          ? "제목·설명과 카드 사진을 수정합니다. 사진은 갤러리에 있는 것만 고르며, 새 파일 업로드는 없습니다. 연결하지 않으면 공개는 파스텔 배경 카드만 보입니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-          : ["burial", "lawn", "columbarium"].includes(slug)
-            ? "제목·요약·본문만 수정합니다. 사진은 갤러리에서 해당 태그(매장묘·평장묘·봉안묘)를 붙여 올립니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-            : slug === "remodeling"
-              ? "갤러리와 같이 사진을 올리고, 격자에서 제목·설명을 수정합니다. Enter는 줄바꿈, 빈 줄은 문단입니다. 한글 저장 시 영어·중국어가 자동 번역됩니다."
-              : "한글 제목·본문·항목을 저장하면 Enter는 줄바꿈, 빈 줄은 문단으로 공개됩니다. 영어·중국어는 자동 번역됩니다. 분양가 원을 비우면 ‘확인 필요’로 보입니다.";
-
-  const visual = isManageVisualCmsSlug(slug);
-  const lotsPreview =
-    slug === "burial" || slug === "lawn" || slug === "columbarium"
-      ? await listLotsPhotosFromGallery(slug as LotsGallerySlug, "ko")
-      : [];
-
-  if (visual) {
-    return (
-      <>
-        <ManageCmsVisualEditor initial={page} lotsPreviewItems={lotsPreview} />
-        {funeralDocs ? (
-          <div className="mx-auto max-w-6xl space-y-3 border-t bg-background px-4 py-10">
-            <h2 className="text-lg font-medium text-foreground">공공서류 PDF (4종)</h2>
-            <p className="text-sm text-muted-foreground">
-              이용절차 카드 아래에 공개됩니다. PDF 등록은 이 영역에서만 수정합니다.
-            </p>
-            <ManageFuneralDocs initial={funeralDocs} />
-          </div>
-        ) : null}
-      </>
-    );
+  if (!isManageVisualCmsSlug(slug)) {
+    notFound();
   }
 
-  const publicCopy = resolveCmsPageHero("ko", { ...page, slug });
+  const meta = CMS_SLUGS.find((item) => item.slug === slug)!;
 
   return (
     <>
-      <PageHero kicker={`관리 · ${meta.label}`} title={publicCopy.title} lead={publicCopy.lead} />
-      <p className="mx-auto max-w-6xl border-b border-border/80 bg-muted/30 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-        {lead}
-      </p>
-      <CmsEditor initial={page} />
+      <header className="shrink-0 border-b bg-[#fffcf7] px-4 py-3">
+        <h1 className="text-lg font-medium text-foreground">홈페이지 CMS · {meta.label}</h1>
+      </header>
+      <ManagePageCms initial={page} slug={slug} />
       {funeralDocs ? (
-        <div className="mx-auto max-w-6xl space-y-3 border-t px-4 py-10">
-          <h2 className="text-lg font-medium">공공서류 PDF (4종)</h2>
+        <div className="mx-auto max-w-6xl space-y-3 border-t bg-background px-4 py-10">
+          <h2 className="text-lg font-medium text-foreground">공공서류 PDF (4종)</h2>
           <p className="text-sm text-muted-foreground">
-            사망진단서·화장증명서·가족관계증명서(또는 제적등본)·검사지휘서 PDF를 등록합니다. 공개 페이지에서는 매장 시 /
-            화장 시 목록으로 나눠 보이며, 없으면 「준비 중」입니다.
+            이용절차 카드 아래에 공개됩니다. PDF는 이 영역에서만 수정합니다.
           </p>
           <ManageFuneralDocs initial={funeralDocs} />
         </div>

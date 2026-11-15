@@ -8,6 +8,7 @@ import {
   GUIDE_CARD_SKY_OVERLAY_FULL,
   GUIDE_CARD_SKY_OVERLAY_LEFT,
 } from "@/lib/guide-photo-card";
+import { pageSlotItemImage, pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,8 @@ export function FeaturesPhotoGrid({
   captionFirstLine = false,
   /** PC 잔여 높이 2×2 fill (AMP-79) — dense와 병행하지 않음 */
   viewportFill = false,
+  cmsSlug,
+  cmsEditMarkers = false,
 }: {
   items: FeaturePhotoItem[];
   className?: string;
@@ -62,6 +65,8 @@ export function FeaturesPhotoGrid({
   titleBar?: boolean;
   captionFirstLine?: boolean;
   viewportFill?: boolean;
+  cmsSlug?: string;
+  cmsEditMarkers?: boolean;
 }) {
   if (!items.length) return null;
   const fill = viewportFill && !dense;
@@ -87,10 +92,18 @@ export function FeaturesPhotoGrid({
         const hasPhoto = cardHasGalleryImage(item.image);
         const src = hasPhoto ? uploadOriginalUrl(item.image!.trim()) : "";
         const alt = title || text || "photo";
+        const itemId = item.id || item.title || String(index);
+        const cmsTitleKey =
+          cmsSlug && cmsEditMarkers && !hideTitle && !captionFirstLine
+            ? pageSlotItemTitle(cmsSlug, itemId)
+            : undefined;
+        const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, itemId) : undefined;
+        const cmsImageKey =
+          cmsSlug && cmsEditMarkers && hasPhoto ? pageSlotItemImage(cmsSlug, itemId) : undefined;
 
         return (
           <article
-            key={item.id || item.title || String(index)}
+            key={itemId}
             className={cn(
               "pc-viewport-card relative isolate overflow-hidden rounded-2xl shadow-sm",
               !hasPhoto && guideCardPastelSurface(index),
@@ -106,14 +119,26 @@ export function FeaturesPhotoGrid({
             )}
           >
             {hasPhoto ? (
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover object-center"
-                sizes={dense ? "(max-width: 767px) 100vw, 33vw" : "(max-width: 767px) 100vw, 50vw"}
-                priority={index < 2}
-                unoptimized={src.includes("/api/uploads/")}
+              <>
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-cover object-center"
+                  sizes={dense ? "(max-width: 767px) 100vw, 33vw" : "(max-width: 767px) 100vw, 50vw"}
+                  priority={index < 2}
+                  unoptimized={src.includes("/api/uploads/")}
+                />
+                {cmsImageKey ? (
+                  <div data-cms-key={cmsImageKey} className="absolute inset-0 z-20" aria-hidden />
+                ) : null}
+              </>
+            ) : null}
+            {cmsSlug && cmsEditMarkers && !hasPhoto ? (
+              <div
+                data-cms-key={pageSlotItemImage(cmsSlug, itemId)}
+                className="absolute inset-0 z-20"
+                aria-label="사진 슬롯"
               />
             ) : null}
             {hasPhoto && showCopy ? (
@@ -155,6 +180,7 @@ export function FeaturesPhotoGrid({
                     )}
                   >
                     <h3
+                      {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
                       className={cn(
                         "text-base font-semibold tracking-tight text-[color:var(--pastel-chrome-fg)] sm:text-[1.05rem]",
                         hasPhoto && "drop-shadow-none",
@@ -165,10 +191,16 @@ export function FeaturesPhotoGrid({
                   </div>
                 ) : null}
                 {showTitle && !transit ? (
-                  <h3 className={guideCardTitleClass({ onPhoto: hasPhoto, dense })}>{title}</h3>
+                  <h3
+                    {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
+                    className={guideCardTitleClass({ onPhoto: hasPhoto, dense })}
+                  >
+                    {title}
+                  </h3>
                 ) : null}
                 {showText ? (
                   <div
+                    {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
                     className={cn(
                       guideCardBodyTextClass({ onPhoto: hasPhoto, dense }),
                       transit && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",

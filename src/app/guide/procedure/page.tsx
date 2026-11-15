@@ -1,4 +1,7 @@
+import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsPageIntro } from "@/components/cms-page-intro";
+import { readCmsEditEnabled } from "@/lib/cms-edit-server";
+import { pageSlotBody } from "@/lib/page-cms-slots";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
@@ -45,11 +48,17 @@ function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, bod
   ];
 }
 
-export default async function ProcedurePage() {
+export default async function ProcedurePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cmsEdit?: string }>;
+}) {
   const locale = await readLocale();
+  const cmsEdit = await readCmsEditEnabled(searchParams);
   const cms = await getCmsPageLocalized("procedure", locale);
   const steps = (cms.items ?? []).map((item, index) => ({
     n: String(index + 1),
+    id: item.id,
     title: item.title,
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
@@ -57,7 +66,7 @@ export default async function ProcedurePage() {
 
   const noteAside = (
     <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
-      {procedureNoteBlocks(locale, cms.body)}
+      <div {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure") } : {})}>{procedureNoteBlocks(locale, cms.body)}</div>
     </PastelBox>
   );
 
@@ -67,10 +76,16 @@ export default async function ProcedurePage() {
     <>
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} />
+          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="procedure" cmsEditMarkers={cmsEdit} />
         </PastelBox>
-        <SaleSteps steps={steps.length ? steps : undefined} aside={noteAside} />
+        <SaleSteps
+          steps={steps.length ? steps : undefined}
+          aside={noteAside}
+          cmsSlug="procedure"
+          cmsEditMarkers={cmsEdit}
+        />
       </div>
+      {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>
   );
 }
