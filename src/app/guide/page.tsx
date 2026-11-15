@@ -1,5 +1,6 @@
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
+import { NoticesList } from "@/components/notices-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
@@ -9,6 +10,7 @@ import { getCmsPageLocalized } from "@/lib/cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
+import { listNoticesLocalized } from "@/lib/notices";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -28,12 +30,13 @@ export async function generateMetadata() {
 
 export default async function GuideHubPage() {
   const locale = await readLocale();
-  const [procedure, fees, services, funeral, docs] = await Promise.all([
+  const [procedure, fees, services, funeral, docs, notices] = await Promise.all([
     getCmsPageLocalized("procedure", locale),
     getCmsPageLocalized("fees", locale),
     getCmsPageLocalized("services", locale),
     getCmsPageLocalized("funeral", locale),
     funeralDocsById(),
+    listNoticesLocalized(locale),
   ]);
 
   const steps = (procedure.items ?? []).map((item, index) => ({
@@ -157,6 +160,15 @@ export default async function GuideHubPage() {
               </p>
             </Prose>
           </div>
+        </MenuHubSection>
+
+        <MenuHubSection
+          id="notices"
+          title={t(locale, "notices.title")}
+          href="/support/notices"
+          moreLabel={t(locale, "more.detail")}
+        >
+          <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} />
         </MenuHubSection>
     </div>
   );

@@ -293,7 +293,6 @@ export const NAV: NavItem[] = [
     children: [
       { href: "/intro/greeting", label: "인사말", i18n: "nav.greeting" },
       { href: "/intro/features", label: "공원 특징", i18n: "nav.features" },
-      { href: "/support/notices", label: "공지사항", i18n: "nav.notices" },
       { href: "/intro/directions", label: "오시는 길", i18n: "nav.directions" },
     ],
   },
@@ -320,6 +319,7 @@ export const NAV: NavItem[] = [
       { href: "/guide/fees", label: "관리비", i18n: "nav.fees" },
       { href: "/guide/services", label: "이용안내", i18n: "nav.services" },
       { href: "/guide/funeral", label: "이용절차", i18n: "nav.funeral" },
+      { href: "/support/notices", label: "공지사항", i18n: "nav.notices" },
     ],
   },
   {

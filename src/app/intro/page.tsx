@@ -2,7 +2,6 @@ import Image from "next/image";
 import { DirectionsMap } from "@/components/directions-map";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { MenuHubSection } from "@/components/menu-hub-section";
-import { NoticesList } from "@/components/notices-list";
 import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
@@ -10,7 +9,6 @@ import { getCmsPageLocalized } from "@/lib/cms";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import { uploadOriginalUrl } from "@/lib/media";
-import { listNoticesLocalized } from "@/lib/notices";
 import { FEATURES, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +20,9 @@ export async function generateMetadata() {
 
 export default async function IntroHubPage() {
   const locale = await readLocale();
-  const [greeting, featuresCms, notices] = await Promise.all([
+  const [greeting, featuresCms] = await Promise.all([
     getCmsPageLocalized("greeting", locale),
     getCmsPageLocalized("features", locale),
-    listNoticesLocalized(locale),
   ]);
   const bodyImage = greeting.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
@@ -95,15 +92,6 @@ export default async function IntroHubPage() {
           moreLabel={t(locale, "more.detail")}
         >
           <FeaturesPhotoGrid items={featureItems} />
-        </MenuHubSection>
-
-        <MenuHubSection
-          id="notices"
-          title={t(locale, "notices.title")}
-          href="/support/notices"
-          moreLabel={t(locale, "more.detail")}
-        >
-          <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} />
         </MenuHubSection>
 
         <MenuHubSection

@@ -20,20 +20,20 @@ export function manageNavItems(): ManageNavItem[] {
     { href: "/manage/home-slides", i18n: "manage.homeSlides" },
     { href: "/manage/home-hero", i18n: "manage.homeHero" },
     { href: "/manage/announcements", i18n: "manage.announcements" },
-    // 공원소개: 인사말 → 공원 특징 → 공지사항 → 오시는 길
+    // 공원소개: 인사말 → 공원 특징 → 오시는 길
     cmsPage("greeting"),
     cmsPage("features"),
-    { href: "/manage/notices", i18n: "manage.noticesPage" },
     cmsPage("directions"),
     // 분양안내: 평장묘 → 매장묘 → 봉안묘
     cmsPage("lawn"),
     cmsPage("burial"),
     cmsPage("columbarium"),
-    // 이용안내: 분양 절차 → 관리비 → 이용안내 → 이용절차
+    // 이용안내: 분양 절차 → 관리비 → 이용안내 → 이용절차 → 공지사항
     cmsPage("procedure"),
     cmsPage("fees"),
     { href: "/manage/pages/services", i18n: "manage.servicesPage" },
     cmsPage("funeral"),
+    { href: "/manage/notices", i18n: "manage.noticesPage" },
     // 갤러리
     { href: "/manage/gallery", i18n: "manage.galleryAdmin" },
   ];
