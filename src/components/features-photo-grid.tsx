@@ -1,4 +1,4 @@
-import { Paragraphs } from "@/components/paragraphs";
+import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
 import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
@@ -169,9 +169,9 @@ export function FeaturesPhotoGrid({
                       style={titleStyleProps.style}
                       {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
-                      {title}
+                      <CmsInlineBreaks text={title} />
                     </h3>
-                  </div>
+                    </div>
                 ) : null}
                 <div
                   className={cn(
@@ -191,7 +191,7 @@ export function FeaturesPhotoGrid({
                       style={titleStyleProps.style}
                       {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
-                      {title}
+                      <CmsInlineBreaks text={title} />
                     </h3>
                   ) : null}
                   {showText ? (

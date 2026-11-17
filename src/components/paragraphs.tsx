@@ -1,6 +1,22 @@
 import { Fragment } from "react";
 import { cn } from "@/lib/utils";
 
+/** CMS 한 블록(제목·카드 제목 등) — Enter 줄바꿈 */
+export function CmsInlineBreaks({ text }: { text: string }) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  if (lines.length <= 1) return <>{text}</>;
+  return (
+    <>
+      {lines.map((line, i) => (
+        <Fragment key={`${i}-${line.slice(0, 12)}`}>
+          {i > 0 ? <br /> : null}
+          {line}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 /**
  * CMS 텍스트 표시:
  * - Enter 한 번 → 줄바꿈(br)

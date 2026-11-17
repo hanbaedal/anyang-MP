@@ -344,20 +344,17 @@ export function ManagePageCms({
     return (
       <div className="space-y-3">
         {renderTextStyleControls(titleKey)}
-        <label className="block space-y-1.5 text-sm">
-          <span className="font-medium text-foreground">
-            {slug === "directions" ? "교통 수단 이름 (ko)" : "카드 제목 (ko)"}
-          </span>
-          <input
-            className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            disabled={busy}
-            value={item.title}
-            onChange={(e) => patchText(titleKey, e.target.value)}
-          />
-        </label>
+        <CmsFieldKo
+          multiline
+          label={slug === "directions" ? "교통 수단 이름 (한국어)" : "카드 제목 (한국어)"}
+          disabled={busy}
+          value={item.title}
+          onChange={(value) => patchText(titleKey, value)}
+        />
         {renderTextStyleControls(textKey)}
         <CmsFieldKo
           multiline
+          label="카드 설명 (한국어)"
           disabled={busy}
           value={item.text ?? ""}
           onChange={(value) => patchText(textKey, value)}
@@ -404,10 +401,12 @@ export function ManagePageCms({
     }
     if (!activeMeta) return null;
     const multiline =
+      activeMeta.kind === "title" ||
       activeMeta.kind === "lead" ||
       activeMeta.kind === "body" ||
       activeMeta.kind === "itemText" ||
-      (activeMeta.kind === "funeralDocText" && activeMeta.funeralDocField === "hint");
+      activeMeta.kind === "itemTitle" ||
+      activeMeta.kind === "funeralDocText";
     if (activeMeta.kind === "heroImage") {
       return (
         <ManageImagePicker

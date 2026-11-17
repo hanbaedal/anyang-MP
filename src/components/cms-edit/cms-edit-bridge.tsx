@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { homeLeadToInnerHTML, paragraphsToInnerHTML } from "@/lib/cms-edit-html";
+import { homeLeadToInnerHTML, inlineBreaksToInnerHTML, paragraphsToInnerHTML } from "@/lib/cms-edit-html";
 import {
   applyHomeHeroSlotStyleToElement,
   patchHomeHeroCopyText,
@@ -44,19 +44,25 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
         el.innerHTML = homeLeadToInnerHTML(text);
         return;
       }
-      if (key.endsWith(".body") || key.endsWith(".text") || key.endsWith(".lead")) {
-        if (key.endsWith(".lead") && !key.startsWith("page.")) {
-          el.textContent = text;
+      if (key.startsWith("page.")) {
+        if (key.endsWith(".body") || key.endsWith(".text")) {
+          el.innerHTML = paragraphsToInnerHTML(text);
           return;
         }
-        if (key.endsWith(".lead")) {
-          el.textContent = text;
+        if (key.endsWith(".title") || key.endsWith(".lead") || key.includes(".funeral.docs.")) {
+          el.innerHTML = inlineBreaksToInnerHTML(text);
           return;
         }
+      }
+      if (key.endsWith(".body") || key.endsWith(".text")) {
         el.innerHTML = paragraphsToInnerHTML(text);
         return;
       }
-      el.textContent = text;
+      if (key.endsWith(".lead")) {
+        el.textContent = text;
+        return;
+      }
+      el.innerHTML = inlineBreaksToInnerHTML(text);
     }
 
     function onClick(e: MouseEvent) {

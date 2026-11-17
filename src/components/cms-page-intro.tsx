@@ -1,3 +1,4 @@
+import { CmsInlineBreaks } from "@/components/paragraphs";
 import { pageSlotLead, pageSlotTitle } from "@/lib/page-cms-slots";
 
 /** CMS 소메뉴 — 파스텔 본문 상단 제목·요약 */
@@ -24,7 +25,7 @@ export function CmsPageIntro({
           {...(titleKey ? { "data-cms-key": titleKey } : {})}
           className="font-serif text-2xl font-semibold tracking-tight text-[color:var(--pastel-chrome-fg)] md:text-[1.65rem]"
         >
-          {headline}
+          <CmsInlineBreaks text={headline} />
         </h1>
       ) : null}
       {leadText ? (
@@ -32,7 +33,7 @@ export function CmsPageIntro({
           {...(leadKey ? { "data-cms-key": leadKey } : {})}
           className="mt-2 max-w-3xl text-[15px] leading-relaxed text-[color:var(--pastel-chrome-fg)]/88 md:mt-2.5 md:text-base md:leading-7"
         >
-          {leadText}
+          <CmsInlineBreaks text={leadText} />
         </p>
       ) : null}
     </header>

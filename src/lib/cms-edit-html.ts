@@ -38,3 +38,12 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
+
+/** 제목·요약 등 단일 블록 — Enter → `<br>` (iframe 실시간 패치) */
+export function inlineBreaksToInnerHTML(text: string) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  if (!lines.length) return "";
+  return lines
+    .map((line, i) => (i ? `<br />` : "") + escapeHtml(line))
+    .join("");
+}

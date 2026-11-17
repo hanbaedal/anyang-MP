@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Paragraphs } from "@/components/paragraphs";
+import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
 import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
@@ -127,7 +127,7 @@ export function SaleSteps({
                   style={titleStyleProps.style}
                   {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                 >
-                  {step.title}
+                  <CmsInlineBreaks text={step.title} />
                 </h3>
                 {compact || !step.text ? null : (
                   <div

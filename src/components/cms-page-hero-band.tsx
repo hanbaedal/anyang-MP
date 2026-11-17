@@ -8,6 +8,7 @@ import {
   pageCmsTextStyleProps,
   type PageCmsTextStyles,
 } from "@/lib/page-cms-text-style";
+import { CmsInlineBreaks } from "@/components/paragraphs";
 import { cn } from "@/lib/utils";
 
 /** 소메뉴 상단 — 배경·제목·요약 (인사말 등) */
@@ -84,7 +85,7 @@ export function CmsPageHeroBand({
             style={titleStyleProps.style}
             {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
           >
-            {headline}
+            <CmsInlineBreaks text={headline} />
           </h1>
         ) : null}
         {leadText ? (
@@ -101,7 +102,7 @@ export function CmsPageHeroBand({
             style={leadStyleProps.style}
             {...(leadColored ? { "data-hero-custom-color": "1" as const } : {})}
           >
-            {leadText}
+            <CmsInlineBreaks text={leadText} />
           </p>
         ) : null}
       </div>

@@ -67,12 +67,14 @@ export function CmsFieldKo({
   onChange,
   disabled,
   maxLength,
+  label = "내용 (한국어)",
 }: {
   multiline?: boolean;
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   maxLength?: number;
+  label?: string;
 }) {
   const fieldClass =
     "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -80,7 +82,7 @@ export function CmsFieldKo({
     "min-h-28 w-full resize-y rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
     <label className="block space-y-1.5 text-sm">
-      <span className="font-medium text-foreground">내용 (한국어)</span>
+      <span className="font-medium text-foreground">{label}</span>
       {multiline ? (
         <textarea
           className={areaClass}
