@@ -218,12 +218,14 @@ export function ManagePageCms({
       }
       if (json.page) setPage(json.page);
       setDirty(false);
-      setMessage("저장했습니다. 공개 페이지에 반영됩니다.");
+      setMessage("저장했습니다. 공개 페이지를 새로고침하면 반영됩니다.");
       setStatus("ok");
       setFrameRev((n) => n + 1);
     } catch {
-      setMessage("네트워크 오류입니다.");
+      setMessage("네트워크 오류입니다. 저장되지 않았을 수 있습니다.");
       setStatus("error");
+    } finally {
+      setStatus((prev) => (prev === "busy" ? "idle" : prev));
     }
   }
 

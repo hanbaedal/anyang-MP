@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCmsPageOrDefault, isCmsSlug, saveCmsPage, type CmsItem } from "@/lib/cms";
+
+export const dynamic = "force-dynamic";
 import type { FuneralDocsKo } from "@/lib/cms-types";
 import { requireStaffApi } from "@/lib/manage-guard";
 

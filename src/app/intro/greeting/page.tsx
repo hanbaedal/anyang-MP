@@ -11,6 +11,8 @@ import { readLocale } from "@/lib/i18n-server";
 import { pageSlotBodyImage } from "@/lib/page-cms-slots";
 import { uploadOriginalUrl } from "@/lib/media";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata() {
   const locale = await readLocale();
   return { title: t(locale, "nav.greeting") };

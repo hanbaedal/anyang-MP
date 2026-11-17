@@ -352,11 +352,15 @@ function applyGalleryCardEnsures(page: CmsPage): CmsPage {
 /** Mongo·JSON에 null/누락 필드가 있어도 렌더가 깨지지 않도록 */
 export function normalizeCmsPage(page: CmsPage): CmsPage {
   const funeralDocs = normalizeFuneralDocsKo(page.funeralDocs);
+  const heroImage = String(page.heroImage ?? "").trim();
+  const bodyImage = String(page.bodyImage ?? "").trim();
   return {
     ...page,
     title: String(page.title ?? ""),
     lead: String(page.lead ?? ""),
     body: String(page.body ?? ""),
+    ...(heroImage ? { heroImage } : {}),
+    ...(bodyImage ? { bodyImage } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
     items: (page.items ?? []).map((item, index) => ({
       id: String(item?.id ?? `item-${index}`),
@@ -504,6 +508,29 @@ export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage
   return i18n;
 }
 
+async function writeCmsPageDocument(page: CmsPage) {
+  const doc = { ...page, updatedAt: new Date(page.updatedAt) };
+  if (hasMongo()) {
+    const db = await getDb();
+    if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
+    const $unset: Record<string, ""> = {};
+    if (!page.bodyImage) $unset.bodyImage = "";
+    if (!page.heroImage) $unset.heroImage = "";
+    const update =
+      Object.keys($unset).length > 0 ? { $set: doc, $unset } : { $set: doc };
+    await db.collection("cms").updateOne({ slug: page.slug }, update, { upsert: true });
+    return;
+  }
+  const all = await readLocal();
+  const idx = all.findIndex((item) => item.slug === page.slug);
+  const stored = { ...page };
+  if (!stored.bodyImage) delete stored.bodyImage;
+  if (!stored.heroImage) delete stored.heroImage;
+  if (idx >= 0) all[idx] = stored;
+  else all.push(stored);
+  await writeJsonFile(localFile, all);
+}
+
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
   const bodyImage = String(input.bodyImage ?? "").trim();
   const heroImage = String(input.heroImage ?? "").trim();
@@ -521,6 +548,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
       remaining: item.remaining,
     };
   });
+  const existing = await getCmsPage(input.slug);
   const page: CmsPage = sanitizeDirectionsPage({
     slug: input.slug,
     title: input.title.trim(),
@@ -531,27 +559,19 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
+    ...(existing?.i18n ? { i18n: existing.i18n } : {}),
   });
-  page.i18n = await fillCmsI18n(page, true);
 
-  if (hasMongo()) {
-    const db = await getDb();
-    if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
-    const $unset: Record<string, ""> = {};
-    if (!page.bodyImage) $unset.bodyImage = "";
-    if (!page.heroImage) $unset.heroImage = "";
-    const setDoc = { ...page, updatedAt: new Date(page.updatedAt) };
-    const update =
-      Object.keys($unset).length > 0 ? { $set: setDoc, $unset } : { $set: setDoc };
-    await db.collection("cms").updateOne({ slug: page.slug }, update, { upsert: true });
-    return page;
+  /** 한국어·이미지 먼저 저장 — 번역 API 지연/실패 시에도 공개에 반영 */
+  await writeCmsPageDocument(page);
+
+  try {
+    page.i18n = await fillCmsI18n(page, false);
+    await writeCmsPageDocument(page);
+  } catch (error) {
+    console.error("[cms] i18n refresh failed (korean content saved)", error);
   }
 
-  const all = await readLocal();
-  const idx = all.findIndex((item) => item.slug === page.slug);
-  if (idx >= 0) all[idx] = page;
-  else all.push(page);
-  await writeJsonFile(localFile, all);
   return page;
 }
 

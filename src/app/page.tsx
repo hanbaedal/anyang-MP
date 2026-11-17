@@ -7,6 +7,8 @@ import { isCmsStaff } from "@/lib/auth-types";
 import { getHomeHeroSettings } from "@/lib/home-hero";
 import { getHomeIntroSlidesForPublic, getHomeIntroSlidesSettings } from "@/lib/home-intro-slides";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage({
   searchParams,
 }: {
