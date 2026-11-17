@@ -2,17 +2,29 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CmsFontPick } from "@/components/manage/cms-font-pick";
+import { CmsFontScale } from "@/components/manage/cms-font-scale";
+import { CmsTextColor } from "@/components/manage/cms-text-color";
 import { CmsFieldKo, CmsSlotPanel } from "@/components/manage/cms-slot-panel";
 import { Button } from "@/components/ui/button";
 import {
+  defaultHomeHeroTextScale,
   defaultHomeIntroHeroCopy,
   HOME_INTRO_HERO_COPY_LIMITS,
   HOME_INTRO_SLIDES_MAX,
+  type HomeHeroTextScale,
   type HomeIntroHeroCopy,
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "@/lib/home-intro-slides-types";
-import { HOME_CMS_SLOT_META } from "@/lib/home-cms-slots";
+import { HOME_CMS_SLOT_KEYS, HOME_CMS_SLOT_META, type HomeCmsSlotKey } from "@/lib/home-cms-slots";
+import {
+  defaultHomeHeroTextColor,
+  defaultHomeHeroTextFont,
+  type HomeHeroFontPreset,
+  type HomeHeroTextColor,
+  type HomeHeroTextFont,
+} from "@/lib/home-hero-text-style";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import { thumbUrl } from "@/lib/media";
@@ -40,6 +52,13 @@ const KEY_TO_FIELD: Record<string, keyof HomeIntroHeroCopy> = {
   "home.lead": "lead",
 };
 
+const KEY_TO_SCALE: Record<string, keyof HomeHeroTextScale> = {
+  "home.kicker": "kicker",
+  "home.heroLine1": "heroLine1",
+  "home.heroLine2": "heroLine2",
+  "home.lead": "lead",
+};
+
 function slideIdForPhoto(photo: GalleryPhoto) {
   return `gallery:${photo.id}`;
 }
@@ -53,6 +72,15 @@ export function ManageHomeCms({
 }) {
   const [slides, setSlides] = useState<HomeIntroSlide[]>(initial.slides);
   const [heroCopy, setHeroCopy] = useState<HomeIntroHeroCopy>(initial.heroCopy ?? defaultHomeIntroHeroCopy());
+  const [heroTextScale, setHeroTextScale] = useState<HomeHeroTextScale>(
+    initial.heroTextScale ?? defaultHomeHeroTextScale(),
+  );
+  const [heroTextFont, setHeroTextFont] = useState<HomeHeroTextFont>(
+    initial.heroTextFont ?? defaultHomeHeroTextFont(),
+  );
+  const [heroTextColor, setHeroTextColor] = useState<HomeHeroTextColor>(
+    initial.heroTextColor ?? defaultHomeHeroTextColor(),
+  );
   const [socialLinks, setSocialLinks] = useState<SiteSocialLink[]>(
     initial.socialLinks?.length ? initial.socialLinks : defaultSiteSocialLinks(),
   );
@@ -69,7 +97,10 @@ export function ManageHomeCms({
   const [dirty, setDirty] = useState(false);
   const [frameRev, setFrameRev] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const galleryGridRef = useRef<HTMLUListElement>(null);
   const busy = status === "busy";
+
+  const isHomeContentSlot = activeKey === "home.slides" || Boolean(activeKey && activeKey in HOME_CMS_SLOT_META);
 
   const iframeSrc = useMemo(() => `/?cmsEdit=1&_v=${frameRev}`, [frameRev]);
 
@@ -99,6 +130,19 @@ export function ManageHomeCms({
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string; key?: string; href?: string; text?: string };
+      if (data?.type === "anyang-cms-ready") {
+        for (const key of Object.keys(KEY_TO_SCALE)) {
+          const field = KEY_TO_SCALE[key];
+          if (!field) continue;
+          postToFrame({
+            type: "anyang-cms-patch",
+            key,
+            fontScale: heroTextScale[field],
+            fontPreset: heroTextFont[field],
+            textColor: heroTextColor[field],
+          });
+        }
+      }
       if (data?.type === "anyang-cms-select" && data.key) {
         const key = data.key;
         const socialId = socialIdFromHomeSlotKey(key);
@@ -124,7 +168,7 @@ export function ManageHomeCms({
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [heroTextColor, heroTextFont, heroTextScale, postToFrame]);
 
   const loadGallery = useCallback(async () => {
     setLoadingGallery(true);
@@ -218,6 +262,30 @@ export function ManageHomeCms({
     bumpFrame();
   }
 
+  function patchHeroScale(field: keyof HomeHeroTextScale, scale: number) {
+    setHeroTextScale((prev) => ({ ...prev, [field]: scale }));
+    setDirty(true);
+    setStatus("idle");
+    const slotKey = Object.entries(KEY_TO_SCALE).find(([, f]) => f === field)?.[0];
+    if (slotKey) postToFrame({ type: "anyang-cms-patch", key: slotKey, fontScale: scale });
+  }
+
+  function patchHeroFont(field: keyof HomeHeroTextFont, preset: HomeHeroFontPreset) {
+    setHeroTextFont((prev) => ({ ...prev, [field]: preset }));
+    setDirty(true);
+    setStatus("idle");
+    const slotKey = Object.entries(KEY_TO_SCALE).find(([, f]) => f === field)?.[0];
+    if (slotKey) postToFrame({ type: "anyang-cms-patch", key: slotKey, fontPreset: preset });
+  }
+
+  function patchHeroColor(field: keyof HomeHeroTextColor, color: string) {
+    setHeroTextColor((prev) => ({ ...prev, [field]: color }));
+    setDirty(true);
+    setStatus("idle");
+    const slotKey = Object.entries(KEY_TO_SCALE).find(([, f]) => f === field)?.[0];
+    if (slotKey) postToFrame({ type: "anyang-cms-patch", key: slotKey, textColor: color });
+  }
+
   function patchHeroField(field: keyof HomeIntroHeroCopy, value: string) {
     setHeroCopy((prev) => ({ ...prev, [field]: value }));
     setDirty(true);
@@ -262,7 +330,7 @@ export function ManageHomeCms({
       const res = await fetch("/api/manage/home-slides", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slides, heroCopy, socialLinks }),
+        body: JSON.stringify({ slides, heroCopy, heroTextScale, heroTextFont, heroTextColor, socialLinks }),
       });
       const json = (await res.json()) as {
         ok?: boolean;
@@ -276,6 +344,9 @@ export function ManageHomeCms({
       }
       setSlides(json.settings.slides);
       setHeroCopy(json.settings.heroCopy);
+      if (json.settings.heroTextScale) setHeroTextScale(json.settings.heroTextScale);
+      if (json.settings.heroTextFont) setHeroTextFont(json.settings.heroTextFont);
+      if (json.settings.heroTextColor) setHeroTextColor(json.settings.heroTextColor);
       if (json.settings.socialLinks?.length) setSocialLinks(json.settings.socialLinks);
       setDirty(false);
       setMessage("저장했습니다. 공개 홈에 반영됩니다.");
@@ -299,6 +370,31 @@ export function ManageHomeCms({
     activeKey && activeKey in HOME_CMS_SLOT_META
       ? HOME_CMS_SLOT_META[activeKey as keyof typeof HOME_CMS_SLOT_META]
       : null;
+
+  function HomeCmsSlotSelect() {
+    if (!isHomeContentSlot) return null;
+    const value: HomeCmsSlotKey =
+      activeKey === "home.slides" || (activeKey && activeKey in HOME_CMS_SLOT_META)
+        ? (activeKey as HomeCmsSlotKey)
+        : "home.slides";
+    return (
+      <label className="block space-y-1 text-sm">
+        <span className="font-medium text-foreground">편집 슬롯</span>
+        <select
+          className="h-9 w-full rounded-md border-2 border-primary/35 bg-card px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          value={value}
+          disabled={busy}
+          onChange={(e) => setActiveKey(e.target.value)}
+        >
+          {HOME_CMS_SLOT_KEYS.map((key) => (
+            <option key={key} value={key}>
+              {HOME_CMS_SLOT_META[key].label}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
 
   const panelChildren =
     activeKey === HOME_SOCIAL_ADD_SLOT ? (
@@ -402,6 +498,26 @@ export function ManageHomeCms({
       </div>
     ) : activeKey === "home.slides" ? (
       <>
+        <HomeCmsSlotSelect />
+        <Button
+          type="button"
+          className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+          disabled={busy}
+          onClick={() => galleryGridRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
+        >
+          배경 이미지 선택
+        </Button>
+        {slides.length > 0 ? (
+          <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+            {slides.map((s) => (
+              <li key={s.id} className="truncate font-mono" title={s.src}>
+                {s.src}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">선택된 전경 이미지가 없습니다.</p>
+        )}
         <p className="text-xs text-muted-foreground">
           클릭 순서 = 슬라이드 순서 (최대 {HOME_INTRO_SLIDES_MAX}장). 저장 후 iframe이 갱신됩니다.
         </p>
@@ -429,7 +545,7 @@ export function ManageHomeCms({
           </div>
           {loadingGallery ? <p className="text-xs text-muted-foreground">불러오는 중…</p> : null}
           {galleryError ? <p className="text-xs text-destructive">{galleryError}</p> : null}
-          <ul className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
+          <ul ref={galleryGridRef} className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
             {visible.map((item) => {
               const id = slideIdForPhoto(item);
               const order = orderById.get(id) ?? orderBySrc.get(item.src);
@@ -462,15 +578,38 @@ export function ManageHomeCms({
     ) : activeKey && slotMeta && slotMeta.field !== "slides" ? (
       (() => {
         const field = KEY_TO_FIELD[activeKey];
+        const scaleField = KEY_TO_SCALE[activeKey];
         if (!field) return null;
         return (
-          <CmsFieldKo
-            multiline={activeKey === "home.lead"}
-            disabled={busy}
-            maxLength={HOME_INTRO_HERO_COPY_LIMITS[field]}
-            value={heroCopy[field]}
-            onChange={(value) => patchHeroField(field, value)}
-          />
+          <>
+            <HomeCmsSlotSelect />
+            {scaleField ? (
+              <>
+                <CmsFontPick
+                  value={heroTextFont[scaleField]}
+                  disabled={busy}
+                  onChange={(preset) => patchHeroFont(scaleField, preset)}
+                />
+                <CmsFontScale
+                  value={heroTextScale[scaleField]}
+                  disabled={busy}
+                  onChange={(scale) => patchHeroScale(scaleField, scale)}
+                />
+                <CmsTextColor
+                  value={heroTextColor[scaleField]}
+                  disabled={busy}
+                  onChange={(color) => patchHeroColor(scaleField, color)}
+                />
+              </>
+            ) : null}
+            <CmsFieldKo
+              multiline={activeKey === "home.lead"}
+              disabled={busy}
+              maxLength={HOME_INTRO_HERO_COPY_LIMITS[field]}
+              value={heroCopy[field]}
+              onChange={(value) => patchHeroField(field, value)}
+            />
+          </>
         );
       })()
     ) : null;

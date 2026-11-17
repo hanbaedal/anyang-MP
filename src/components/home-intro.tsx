@@ -6,7 +6,13 @@ import { HomeHeroMedia } from "@/components/home-hero-media";
 import { HomeViewSlides, type ViewSlide } from "@/components/home-view-slides";
 import { useLocale, useT } from "@/components/locale-provider";
 import { t as tStatic } from "@/lib/i18n";
-import type { HomeIntroHeroCopy } from "@/lib/home-intro-slides-types";
+import {
+  buildHomeHeroSlotStyle,
+  normalizeHeroTextColorValue,
+  type HomeHeroTextColor,
+  type HomeHeroTextFont,
+} from "@/lib/home-hero-text-style";
+import type { HomeHeroTextScale, HomeIntroHeroCopy } from "@/lib/home-intro-slides-types";
 import type { HomeCmsSlotKey } from "@/lib/home-cms-slots";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +22,9 @@ type Props = {
   posterSrc: string;
   viewPhotos: ViewSlide[];
   heroCopy: HomeIntroHeroCopy;
+  heroTextScale?: HomeHeroTextScale;
+  heroTextFont?: HomeHeroTextFont;
+  heroTextColor?: HomeHeroTextColor;
   /** 홈페이지 CMS: 클릭으로 슬롯 선택 → 우측 패널 편집 */
   cmsSlot?: {
     activeKey: HomeCmsSlotKey | null;
@@ -64,16 +73,18 @@ function CmsPick({
   cmsEditMarkers,
   className,
   children,
+  slotStyle,
 }: {
   slotKey: HomeCmsSlotKey;
   cmsSlot?: Props["cmsSlot"];
   cmsEditMarkers?: boolean;
   className?: string;
   children: ReactNode;
+  slotStyle?: ReturnType<typeof buildHomeHeroSlotStyle>;
 }) {
   if (cmsEditMarkers && !cmsSlot) {
     return (
-      <span data-cms-key={slotKey} className={className}>
+      <span data-cms-key={slotKey} className={className} style={slotStyle}>
         {children}
       </span>
     );
@@ -86,6 +97,7 @@ function CmsPick({
       tabIndex={0}
       data-cms-key={slotKey}
       className={cn("cms-editable-slot", active && "cms-slot-active", className)}
+      style={slotStyle}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -110,10 +122,29 @@ export function HomeIntro({
   posterSrc,
   viewPhotos,
   heroCopy,
+  heroTextScale,
+  heroTextFont,
+  heroTextColor,
   cmsSlot,
   cmsEditMarkers = false,
 }: Props) {
   const locale = useLocale();
+  const scale = heroTextScale;
+  const fonts = heroTextFont;
+  const colors = heroTextColor;
+
+  function koSlotStyle(field: keyof HomeHeroTextScale) {
+    if (locale !== "ko") return undefined;
+    return buildHomeHeroSlotStyle({
+      scalePct: scale?.[field],
+      font: fonts?.[field],
+      color: colors?.[field],
+    });
+  }
+
+  function koCustomColor(field: keyof HomeHeroTextColor) {
+    return locale === "ko" && Boolean(normalizeHeroTextColorValue(colors?.[field]));
+  }
   const t = useT();
   const useSlides = viewPhotos.length > 0;
   const kicker = locale === "ko" ? heroCopy.kicker : t("home.kicker");
@@ -159,21 +190,61 @@ export function HomeIntro({
         <div className="pointer-events-auto w-full min-w-0 text-center md:max-w-[min(100%,40rem)] md:text-left">
           <div>
             <>
-              <CmsPick slotKey="home.kicker" cmsSlot={cmsSlot} cmsEditMarkers={cmsEditMarkers}>
-                <p className="text-sm tracking-wide text-primary-foreground/85">{kicker}</p>
+              <CmsPick
+                slotKey="home.kicker"
+                cmsSlot={cmsSlot}
+                cmsEditMarkers={cmsEditMarkers}
+                slotStyle={koSlotStyle("kicker")}
+              >
+                <p
+                  className={cn(
+                    "text-sm tracking-wide",
+                    !koCustomColor("kicker") && "text-primary-foreground/85",
+                  )}
+                >
+                  {kicker}
+                </p>
               </CmsPick>
-              <h1 className="mt-2 font-serif leading-tight text-primary-foreground">
-                <CmsPick slotKey="home.heroLine1" cmsSlot={cmsSlot} cmsEditMarkers={cmsEditMarkers} className="block">
+              <h1
+                className={cn(
+                  "mt-2 font-serif leading-tight",
+                  !koCustomColor("heroLine1") && !koCustomColor("heroLine2") && "text-primary-foreground",
+                )}
+              >
+                <CmsPick
+                  slotKey="home.heroLine1"
+                  cmsSlot={cmsSlot}
+                  cmsEditMarkers={cmsEditMarkers}
+                  className="block"
+                  slotStyle={koSlotStyle("heroLine1")}
+                >
                   <span className="block break-keep text-[1.125rem] tracking-tight sm:text-xl md:text-[2.15rem] lg:text-[2.35rem] md:whitespace-nowrap">
                     {hero1}
                   </span>
                 </CmsPick>
-                <CmsPick slotKey="home.heroLine2" cmsSlot={cmsSlot} cmsEditMarkers={cmsEditMarkers} className="mt-1 block">
+                <CmsPick
+                  slotKey="home.heroLine2"
+                  cmsSlot={cmsSlot}
+                  cmsEditMarkers={cmsEditMarkers}
+                  className="mt-1 block"
+                  slotStyle={koSlotStyle("heroLine2")}
+                >
                   <span className="block break-keep text-2xl md:text-4xl lg:text-[2.75rem]">{hero2}</span>
                 </CmsPick>
               </h1>
-              <CmsPick slotKey="home.lead" cmsSlot={cmsSlot} cmsEditMarkers={cmsEditMarkers} className="mt-3 block">
-                <p className="break-keep text-sm tracking-wide text-primary-foreground/85 md:whitespace-nowrap">
+              <CmsPick
+                slotKey="home.lead"
+                cmsSlot={cmsSlot}
+                cmsEditMarkers={cmsEditMarkers}
+                className="mt-3 block"
+                slotStyle={koSlotStyle("lead")}
+              >
+                <p
+                  className={cn(
+                    "break-keep text-sm tracking-wide md:whitespace-nowrap",
+                    !koCustomColor("lead") && "text-primary-foreground/85",
+                  )}
+                >
                   {locale === "ko" ? renderLeadKo(heroCopy.lead) : tStatic(locale, "home.lead")}
                 </p>
               </CmsPick>

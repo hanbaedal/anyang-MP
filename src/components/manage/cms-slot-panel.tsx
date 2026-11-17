@@ -61,7 +61,10 @@ export function CmsSlotPanel({
           ) : null}
           <Button
             type="button"
-            className={cn("w-full", saving && "opacity-80")}
+            className={cn(
+              "w-full bg-emerald-800 text-white hover:bg-emerald-900",
+              saving && "opacity-80",
+            )}
             disabled={saveDisabled || saving}
             onClick={onSave}
           >
@@ -93,7 +96,7 @@ export function CmsFieldKo({
     "min-h-28 w-full resize-y rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
     <label className="block space-y-1.5 text-sm">
-      <span className="font-medium text-foreground">내용 (ko)</span>
+      <span className="font-medium text-foreground">내용 (한국어)</span>
       {multiline ? (
         <textarea
           className={areaClass}

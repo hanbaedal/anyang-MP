@@ -36,6 +36,9 @@ export default async function HomePage({
         posterSrc={heroMedia.posterSrc}
         viewPhotos={viewPhotos}
         heroCopy={introSettings.heroCopy}
+        heroTextScale={introSettings.heroTextScale}
+        heroTextFont={introSettings.heroTextFont}
+        heroTextColor={introSettings.heroTextColor}
         cmsEditMarkers={cmsEdit}
       />
       {cmsEdit ? <HomeCmsEditBridge enabled /> : null}

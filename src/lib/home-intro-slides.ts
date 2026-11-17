@@ -2,17 +2,27 @@ import { randomUUID } from "node:crypto";
 import type { ViewSlide } from "@/components/home-view-slides";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
 import {
+  defaultHomeHeroTextScale,
   defaultHomeIntroHeroCopy,
+  HOME_HERO_TEXT_SCALE_MAX,
+  HOME_HERO_TEXT_SCALE_MIN,
   HOME_INTRO_HERO_COPY_LIMITS,
   HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
+  type HomeHeroTextScale,
   type HomeIntroHeroCopy,
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "./home-intro-slides-types";
 import { getDb, hasMongo } from "./mongo";
 import { deleteUploadObject } from "./upload-store";
+import {
+  defaultHomeHeroTextColor,
+  defaultHomeHeroTextFont,
+  normalizeHomeHeroTextColor,
+  normalizeHomeHeroTextFont,
+} from "./home-hero-text-style";
 import { defaultSiteSocialLinks, normalizeSiteSocialLinks } from "./site-social";
 
 export type { HomeIntroHeroCopy, HomeIntroSlide, HomeIntroSlidesSettings } from "./home-intro-slides-types";
@@ -32,8 +42,27 @@ export function defaultHomeIntroSlidesSettings(): HomeIntroSlidesSettings {
   return {
     slides: [],
     heroCopy: defaultHomeIntroHeroCopy(),
+    heroTextScale: defaultHomeHeroTextScale(),
+    heroTextFont: defaultHomeHeroTextFont(),
+    heroTextColor: defaultHomeHeroTextColor(),
     socialLinks: defaultSiteSocialLinks(),
     updatedAt: new Date().toISOString(),
+  };
+}
+
+function clampScale(n: number) {
+  return Math.min(HOME_HERO_TEXT_SCALE_MAX, Math.max(HOME_HERO_TEXT_SCALE_MIN, Math.round(n / 10) * 10));
+}
+
+export function normalizeHomeHeroTextScale(raw: unknown): HomeHeroTextScale {
+  const base = defaultHomeHeroTextScale();
+  if (!raw || typeof raw !== "object") return base;
+  const row = raw as Record<string, unknown>;
+  return {
+    kicker: clampScale(Number(row.kicker ?? base.kicker)),
+    heroLine1: clampScale(Number(row.heroLine1 ?? base.heroLine1)),
+    heroLine2: clampScale(Number(row.heroLine2 ?? base.heroLine2)),
+    lead: clampScale(Number(row.lead ?? base.lead)),
   };
 }
 
@@ -95,6 +124,9 @@ function fromDoc(doc: Record<string, unknown>): HomeIntroSlidesSettings {
   return {
     slides,
     heroCopy: normalizeHomeIntroHeroCopy(doc.heroCopy),
+    heroTextScale: normalizeHomeHeroTextScale(doc.heroTextScale),
+    heroTextFont: normalizeHomeHeroTextFont(doc.heroTextFont),
+    heroTextColor: normalizeHomeHeroTextColor(doc.heroTextColor),
     socialLinks: normalizeSiteSocialLinks(doc.socialLinks),
     updatedAt:
       doc.updatedAt instanceof Date
@@ -154,6 +186,9 @@ export async function saveHomeIntroSlidesSettings(
   const settings = fromDoc({
     slides: input.slides,
     heroCopy: normalizeHomeIntroHeroCopy(input.heroCopy),
+    heroTextScale: normalizeHomeHeroTextScale(input.heroTextScale),
+    heroTextFont: normalizeHomeHeroTextFont(input.heroTextFont),
+    heroTextColor: normalizeHomeHeroTextColor(input.heroTextColor),
     socialLinks: normalizeSiteSocialLinks(input.socialLinks),
     updatedAt: new Date().toISOString(),
   });
@@ -168,6 +203,9 @@ export async function saveHomeIntroSlidesSettings(
           key: SETTINGS_KEY,
           slides: settings.slides,
           heroCopy: settings.heroCopy,
+          heroTextScale: settings.heroTextScale,
+          heroTextFont: settings.heroTextFont,
+          heroTextColor: settings.heroTextColor,
           socialLinks: settings.socialLinks,
           updatedAt: new Date(settings.updatedAt),
         },

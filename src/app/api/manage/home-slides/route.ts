@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import {
   getHomeIntroSlidesSettingsForWrite,
   HOME_INTRO_SLIDES_MAX,
+  normalizeHomeHeroTextScale,
   normalizeHomeIntroHeroCopy,
   saveHomeIntroSlidesSettings,
   type HomeIntroSlide,
 } from "@/lib/home-intro-slides";
+import { normalizeHomeHeroTextColor, normalizeHomeHeroTextFont } from "@/lib/home-hero-text-style";
 import { normalizeSiteSocialLinks } from "@/lib/site-social";
 import { requireStaffApi } from "@/lib/manage-guard";
 
@@ -47,7 +49,14 @@ export async function PUT(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
 
-  let body: { slides?: unknown; heroCopy?: unknown; socialLinks?: unknown };
+  let body: {
+    slides?: unknown;
+    heroCopy?: unknown;
+    heroTextScale?: unknown;
+    heroTextFont?: unknown;
+    heroTextColor?: unknown;
+    socialLinks?: unknown;
+  };
   try {
     body = (await request.json()) as { slides?: unknown; heroCopy?: unknown };
   } catch {
@@ -92,11 +101,26 @@ export async function PUT(request: Request) {
     // 갤러리 공유 자산 — 선택 해제 시 파일을 지우지 않음
     const heroCopy =
       body.heroCopy !== undefined ? normalizeHomeIntroHeroCopy(body.heroCopy) : current.heroCopy;
+    const heroTextScale =
+      body.heroTextScale !== undefined
+        ? normalizeHomeHeroTextScale(body.heroTextScale)
+        : current.heroTextScale ?? normalizeHomeHeroTextScale(undefined);
+    const heroTextFont =
+      body.heroTextFont !== undefined
+        ? normalizeHomeHeroTextFont(body.heroTextFont)
+        : current.heroTextFont ?? normalizeHomeHeroTextFont(undefined);
+    const heroTextColor =
+      body.heroTextColor !== undefined
+        ? normalizeHomeHeroTextColor(body.heroTextColor)
+        : current.heroTextColor ?? normalizeHomeHeroTextColor(undefined);
     const socialLinks =
       body.socialLinks !== undefined ? normalizeSiteSocialLinks(body.socialLinks) : current.socialLinks;
     const settings = await saveHomeIntroSlidesSettings({
       slides: nextSlides,
       heroCopy,
+      heroTextScale,
+      heroTextFont,
+      heroTextColor,
       socialLinks,
       updatedAt: new Date().toISOString(),
     });

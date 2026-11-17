@@ -1,3 +1,4 @@
+import type { HomeHeroTextColor, HomeHeroTextFont } from "@/lib/home-hero-text-style";
 import type { SiteSocialLink } from "@/lib/site-social";
 
 /** 홈 전경 슬라이드 CMS 상한 */
@@ -30,6 +31,20 @@ export const HOME_INTRO_HERO_COPY_LIMITS = {
   lead: 240,
 } as const;
 
+export type HomeHeroTextScale = {
+  kicker: number;
+  heroLine1: number;
+  heroLine2: number;
+  lead: number;
+};
+
+export const HOME_HERO_TEXT_SCALE_MIN = 50;
+export const HOME_HERO_TEXT_SCALE_MAX = 300;
+
+export function defaultHomeHeroTextScale(): HomeHeroTextScale {
+  return { kicker: 100, heroLine1: 100, heroLine2: 100, lead: 100 };
+}
+
 export function defaultHomeIntroHeroCopy(): HomeIntroHeroCopy {
   return {
     kicker: "수도권 최상 · 최선 · 최고 · 최대",
@@ -42,6 +57,12 @@ export function defaultHomeIntroHeroCopy(): HomeIntroHeroCopy {
 export type HomeIntroSlidesSettings = {
   slides: HomeIntroSlide[];
   heroCopy: HomeIntroHeroCopy;
+  /** 히어로 문구 글자 크기(%) — 100이 기본 */
+  heroTextScale?: HomeHeroTextScale;
+  /** 히어로 문구 폰트(슬롯별) */
+  heroTextFont?: HomeHeroTextFont;
+  /** 히어로 문구 색(#hex, 빈 값은 기본) */
+  heroTextColor?: HomeHeroTextColor;
   /** 우측 고정 SNS 아이콘 링크 */
   socialLinks?: SiteSocialLink[];
   updatedAt: string;

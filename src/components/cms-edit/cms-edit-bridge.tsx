@@ -2,6 +2,10 @@
 
 import { useEffect } from "react";
 import { homeLeadToInnerHTML, paragraphsToInnerHTML } from "@/lib/cms-edit-html";
+import {
+  applyHomeHeroSlotStyleToElement,
+  type HomeHeroFontPreset,
+} from "@/lib/home-hero-text-style";
 
 /** iframe CMS — 홈·소메뉴 공통 클릭 / 하이라이트 / 실시간 패치 */
 export function CmsEditBridge({ enabled }: { enabled: boolean }) {
@@ -72,6 +76,9 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
         text?: string;
         imageSrc?: string;
         href?: string;
+        fontScale?: number;
+        fontPreset?: HomeHeroFontPreset;
+        textColor?: string;
       };
       if (data?.type === "anyang-cms-active") {
         document.querySelectorAll(".cms-slot-active").forEach((el) => el.classList.remove("cms-slot-active"));
@@ -82,6 +89,20 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
         }
       }
       if (data?.type === "anyang-cms-patch" && data.key) {
+        if (
+          data.key.startsWith("home.") &&
+          (typeof data.fontScale === "number" ||
+            data.fontPreset !== undefined ||
+            data.textColor !== undefined)
+        ) {
+          document.querySelectorAll(`[data-cms-key="${CSS.escape(data.key)}"]`).forEach((node) => {
+            applyHomeHeroSlotStyleToElement(node as HTMLElement, {
+              ...(typeof data.fontScale === "number" ? { scalePct: data.fontScale } : {}),
+              ...(data.fontPreset !== undefined ? { font: data.fontPreset } : {}),
+              ...(data.textColor !== undefined ? { color: data.textColor } : {}),
+            });
+          });
+        }
         const el = document.querySelector(`[data-cms-key="${CSS.escape(data.key)}"]`);
         if (!el || !(el instanceof HTMLElement)) return;
         if (typeof data.text === "string" && !data.key.startsWith("home.social.")) {
