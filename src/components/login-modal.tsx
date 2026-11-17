@@ -63,7 +63,7 @@ export function LoginModal() {
           type="button"
           aria-label={t("header.login")}
           title={t("header.login")}
-          className="inline-flex size-7 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:size-9"
+          className="inline-flex size-7 items-center justify-center rounded-md text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8 lg:size-9"
         >
           <CircleUserRound className="size-4 lg:size-5" aria-hidden />
         </button>

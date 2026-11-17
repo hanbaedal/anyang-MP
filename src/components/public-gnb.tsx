@@ -75,7 +75,7 @@ export function PublicGnb({
               key={item.i18n}
               className={cn(
                 "relative flex h-full overflow-visible",
-                "after:absolute after:top-1/2 after:right-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--chrome-border)] last:after:hidden",
+                "after:absolute after:top-1/2 after:right-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--pastel-chrome-border)] last:after:hidden",
               )}
               onMouseEnter={() => hasChildren && setOpenKey(item.i18n)}
               onMouseLeave={() => hasChildren && setOpenKey(null)}
@@ -84,8 +84,8 @@ export function PublicGnb({
                 href={item.href}
                 className={cn(
                   "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[0.9375rem] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-base",
-                  "text-[color:var(--chrome-foreground)] hover:bg-white/15",
-                  (open || parentActive) && "bg-white/20",
+                  "text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8",
+                  (open || parentActive) && "bg-primary/12",
                 )}
                 aria-expanded={hasChildren ? open : undefined}
                 aria-controls={hasChildren ? panelId : undefined}

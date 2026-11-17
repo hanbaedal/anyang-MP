@@ -28,7 +28,7 @@ export function SiteHeader({
 
   return (
     <header className="relative z-50 shrink-0 overflow-visible">
-      <div className="site-chrome-shell flex h-12 min-w-0 items-center gap-1 overflow-visible border-b border-[color:var(--chrome-border)] bg-[color:var(--chrome)] text-[color:var(--chrome-foreground)] backdrop-blur sm:gap-2 lg:h-14">
+      <div className="site-chrome-shell site-header-bar flex h-12 min-w-0 items-center gap-1 overflow-visible border-b sm:gap-2 lg:h-14">
         <PublicNavSheet role={role} username={username} />
 
         <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -41,7 +41,7 @@ export function SiteHeader({
             className="size-7 object-contain lg:size-9"
             aria-hidden
           />
-          <p className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--chrome-foreground)] lg:text-lg">
+          <p className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--pastel-chrome-fg)] lg:text-lg">
             {chrome("site.legalName")}
           </p>
         </Link>
@@ -51,7 +51,7 @@ export function SiteHeader({
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <Link
             href="/sitemap"
-            className="whitespace-nowrap rounded-md px-1 py-1 text-[0.625rem] text-[color:var(--chrome-muted)] underline-offset-4 hover:bg-white/15 hover:underline sm:px-1.5 sm:text-xs"
+            className="whitespace-nowrap rounded-md px-1 py-1 text-[0.625rem] text-[color:var(--pastel-chrome-fg)]/80 underline-offset-4 hover:bg-primary/8 hover:underline sm:px-1.5 sm:text-xs"
           >
             {chrome("nav.sitemap")}
           </Link>
@@ -61,7 +61,7 @@ export function SiteHeader({
               href="/account"
               aria-label={tKo("account.myTitle")}
               title={tKo("account.myTitle")}
-              className="inline-flex size-7 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:size-9"
+              className="inline-flex size-7 items-center justify-center rounded-md text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8 lg:size-9"
             >
               <CircleUserRound className="size-4 lg:size-5" aria-hidden />
             </Link>

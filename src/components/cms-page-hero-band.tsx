@@ -51,62 +51,69 @@ export function CmsPageHeroBand({
   const leadColored = leadStyleKey && pageCmsTextStyleColorized(textStyles, leadStyleKey, locale);
 
   return (
-    <section
-      {...(heroKey ? { "data-cms-key": heroKey } : {})}
-      className="relative shrink-0 overflow-hidden border-b bg-muted text-primary-foreground"
-    >
-      <Image
-        src={bgSrc}
-        alt={imageAlt}
-        fill
-        priority
-        className="object-cover object-[center_40%]"
-        sizes="100vw"
-        unoptimized
-      />
-      <div
-        className={cn(
-          "site-container relative",
-          large ? "py-12 md:py-16 lg:py-[4.5rem]" : "py-4 md:py-6",
-        )}
-      >
-        <p className="text-[11px] font-medium tracking-[0.2em] text-amber-300 uppercase [text-shadow:0_1px_3px_rgba(0,0,0,.9),0_2px_12px_rgba(0,0,0,.65)] md:text-xs md:tracking-[0.22em]">
-          {kicker}
-        </p>
-        {headline ? (
-          <h1
-            {...(titleKey ? { "data-cms-key": titleKey } : {})}
+    <section className="shrink-0">
+      <div className="site-content-width">
+        <div
+          {...(heroKey ? { "data-cms-key": heroKey } : {})}
+          className={cn(
+            "site-page-hero-band border-b border-[color:var(--pastel-chrome-border)] bg-muted text-primary-foreground",
+            large ? "min-h-[11rem] sm:min-h-[13rem] md:min-h-[15rem]" : "min-h-[7.5rem] md:min-h-[9rem]",
+          )}
+        >
+          <Image
+            src={bgSrc}
+            alt={imageAlt}
+            fill
+            priority
+            className="object-cover object-[center_40%]"
+            sizes="(max-width: 768px) 100vw, (max-width: 1136px) 100vw, 1136px"
+            unoptimized
+          />
+          <div
             className={cn(
-              "max-w-2xl font-serif font-semibold tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
-              !titleColored && "text-white",
-              titleStyleProps.className,
-              large
-                ? "mt-3 text-2xl leading-tight md:mt-4 md:text-3xl lg:text-[2.125rem]"
-                : "mt-1.5 text-xl md:mt-2 md:text-2xl",
+              "relative z-10 px-[var(--site-content-pad-x)]",
+              large ? "py-12 md:py-16 lg:py-[4.5rem]" : "py-4 md:py-6",
             )}
-            style={titleStyleProps.style}
-            {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
           >
-            <CmsInlineBreaks text={headline} />
-          </h1>
-        ) : null}
-        {leadText ? (
-          <p
-            {...(leadKey ? { "data-cms-key": leadKey } : {})}
-            className={cn(
-              "max-w-2xl [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
-              !leadColored && "text-amber-200/95",
-              leadStyleProps.className,
-              large
-                ? "mt-2 text-sm leading-relaxed md:mt-2.5 md:text-base md:leading-7"
-                : "mt-1.5 text-sm leading-snug md:leading-6",
-            )}
-            style={leadStyleProps.style}
-            {...(leadColored ? { "data-hero-custom-color": "1" as const } : {})}
-          >
-            <CmsInlineBreaks text={leadText} />
-          </p>
-        ) : null}
+            <p className="text-[11px] font-medium tracking-[0.2em] text-amber-300 uppercase [text-shadow:0_1px_3px_rgba(0,0,0,.9),0_2px_12px_rgba(0,0,0,.65)] md:text-xs md:tracking-[0.22em]">
+              {kicker}
+            </p>
+            {headline ? (
+              <h1
+                {...(titleKey ? { "data-cms-key": titleKey } : {})}
+                className={cn(
+                  "max-w-2xl font-serif font-semibold tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
+                  !titleColored && "text-white",
+                  titleStyleProps.className,
+                  large
+                    ? "mt-3 text-2xl leading-tight md:mt-4 md:text-3xl lg:text-[2.125rem]"
+                    : "mt-1.5 text-xl md:mt-2 md:text-2xl",
+                )}
+                style={titleStyleProps.style}
+                {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
+              >
+                <CmsInlineBreaks text={headline} />
+              </h1>
+            ) : null}
+            {leadText ? (
+              <p
+                {...(leadKey ? { "data-cms-key": leadKey } : {})}
+                className={cn(
+                  "max-w-2xl [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
+                  !leadColored && "text-amber-200/95",
+                  leadStyleProps.className,
+                  large
+                    ? "mt-2 text-sm leading-relaxed md:mt-2.5 md:text-base md:leading-7"
+                    : "mt-1.5 text-sm leading-snug md:leading-6",
+                )}
+                style={leadStyleProps.style}
+                {...(leadColored ? { "data-hero-custom-color": "1" as const } : {})}
+              >
+                <CmsInlineBreaks text={leadText} />
+              </p>
+            ) : null}
+          </div>
+        </div>
       </div>
     </section>
   );

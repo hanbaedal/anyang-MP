@@ -14,7 +14,7 @@ import { isNavActive } from "@/components/nav-tree";
 import type { Role } from "@/lib/auth-types";
 
 const triggerClass =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[color:var(--chrome-foreground)] hover:bg-white/15 lg:hidden";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8 lg:hidden";
 
 /** 모바일 햄버거 → 공개 NAV 아코디언 오버레이 (폴더 트리 크롬 없음) */
 export function PublicNavSheet({ role, username }: { role?: Role | null; username?: string | null }) {

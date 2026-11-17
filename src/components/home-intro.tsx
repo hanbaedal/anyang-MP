@@ -176,44 +176,44 @@ export function HomeIntro({
   const hero2 = locale === "ko" ? heroCopy.heroLine2 : t("home.hero2");
 
   return (
-    <section className="relative min-h-full w-full flex-1 overflow-hidden bg-primary text-primary-foreground">
-      <div className="absolute inset-0">
-        <HomeHeroMedia
-          videoSrc={videoSrc}
-          audioSrc={audioSrc}
-          posterSrc={posterSrc}
-          hideVideo={useSlides}
-        />
-        <HomeViewSlides photos={viewPhotos} paused={false} cmsEdit={cmsEditMarkers} />
-        {cmsSlot ? (
-          <button
-            type="button"
-            data-cms-key="home.slides"
-            className={cn(
-              "absolute inset-0 z-[8] border-0 bg-transparent p-0",
-              "cursor-pointer cms-editable-slot",
-              cmsSlot.activeKey === "home.slides" && "cms-slot-active",
-            )}
-            aria-label="메인 전경 슬라이드 편집"
-            onClick={() => cmsSlot.onSelect("home.slides")}
-          />
-        ) : null}
-        {cmsEditMarkers ? (
-          <>
-            <button
-              type="button"
-              data-cms-key="home.slides"
-              className="absolute inset-0 z-[8] cursor-pointer border-0 bg-transparent p-0"
-              aria-label="메인 전경 슬라이드 편집"
+    <section className="relative flex min-h-full w-full flex-1 flex-col bg-background">
+      <div className="site-content-width relative mx-auto flex min-h-full w-full flex-1 flex-col">
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-primary text-primary-foreground">
+          <div className="absolute inset-0">
+            <HomeHeroMedia
+              videoSrc={videoSrc}
+              audioSrc={audioSrc}
+              posterSrc={posterSrc}
+              hideVideo={useSlides}
             />
-            <CmsHomeSlidesSlot />
-          </>
-        ) : null}
-      </div>
-      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-4 pb-5 pt-0 sm:px-6 sm:pb-7 md:px-10 md:pb-8">
-        <div className="pointer-events-auto w-full min-w-0 text-center md:max-w-[min(100%,40rem)] md:text-left">
-          <div>
-            <>
+            <HomeViewSlides photos={viewPhotos} paused={false} cmsEdit={cmsEditMarkers} />
+            {cmsSlot ? (
+              <button
+                type="button"
+                data-cms-key="home.slides"
+                className={cn(
+                  "absolute inset-0 z-[8] border-0 bg-transparent p-0",
+                  "cursor-pointer cms-editable-slot",
+                  cmsSlot.activeKey === "home.slides" && "cms-slot-active",
+                )}
+                aria-label="메인 전경 슬라이드 편집"
+                onClick={() => cmsSlot.onSelect("home.slides")}
+              />
+            ) : null}
+            {cmsEditMarkers ? (
+              <>
+                <button
+                  type="button"
+                  data-cms-key="home.slides"
+                  className="absolute inset-0 z-[8] cursor-pointer border-0 bg-transparent p-0"
+                  aria-label="메인 전경 슬라이드 편집"
+                />
+                <CmsHomeSlidesSlot />
+              </>
+            ) : null}
+          </div>
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-[var(--site-content-pad-x)] pb-5 pt-0 sm:pb-7 md:pb-8">
+            <div className="pointer-events-auto w-full min-w-0 text-center md:max-w-[min(100%,40rem)] md:text-left">
               <CmsPick
                 slotKey="home.kicker"
                 cmsSlot={cmsSlot}
@@ -290,7 +290,7 @@ export function HomeIntro({
                   {locale === "ko" ? renderLeadKo(heroCopy.lead) : tStatic(locale, "home.lead")}
                 </p>
               </CmsPick>
-            </>
+            </div>
           </div>
         </div>
       </div>

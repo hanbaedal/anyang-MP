@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { SITE_MEDIA_MODAL_SHELL, SITE_MEDIA_MODAL_VIEWPORT } from "@/lib/site-media-modal";
 import { uploadOriginalUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-
-const shellClassName =
-  "fixed inset-0 z-50 !top-0 !left-0 flex h-[100dvh] w-screen max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden border-0 bg-black/92 p-0 shadow-none sm:max-w-none [&_[data-slot=dialog-overlay]]:bg-black/92 [&_[data-slot=dialog-close]]:right-3 [&_[data-slot=dialog-close]]:top-3 [&_[data-slot=dialog-close]]:z-10 [&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:hover:bg-white/20";
 
 export function ImageLightboxDialog({
   open,
@@ -28,11 +26,14 @@ export function ImageLightboxDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={shellClassName} showCloseButton>
+      <DialogContent className={SITE_MEDIA_MODAL_SHELL} showCloseButton>
         <DialogTitle className="sr-only">{alt}</DialogTitle>
-        <figure className="relative min-h-0 flex-1">
+        <figure className={cn(SITE_MEDIA_MODAL_VIEWPORT, "bg-black/30")}>
           {!loaded ? (
-            <p className="absolute inset-0 z-[1] flex items-center justify-center text-sm text-white/70" aria-live="polite">
+            <p
+              className="absolute inset-0 z-[1] flex items-center justify-center text-sm text-white/70"
+              aria-live="polite"
+            >
               원본 불러오는 중…
             </p>
           ) : null}
@@ -44,7 +45,7 @@ export function ImageLightboxDialog({
             quality={90}
             unoptimized
             priority
-            sizes="100vw"
+            sizes="(max-width: 1136px) 100vw, 1136px"
             onLoad={() => setLoaded(true)}
             className={cn(
               "guest-photo-bright object-contain p-1 sm:p-2 transition-opacity duration-200",
@@ -52,7 +53,7 @@ export function ImageLightboxDialog({
             )}
           />
           {alt ? (
-            <figcaption className="pointer-events-none absolute inset-x-0 bottom-3 z-[1] px-12 text-center text-sm text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+            <figcaption className="pointer-events-none absolute inset-x-0 bottom-2 z-[1] px-10 text-center text-sm text-white/90">
               {alt}
             </figcaption>
           ) : null}

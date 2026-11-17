@@ -28,50 +28,54 @@ export function PageHero({
   const headline = title?.trim();
   const kickerOnly = !headline && !lead?.trim() && !children;
   return (
-    <section className="relative shrink-0 overflow-hidden border-b bg-[#0a3d66] text-primary-foreground">
-      <Image
-        src={mediaUrl(PAGE_HERO_IMAGE)}
-        alt={alt}
-        fill
-        priority
-        className="object-cover object-[center_28%] opacity-65"
-        quality={90}
-        sizes="100vw"
-      />
-      <div
-        className={cn(
-          "site-container relative",
-          kickerOnly ? "py-1.5 md:py-2" : compact ? "py-2 md:py-2.5" : "py-4 md:py-6",
-        )}
-      >
-        <p
-          className={cn(
-            "text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]",
-            kickerOnly && "md:text-[11px]",
-          )}
-        >
-          {kicker}
-        </p>
-        {headline ? (
-          <h1
+    <section className="shrink-0">
+      <div className="site-content-width">
+        <div className="site-page-hero-band relative min-h-[7rem] overflow-hidden border-b border-[color:var(--pastel-chrome-border)] bg-[#0a3d66] text-primary-foreground md:min-h-[8.5rem]">
+          <Image
+            src={mediaUrl(PAGE_HERO_IMAGE)}
+            alt={alt}
+            fill
+            priority
+            className="object-cover object-[center_28%] opacity-65"
+            quality={90}
+            sizes="(max-width: 768px) 100vw, (max-width: 1136px) 100vw, 1136px"
+          />
+          <div
             className={cn(
-              "max-w-2xl font-serif font-semibold text-primary-foreground",
-              compact ? "mt-1.5 text-xl md:mt-2 md:text-2xl" : "mt-1.5 text-xl md:mt-2 md:text-2xl",
+              "relative z-10 px-[var(--site-content-pad-x)]",
+              kickerOnly ? "py-1.5 md:py-2" : compact ? "py-2 md:py-2.5" : "py-4 md:py-6",
             )}
           >
-            {headline}
-          </h1>
-        ) : null}
-        {lead ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-sm md:leading-6">
-            {lead}
-          </p>
-        ) : null}
-        {children ? (
-          <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-1.5 md:text-sm md:leading-6">
-            {children}
+            <p
+              className={cn(
+                "text-[10px] tracking-[0.16em] text-primary-foreground/80 uppercase md:text-xs md:tracking-[0.18em]",
+                kickerOnly && "md:text-[11px]",
+              )}
+            >
+              {kicker}
+            </p>
+            {headline ? (
+              <h1
+                className={cn(
+                  "max-w-2xl font-serif font-semibold text-primary-foreground",
+                  compact ? "mt-1.5 text-xl md:mt-2 md:text-2xl" : "mt-1.5 text-xl md:mt-2 md:text-2xl",
+                )}
+              >
+                {headline}
+              </h1>
+            ) : null}
+            {lead ? (
+              <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-sm md:leading-6">
+                {lead}
+              </p>
+            ) : null}
+            {children ? (
+              <div className="mt-1 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-1.5 md:text-sm md:leading-6">
+                {children}
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        </div>
       </div>
     </section>
   );

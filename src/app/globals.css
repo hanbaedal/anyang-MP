@@ -226,6 +226,29 @@
   padding-inline: var(--site-content-pad-x);
 }
 
+/* 본문 상한만 (패딩 없음) — 히어로 배너를 1136px 가득 */
+.site-content-width {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--site-content-max);
+  margin-inline: auto;
+}
+
+/* 소메뉴 상단 배너 — 본문과 동일 1136px, 배경 사진도 박스 안 */
+.site-page-hero-band {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 게스트 헤더 — 투명 바 + 로고색 글자 */
+.site-header-bar {
+  background: transparent !important;
+  backdrop-filter: none;
+  color: var(--pastel-chrome-fg);
+  border-color: var(--pastel-chrome-border);
+}
+
 @media (max-width: 767px) {
   :root {
     --site-content-pad-x: 0.75rem;
