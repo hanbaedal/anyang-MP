@@ -429,12 +429,16 @@ export async function getCmsPage(slug: CmsSlug): Promise<CmsPage | null> {
   if (hasMongo()) {
     try {
       const db = await getDb();
-      if (db) {
-        const row = await db.collection("cms").findOne({ slug });
-        if (row) return ensureGalleryLinkCardsPersisted(fromDocRaw(row as Record<string, unknown>));
+      if (!db) {
+        console.error("[cms] mongo db unavailable on read", slug);
+        return null;
       }
+      const row = await db.collection("cms").findOne({ slug });
+      if (row) return ensureGalleryLinkCardsPersisted(fromDocRaw(row as Record<string, unknown>));
+      return null;
     } catch (error) {
-      console.error("[cms] mongo read failed", error);
+      console.error("[cms] mongo read failed", slug, error);
+      return null;
     }
   }
   const all = await readLocal();
@@ -573,7 +577,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
   await writeCmsPageDocument(page);
 
   try {
-    page.i18n = await fillCmsI18n(page, false);
+    page.i18n = await fillCmsI18n(page, true);
     await writeCmsPageDocument(page);
   } catch (error) {
     console.error("[cms] i18n refresh failed (korean content saved)", error);
@@ -586,12 +590,15 @@ export async function listCmsPages(): Promise<CmsPage[]> {
   if (hasMongo()) {
     try {
       const db = await getDb();
-      if (db) {
-        const rows = await db.collection("cms").find({}).toArray();
-        if (rows.length) return rows.map((row) => fromDoc(row as Record<string, unknown>));
+      if (!db) {
+        console.error("[cms] mongo db unavailable on list");
+        return [];
       }
+      const rows = await db.collection("cms").find({}).toArray();
+      return rows.map((row) => fromDoc(row as Record<string, unknown>));
     } catch (error) {
       console.error("[cms] mongo list failed", error);
+      return [];
     }
   }
   return readLocal();

@@ -17,8 +17,9 @@ export async function generateMetadata() {
   return { title: t(locale, "proc.title") };
 }
 
-/** 분양 절차 하단 — CMS 본문 단락 전체 (빈 줄로 구분) */
+/** 분양 절차 하단 — CMS 본문 (빈 줄 단락 · 단일 줄바꿈은 한 단락 안에서 처리) */
 function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, body?: string) {
+  const trimmed = body?.trim() ?? "";
   const fromCms = cmsBodyBlocks(body);
 
   const proseClass =
@@ -30,6 +31,14 @@ function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, bod
         <Paragraphs text={block} />
       </Prose>
     ));
+  }
+
+  if (trimmed) {
+    return [
+      <Prose key="body-single" className={proseClass}>
+        <Paragraphs text={trimmed} />
+      </Prose>,
+    ];
   }
 
   return [

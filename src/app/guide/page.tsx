@@ -48,8 +48,11 @@ export default async function GuideHubPage() {
     image: item.image?.trim() || undefined,
   }));
   const procedureNoteParts = (() => {
+    const trimmed = procedure.body?.trim() ?? "";
     const blocks = cmsBodyBlocks(procedure.body);
-    return blocks.length ? blocks : [t(locale, "proc.account"), t(locale, "proc.twoDays")];
+    if (blocks.length) return blocks;
+    if (trimmed) return [trimmed];
+    return [t(locale, "proc.account"), t(locale, "proc.twoDays")];
   })();
   const procedureNoteAside = (
     <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
