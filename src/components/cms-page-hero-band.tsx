@@ -36,33 +36,31 @@ export function CmsPageHeroBand({
   return (
     <section
       {...(heroKey ? { "data-cms-key": heroKey } : {})}
-      className="relative shrink-0 overflow-hidden border-b bg-[#0a2744] text-primary-foreground"
+      className="relative shrink-0 overflow-hidden border-b bg-muted text-primary-foreground"
     >
       <Image
         src={bgSrc}
         alt={imageAlt}
         fill
         priority
-        className="object-cover object-[center_40%] opacity-70"
-        quality={90}
+        className="object-cover object-[center_40%]"
         sizes="100vw"
-        unoptimized={Boolean(custom)}
+        unoptimized
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a2744]/85 via-[#0a2744]/55 to-[#0a2744]/35" />
       <div
         className={cn(
           "relative mx-auto max-w-6xl px-4",
           large ? "py-12 md:py-16 lg:py-[4.5rem]" : "py-4 md:py-6",
         )}
       >
-        <p className="text-[11px] font-medium tracking-[0.2em] text-amber-300/95 uppercase md:text-xs md:tracking-[0.22em]">
+        <p className="text-[11px] font-medium tracking-[0.2em] text-amber-300 uppercase [text-shadow:0_1px_3px_rgba(0,0,0,.9),0_2px_12px_rgba(0,0,0,.65)] md:text-xs md:tracking-[0.22em]">
           {kicker}
         </p>
         {headline ? (
           <h1
             {...(titleKey ? { "data-cms-key": titleKey } : {})}
             className={cn(
-              "mt-2 font-serif font-semibold tracking-tight text-primary-foreground",
+              "mt-2 font-serif font-semibold tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
               large ? "text-2xl md:text-3xl lg:text-[2.125rem] lg:leading-tight" : "text-xl md:text-2xl",
             )}
           >
@@ -73,7 +71,7 @@ export function CmsPageHeroBand({
           <p
             {...(leadKey ? { "data-cms-key": leadKey } : {})}
             className={cn(
-              "max-w-2xl text-primary-foreground/95",
+              "max-w-2xl text-white/98 [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
               large
                 ? "mt-3 text-sm leading-relaxed md:mt-4 md:text-base md:leading-7"
                 : "mt-1.5 text-sm leading-snug md:mt-2 md:leading-6",

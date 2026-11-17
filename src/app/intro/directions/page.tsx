@@ -47,8 +47,8 @@ export default async function DirectionsPage({
   const hero = resolveCmsPageHero(locale, cms);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="shrink-0 px-2 pt-2 sm:px-3 md:px-4">
+    <>
+      <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:space-y-8 md:py-10">
         <PastelBox className="p-4 md:p-5">
           <CmsPageIntro
             title={hero.title}
@@ -57,9 +57,9 @@ export default async function DirectionsPage({
             cmsEditMarkers={cmsEdit}
           />
         </PastelBox>
+        <DirectionsPageBody items={items} cmsSlug="directions" cmsEditMarkers={cmsEdit} />
       </div>
-      <DirectionsPageBody items={items} cmsSlug="directions" cmsEditMarkers={cmsEdit} />
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}
-    </div>
+    </>
   );
 }

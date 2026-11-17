@@ -169,16 +169,10 @@ export function DirectionsMap({
           ref={figureRef}
           className={cn(
             "relative overflow-hidden rounded-xl border bg-muted",
-            fill
-              ? "absolute left-1/2 top-1/2 max-h-full -translate-x-1/2 -translate-y-1/2"
-              : "w-full",
+            fill ? "mx-auto w-full max-w-[min(100%,96rem)]" : "w-full",
             compact && !fill && "max-h-56",
           )}
-          style={
-            fill
-              ? { width: `min(100%, calc(100cqh * ${MAP_W} / ${MAP_H}))`, aspectRatio: `${MAP_W} / ${MAP_H}` }
-              : undefined
-          }
+          style={fill ? { aspectRatio: `${MAP_W} / ${MAP_H}` } : undefined}
         >
           <Image
             src={MAP_SRC}
@@ -188,7 +182,7 @@ export function DirectionsMap({
             height={fill ? undefined : MAP_H}
             className={cn(
               "guest-photo-bright",
-              fill ? "object-contain" : "h-auto w-full",
+              fill ? "object-contain object-center" : "h-auto w-full",
               compact && "object-cover object-center",
             )}
             sizes="100vw"
