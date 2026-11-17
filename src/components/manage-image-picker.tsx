@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ManageGalleryLibrary } from "@/components/manage-gallery-library";
 import type { GalleryPhoto } from "@/lib/gallery-types";
-import { thumbUrl } from "@/lib/media";
+import { uploadOriginalUrl } from "@/lib/media";
 
 export function ManageImagePicker({
   src,
@@ -42,7 +42,7 @@ export function ManageImagePicker({
     });
   }, [src]);
 
-  const preview = localPreview || (src ? thumbUrl(src) : "");
+  const preview = localPreview || (src ? uploadOriginalUrl(src) : "");
 
   return (
     <div className="flex gap-3">

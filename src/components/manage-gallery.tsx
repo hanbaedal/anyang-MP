@@ -59,14 +59,19 @@ export function ManageGallery({
     if (json.items) setItems(json.items);
   }
 
-  async function saveGalleryHero() {
+  async function saveGalleryHero(nextHero = heroImage) {
+    const path = String(nextHero ?? "").trim();
+    if (!path) {
+      setMessage("배너로 쓸 사진을 먼저 고르거나 올려 주세요.");
+      return;
+    }
     setPageBusy(true);
     setMessage("");
     try {
       const res = await fetch("/api/manage/gallery-page", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ heroImage }),
+        body: JSON.stringify({ heroImage: path }),
       });
       const json = (await res.json()) as { ok?: boolean; error?: string; settings?: GalleryPageSettings };
       if (!res.ok || !json.ok || !json.settings) {
@@ -74,7 +79,7 @@ export function ManageGallery({
         return;
       }
       setHeroImage(json.settings.heroImage);
-      setMessage("갤러리 상단 배너 배경을 저장했습니다.");
+      setMessage("갤러리 상단 배너 배경을 저장했습니다. 공개 /gallery 에 반영됩니다.");
     } catch {
       setMessage("네트워크 오류입니다.");
     } finally {
@@ -349,7 +354,7 @@ export function ManageGallery({
           label="배너 배경"
           onPickSrc={(src) => {
             setHeroImage(src);
-            setMessage("배경을 골랐습니다. 「배너 저장」을 눌러 반영하세요.");
+            void saveGalleryHero(src);
           }}
           onFile={async (file) => {
             setPageBusy(true);
@@ -360,7 +365,7 @@ export function ManageGallery({
               const json = (await res.json()) as { src?: string; error?: string };
               if (json.src) {
                 setHeroImage(json.src);
-                setMessage("배경을 올렸습니다. 「배너 저장」을 눌러 반영하세요.");
+                await saveGalleryHero(json.src);
               } else {
                 setMessage(json.error || "업로드 실패");
               }

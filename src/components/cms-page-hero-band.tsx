@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { PAGE_HERO_IMAGE } from "@/components/page-hero";
-import { mediaUrl, uploadOriginalUrl } from "@/lib/media";
+import { isUploadMediaPath, mediaUrl, uploadOriginalUrl } from "@/lib/media";
 import type { Locale } from "@/lib/i18n";
 import { pageSlotHeroImage, pageSlotLead, pageSlotTitle } from "@/lib/page-cms-slots";
 import {
@@ -56,19 +56,29 @@ export function CmsPageHeroBand({
         <div
           {...(heroKey ? { "data-cms-key": heroKey } : {})}
           className={cn(
-            "site-page-hero-band border-b border-[color:var(--pastel-chrome-border)] bg-muted text-primary-foreground",
+            "site-page-hero-band relative border-b border-[color:var(--pastel-chrome-border)] bg-muted text-primary-foreground",
             large ? "min-h-[11rem] sm:min-h-[13rem] md:min-h-[15rem]" : "min-h-[7.5rem] md:min-h-[9rem]",
           )}
         >
-          <Image
-            src={bgSrc}
-            alt={imageAlt}
-            fill
-            priority
-            className="object-cover object-[center_40%]"
-            sizes="(max-width: 768px) 100vw, (max-width: 1136px) 100vw, 1136px"
-            unoptimized
-          />
+          {custom && (isUploadMediaPath(custom) || custom.startsWith("/uploads/")) ? (
+            // eslint-disable-next-line @next/next/no-img-element -- GridFS·관리 업로드 URL
+            <img
+              src={bgSrc}
+              alt={imageAlt}
+              className="absolute inset-0 h-full w-full object-cover object-[center_40%]"
+              decoding="async"
+            />
+          ) : (
+            <Image
+              src={bgSrc}
+              alt={imageAlt}
+              fill
+              priority
+              className="object-cover object-[center_40%]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1136px) 100vw, 1136px"
+              unoptimized
+            />
+          )}
           <div
             className={cn(
               "relative z-10 px-[var(--site-content-pad-x)]",

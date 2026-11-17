@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getGalleryPageSettings, saveGalleryPageSettings } from "@/lib/gallery-page";
 import { requireStaffApi } from "@/lib/manage-guard";
@@ -14,6 +15,7 @@ export async function PUT(request: Request) {
   const body = (await request.json()) as { heroImage?: string };
   try {
     const settings = await saveGalleryPageSettings({ heroImage: body.heroImage });
+    revalidatePath("/gallery");
     return NextResponse.json({ ok: true, settings });
   } catch (error) {
     return NextResponse.json(
