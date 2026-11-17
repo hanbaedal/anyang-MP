@@ -88,7 +88,11 @@ function CmsPick({
       <span
         data-cms-key={slotKey}
         data-hero-custom-color={colorized ? "1" : undefined}
-        className={cn(colorized && "hero-cms-slot-color", className)}
+        className={cn(
+          "cms-editable-slot box-decoration-clone block w-fit max-w-full rounded-sm",
+          colorized && "hero-cms-slot-color",
+          className,
+        )}
         style={slotStyle}
       >
         {children}
@@ -205,7 +209,8 @@ export function HomeIntro({
               >
                 <p
                   className={cn(
-                    "text-sm tracking-wide",
+                    "pointer-events-none text-sm tracking-wide",
+                    cmsEditMarkers && "m-0",
                     !koCustomColor("kicker") && "text-primary-foreground/85",
                   )}
                 >
@@ -225,7 +230,12 @@ export function HomeIntro({
                   className="block"
                   slotStyle={koSlotStyle("heroLine1")}
                 >
-                  <span className="block break-keep text-[1.125rem] tracking-tight sm:text-xl md:text-[2.15rem] lg:text-[2.35rem] md:whitespace-nowrap">
+                  <span
+                    className={cn(
+                      "block break-keep text-[1.125rem] tracking-tight sm:text-xl md:text-[2.15rem] lg:text-[2.35rem] md:whitespace-nowrap",
+                      cmsEditMarkers && "pointer-events-none",
+                    )}
+                  >
                     {hero1}
                   </span>
                 </CmsPick>
@@ -236,7 +246,14 @@ export function HomeIntro({
                   className="mt-1 block"
                   slotStyle={koSlotStyle("heroLine2")}
                 >
-                  <span className="block break-keep text-2xl md:text-4xl lg:text-[2.75rem]">{hero2}</span>
+                  <span
+                    className={cn(
+                      "block break-keep text-2xl md:text-4xl lg:text-[2.75rem]",
+                      cmsEditMarkers && "pointer-events-none",
+                    )}
+                  >
+                    {hero2}
+                  </span>
                 </CmsPick>
               </h1>
               <CmsPick
@@ -249,6 +266,7 @@ export function HomeIntro({
                 <p
                   className={cn(
                     "break-keep text-sm tracking-wide md:whitespace-nowrap",
+                    cmsEditMarkers && "pointer-events-none m-0",
                     !koCustomColor("lead") && "text-primary-foreground/85",
                   )}
                 >

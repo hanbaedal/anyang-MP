@@ -19,9 +19,9 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       const st = document.createElement("style");
       st.id = styleId;
       st.textContent = `
-        [data-cms-key].cms-editable-slot { cursor: pointer; outline: 2px dashed transparent; outline-offset: 2px; transition: outline-color .15s; border-radius: 4px; }
-        [data-cms-key].cms-editable-slot:hover { outline-color: #b99247; background: rgba(185,146,71,.12); }
-        [data-cms-key].cms-slot-active { outline: 2px solid #002b50; background: rgba(0,43,80,.1); }
+        [data-cms-key].cms-editable-slot { cursor: pointer; outline: 2px solid transparent; outline-offset: 3px; transition: outline-color .15s, background-color .15s, box-shadow .15s; border-radius: 4px; }
+        [data-cms-key].cms-editable-slot:hover { outline-color: #002b50; background: rgba(0,43,80,.14); box-shadow: 0 0 0 1px rgba(255,255,255,.85); }
+        [data-cms-key].cms-slot-active { outline: 2px solid #002b50; background: rgba(0,43,80,.18); box-shadow: 0 0 0 1px rgba(255,255,255,.9); }
       `;
       document.head.appendChild(st);
     }
@@ -32,6 +32,8 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       });
     }
     wireSlots();
+    const mo = new MutationObserver(() => wireSlots());
+    mo.observe(document.body, { childList: true, subtree: true });
 
     function applyTextPatch(el: HTMLElement, key: string, text: string) {
       if (key.startsWith("home.") && key !== "home.slides") {
@@ -145,6 +147,7 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
     window.parent.postMessage({ type: "anyang-cms-ready" }, window.location.origin);
 
     return () => {
+      mo.disconnect();
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("message", onMessage);
     };
