@@ -351,11 +351,9 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
-          slotLabel={isItemCard ? itemCardLabel : activeMeta?.label}
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}
-          hint={panelHint}
           footer={
             message ? (
               <p

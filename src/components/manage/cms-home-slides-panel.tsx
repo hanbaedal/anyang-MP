@@ -87,9 +87,10 @@ export function CmsHomeSlidesPanel({
             ))}
           </ul>
         ) : (
-          <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-6 text-center text-xs text-muted-foreground">
-            등록된 전경 이미지가 없습니다.
-          </p>
+          <div
+            className="rounded-md border border-dashed border-border bg-muted/20 px-3 py-8"
+            aria-hidden
+          />
         )}
 
         <Button
@@ -100,20 +101,13 @@ export function CmsHomeSlidesPanel({
         >
           {slides.length === 0 ? "배경 이미지 선택" : "배경 이미지 추가"}
         </Button>
-        {atMax ? (
-          <p className="text-[10px] text-muted-foreground">최대 {HOME_INTRO_SLIDES_MAX}장입니다.</p>
-        ) : (
-          <p className="text-[10px] text-muted-foreground">저장 후 미리보기 iframe이 갱신됩니다.</p>
-        )}
       </div>
 
       <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
         <DialogContent className="flex max-h-[min(92vh,720px)] flex-col gap-3 overflow-hidden p-4 sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-base text-primary">갤러리에서 선택</DialogTitle>
-            <DialogDescription className="text-xs">
-              썸네일을 눌러 추가합니다. 다시 누르면 선택 해제됩니다. (최대 {HOME_INTRO_SLIDES_MAX}장)
-            </DialogDescription>
+            <DialogDescription className="sr-only">갤러리 이미지 선택</DialogDescription>
           </DialogHeader>
           <div className="flex flex-wrap gap-1.5">
             {(["전체", ...GALLERY_TAGS] as Filter[]).map((tag) => (
@@ -160,9 +154,6 @@ export function CmsHomeSlidesPanel({
               );
             })}
           </ul>
-          {!visible.length && !loadingGallery ? (
-            <p className="text-xs text-muted-foreground">이 분류에 사진이 없습니다.</p>
-          ) : null}
           <Button type="button" className="w-full" variant="outline" onClick={() => setGalleryOpen(false)}>
             닫기
           </Button>

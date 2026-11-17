@@ -50,9 +50,7 @@ export function CmsFontPick({
         <DialogContent className="max-h-[min(90vh,640px)] gap-3 overflow-hidden p-4 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base text-primary">글자 폰트</DialogTitle>
-            <DialogDescription className="text-xs">
-              폰트를 고르면 미리보기에 바로 반영됩니다. 슬롯 패널 하단 「저장」으로 확정하세요.
-            </DialogDescription>
+            <DialogDescription className="sr-only">글자 폰트 선택</DialogDescription>
           </DialogHeader>
           <ul className="max-h-[min(60vh,420px)] space-y-1.5 overflow-y-auto rounded-md border border-border bg-card p-1.5">
             {visibleOptions.map((opt) => {

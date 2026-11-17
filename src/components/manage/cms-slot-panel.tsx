@@ -7,22 +7,21 @@ import { cn } from "@/lib/utils";
 
 /** 인천 admin homeCms 우측 「슬롯 편집」 패널 레이아웃 */
 export function CmsSlotPanel({
-  slotLabel,
   slotKey,
+  slotSelector,
   children,
   onSave,
   saveDisabled,
   saving,
-  hint,
   footer,
 }: {
-  slotLabel?: string;
   slotKey?: string;
+  /** 홈 CMS 편집 슬롯 선택(패널 최상단 고정) */
+  slotSelector?: ReactNode;
   children: ReactNode;
   onSave: () => void;
   saveDisabled?: boolean;
   saving?: boolean;
-  hint?: string;
   footer?: ReactNode;
 }) {
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -37,28 +36,13 @@ export function CmsSlotPanel({
         <strong>슬롯 편집</strong>
       </div>
       <div ref={bodyRef} className="cms-panel-body space-y-3">
-        {!slotKey ? (
-          <p className="cms-panel-lead text-sm text-muted-foreground">
-            홈페이지와 동일한 화면에서 <strong>문구·전경</strong>을 클릭하세요.
-          </p>
-        ) : (
+        {!slotKey ? null : (
           <>
-            {slotLabel ? (
-              <p className="text-xs text-muted-foreground">
-                {slotLabel}{" "}
-                <code className="rounded bg-muted px-1 py-0.5 text-[11px] text-foreground/80">{slotKey}</code>
-              </p>
-            ) : null}
+            {slotSelector ? <div className="pb-1">{slotSelector}</div> : null}
             {children}
-            {hint ? <p className="text-[11px] leading-relaxed text-muted-foreground">{hint}</p> : null}
           </>
         )}
         <div className="space-y-2 border-t border-border pt-3">
-          {slotKey ? (
-            <p className="text-[10px] text-muted-foreground">
-              갤러리에서 고른 것·입력한 내용은 아래 「저장」 한 번으로 DB에 반영됩니다. (갤러리 팝업에는 저장 버튼 없음)
-            </p>
-          ) : null}
           <Button
             type="button"
             className={cn(

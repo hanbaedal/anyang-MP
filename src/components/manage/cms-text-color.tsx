@@ -55,9 +55,7 @@ export function CmsTextColor({
         <DialogContent className="gap-3 p-4 sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-base text-primary">글자 컬러</DialogTitle>
-            <DialogDescription className="text-xs">
-              색을 고르면 미리보기에 바로 반영됩니다. 저장 버튼으로 확정하세요.
-            </DialogDescription>
+            <DialogDescription className="sr-only">글자 색 선택</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-4 gap-2">
             {HOME_HERO_COLOR_PALETTE.map((opt) => {

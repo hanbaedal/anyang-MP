@@ -93,6 +93,10 @@
   color: inherit !important;
 }
 
+.cms-home-slot-select {
+  color: var(--foreground);
+}
+
 /* 갤러리 카드 — 글자·줄마다만 배경, 가장자리 블러 */
 .guide-card-photo-copy-wrap p {
   display: inline;

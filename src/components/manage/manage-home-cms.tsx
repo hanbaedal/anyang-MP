@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CmsHomeSlotSelect } from "@/components/manage/cms-home-slot-select";
 import { CmsHomeSlidesPanel } from "@/components/manage/cms-home-slides-panel";
 import { CmsFontPick } from "@/components/manage/cms-font-pick";
 import { CmsFontScale } from "@/components/manage/cms-font-scale";
@@ -17,7 +18,7 @@ import {
   type HomeIntroSlide,
   type HomeIntroSlidesSettings,
 } from "@/lib/home-intro-slides-types";
-import { HOME_CMS_SLOT_KEYS, HOME_CMS_SLOT_META, type HomeCmsSlotKey } from "@/lib/home-cms-slots";
+import { HOME_CMS_SLOT_META, type HomeCmsSlotKey } from "@/lib/home-cms-slots";
 import {
   defaultHomeHeroTextColor,
   defaultHomeHeroTextFont,
@@ -369,35 +370,12 @@ export function ManageHomeCms({
       ? HOME_CMS_SLOT_META[activeKey as keyof typeof HOME_CMS_SLOT_META]
       : null;
 
-  function HomeCmsSlotSelect() {
-    if (!isHomeContentSlot) return null;
-    const value: HomeCmsSlotKey =
-      activeKey === "home.slides" || (activeKey && activeKey in HOME_CMS_SLOT_META)
-        ? (activeKey as HomeCmsSlotKey)
-        : "home.slides";
-    return (
-      <label className="block space-y-1 text-sm">
-        <span className="font-medium text-foreground">편집 슬롯</span>
-        <select
-          className="h-9 w-full rounded-md border-2 border-primary/35 bg-card px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          value={value}
-          disabled={busy}
-          onChange={(e) => setActiveKey(e.target.value)}
-        >
-          {HOME_CMS_SLOT_KEYS.map((key) => (
-            <option key={key} value={key}>
-              {HOME_CMS_SLOT_META[key].label}
-            </option>
-          ))}
-        </select>
-      </label>
-    );
-  }
+  const homeSlotValue: HomeCmsSlotKey =
+    activeKey && activeKey in HOME_CMS_SLOT_META ? (activeKey as HomeCmsSlotKey) : "home.slides";
 
   const panelChildren =
     activeKey === HOME_SOCIAL_ADD_SLOT ? (
       <div className="space-y-3 text-sm">
-        <p className="text-xs text-muted-foreground">우측 SNS 막대에 아이콘을 추가합니다 (최대 {SITE_SOCIAL_MAX}개).</p>
         <label className="block space-y-1">
           <span className="font-medium">아이콘</span>
           <select
@@ -443,7 +421,6 @@ export function ManageHomeCms({
       </div>
     ) : editingSocial ? (
       <div className="space-y-3 text-sm">
-        <p className="text-xs text-muted-foreground">미리보기에서는 이동하지 않습니다. 아래에 현재 연결 URL이 표시됩니다.</p>
         <label className="block space-y-1">
           <span className="font-medium">아이콘</span>
           <select
@@ -496,7 +473,6 @@ export function ManageHomeCms({
       </div>
     ) : activeKey === "home.slides" ? (
       <>
-        <HomeCmsSlotSelect />
         <CmsHomeSlidesPanel
           slides={slides}
           busy={busy}
@@ -520,7 +496,6 @@ export function ManageHomeCms({
         if (!field) return null;
         return (
           <>
-            <HomeCmsSlotSelect />
             {scaleField ? (
               <>
                 <CmsFontPick
@@ -552,24 +527,6 @@ export function ManageHomeCms({
       })()
     ) : null;
 
-  const panelHint =
-    activeKey === "home.slides"
-      ? "갤러리 썸네일을 눌러 순서대로 선택하세요. 또는 미리보기에서 「전경 슬라이드」·배경을 클릭합니다."
-      : isHomeSocialSlotKey(activeKey ?? "")
-        ? "SNS 아이콘은 우측 세로 막대입니다. + 로 추가, 아이콘 클릭으로 URL을 편집합니다."
-        : activeKey
-          ? "입력 즉시 왼쪽 미리보기에 반영됩니다. 한글만 저장하면 영·중은 공개 페이지에서 자동 처리됩니다."
-          : undefined;
-
-  const slotLabel =
-    activeKey === "home.slides"
-      ? HOME_CMS_SLOT_META["home.slides"].label
-      : activeKey === HOME_SOCIAL_ADD_SLOT
-        ? "SNS 아이콘 추가"
-        : editingSocial
-          ? `SNS · ${editingSocial.label}`
-          : slotMeta?.label;
-
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <div className="cms-layout mx-auto w-full max-w-[100rem] flex-1 gap-4 p-3 md:p-4">
@@ -584,11 +541,18 @@ export function ManageHomeCms({
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
-          slotLabel={slotLabel}
+          slotSelector={
+            isHomeContentSlot ? (
+              <CmsHomeSlotSelect
+                value={homeSlotValue}
+                disabled={busy}
+                onChange={(key) => setActiveKey(key)}
+              />
+            ) : null
+          }
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}
-          hint={panelHint}
           footer={
             message ? (
               <p

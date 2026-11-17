@@ -50,9 +50,6 @@ export function CmsFontScale({
           </Button>
         </div>
       </div>
-      <p className="text-[10px] text-muted-foreground">
-        100% = 기준 크기 · {MIN}~{MAX}% ({STEP}% 단위)
-      </p>
     </div>
   );
 }
