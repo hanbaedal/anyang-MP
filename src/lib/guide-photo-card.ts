@@ -65,6 +65,11 @@ export function featureRainbowOrientationDeg(index: number) {
   return degs[index % degs.length]!;
 }
 
+/** 2·3번 — 세로 중앙축 기준 좌우 뒤집기 */
+export function featureRainbowFlipX(index: number) {
+  return index === 1 || index === 2 ? -1 : 1;
+}
+
 export function guideCardTitleClass({
   onPhoto,
   dense,

@@ -3,6 +3,7 @@ import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
   featureRainbowPastelClass,
+  featureRainbowFlipX,
   featureRainbowOrientationDeg,
   guideCardBodyTextClass,
   guideCardPastelSurface,
@@ -118,6 +119,7 @@ export function FeaturesPhotoGrid({
         const rainbow = featureRainbow && !dense && !transit;
         const copyOnPhoto = hasPhoto && !rainbow;
         const orientDeg = featureRainbowOrientationDeg(index);
+        const flipX = featureRainbowFlipX(index);
 
         const cardContent = (
           <>
@@ -264,7 +266,10 @@ export function FeaturesPhotoGrid({
             )}
             style={
               rainbow
-                ? ({ ["--fr-rotate" as string]: `${orientDeg}deg` } as CSSProperties)
+                ? ({
+                    ["--fr-rotate" as string]: `${orientDeg}deg`,
+                    ["--fr-flip-x" as string]: String(flipX),
+                  } as CSSProperties)
                 : undefined
             }
           >

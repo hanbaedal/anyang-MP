@@ -439,18 +439,19 @@
 
 .feature-rainbow-card {
   --fr-rotate: 0deg;
+  --fr-flip-x: 1;
   overflow: hidden;
   border-radius: 0;
   clip-path: polygon(0 0, 100% 0, 100% 84%, 16% 100%);
   filter: drop-shadow(0 0 0 1.25px rgba(15, 23, 42, 0.92));
-  transform: rotate(var(--fr-rotate));
+  transform: rotate(var(--fr-rotate)) scaleX(var(--fr-flip-x));
   transform-origin: center center;
 }
 
 .feature-rainbow-card-inner {
   height: 100%;
   width: 100%;
-  transform: rotate(calc(-1 * var(--fr-rotate)));
+  transform: rotate(calc(-1 * var(--fr-rotate))) scaleX(var(--fr-flip-x));
   transform-origin: center center;
 }
 
