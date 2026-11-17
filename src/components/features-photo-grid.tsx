@@ -3,7 +3,7 @@ import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
   featureRainbowPastelClass,
-  featureRainbowShapeClass,
+  featureRainbowOrientationDeg,
   guideCardBodyTextClass,
   guideCardPastelSurface,
   guideCardTitleClass,
@@ -16,6 +16,7 @@ import type { Locale } from "@/lib/i18n";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
+import type { CSSProperties } from "react";
 
 export type FeaturePhotoItem = {
   id?: string;
@@ -116,33 +117,10 @@ export function FeaturesPhotoGrid({
         const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
         const rainbow = featureRainbow && !dense && !transit;
         const copyOnPhoto = hasPhoto && !rainbow;
+        const orientDeg = featureRainbowOrientationDeg(index);
 
-        return (
-          <article
-            key={itemId}
-            className={cn(
-              "pc-viewport-card relative isolate",
-              !rainbow && "overflow-hidden rounded-2xl shadow-sm",
-              rainbow &&
-                cn(
-                  featureRainbowPastelClass(index),
-                  featureRainbowShapeClass(index),
-                  "feature-rainbow-card pc-viewport-card--features-rainbow",
-                ),
-              !rainbow && !hasPhoto && guideCardPastelSurface(index),
-              transit && "flex flex-col shadow-md ring-1 ring-[color:var(--pastel-chrome-border)]",
-              !dense && "pc-viewport-card--scale",
-              transit
-                ? "h-auto min-h-[10.5rem] sm:min-h-[11.5rem] md:min-h-[12.5rem] lg:min-h-[13rem]"
-                : dense
-                ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
-                : fill
-                  ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
-                  : rainbow
-                    ? "min-h-[15.5rem] w-full sm:min-h-[17rem] md:min-h-[18.5rem]"
-                    : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
-            )}
-          >
+        const cardContent = (
+          <>
             {hasPhoto ? (
               <GuideCardCoverImage
                 imagePath={item.image!.trim()}
@@ -156,7 +134,6 @@ export function FeaturesPhotoGrid({
             {hasPhoto && showCopy && !transit && !rainbow ? (
               <div className={GUIDE_CARD_PHOTO_FOOT_SCRIM} aria-hidden />
             ) : null}
-
             {showCopy ? (
               <div
                 className={cn(
@@ -166,7 +143,7 @@ export function FeaturesPhotoGrid({
                     : rainbow
                       ? "h-full min-h-0 items-center justify-center text-center md:max-w-full"
                       : "justify-end md:max-w-[92%]",
-                  rainbow && "gap-0 px-6 py-4 sm:px-7 sm:py-5 md:px-8 md:py-6",
+                  rainbow && "gap-0 px-4 py-2 sm:px-5 sm:py-3",
                   !rainbow &&
                     (dense && !transit
                       ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
@@ -198,7 +175,7 @@ export function FeaturesPhotoGrid({
                     >
                       <CmsInlineBreaks text={title} />
                     </h3>
-                    </div>
+                  </div>
                 ) : null}
                 <div
                   className={cn(
@@ -212,7 +189,7 @@ export function FeaturesPhotoGrid({
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
                       className={cn(
-                        guideCardTitleClass({ onPhoto: copyOnPhoto, dense }),
+                        guideCardTitleClass({ onPhoto: copyOnPhoto, dense: dense || rainbow }),
                         copyOnPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
                         rainbow && "w-full text-center",
                         titleStyleProps.className,
@@ -229,8 +206,8 @@ export function FeaturesPhotoGrid({
                         ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
                         : { "data-cms-body-root": "1" as const })}
                       className={cn(
-                        guideCardBodyTextClass({ onPhoto: copyOnPhoto, dense }),
-                        rainbow && "mt-3 w-full max-w-[min(100%,32rem)] text-center",
+                        guideCardBodyTextClass({ onPhoto: copyOnPhoto, dense: dense || rainbow }),
+                        rainbow && "mt-2 w-full max-w-[18rem] text-center",
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
                         transit && hasPhoto && "w-fit max-w-full",
                         textStyleProps.className,
@@ -238,27 +215,66 @@ export function FeaturesPhotoGrid({
                       style={textStyleProps.style}
                       {...(textColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
-                    {captionFirstLine ? (
-                      /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */
-                      <p
-                        className={cn(
-                          "whitespace-normal break-words text-inherit",
-                          copyOnPhoto && guideCardPhotoTextHighlight(),
-                        )}
-                      >
-                        {text}
-                      </p>
-                    ) : (
-                      <Paragraphs
-                        text={text}
-                        className={cn("text-inherit", copyOnPhoto && guideCardPhotoTextHighlight())}
-                      />
-                    )}
+                      {captionFirstLine ? (
+                        <p
+                          className={cn(
+                            "whitespace-normal break-words text-inherit",
+                            copyOnPhoto && guideCardPhotoTextHighlight(),
+                          )}
+                        >
+                          {text}
+                        </p>
+                      ) : (
+                        <Paragraphs
+                          text={text}
+                          className={cn("text-inherit", copyOnPhoto && guideCardPhotoTextHighlight())}
+                        />
+                      )}
                     </div>
                   ) : null}
                 </div>
               </div>
             ) : null}
+          </>
+        );
+
+        return (
+          <article
+            key={itemId}
+            className={cn(
+              "pc-viewport-card relative isolate",
+              !rainbow && "overflow-hidden rounded-2xl shadow-sm",
+              rainbow &&
+                cn(
+                  featureRainbowPastelClass(index),
+                  "feature-rainbow-card pc-viewport-card--features-rainbow",
+                ),
+              !rainbow && !hasPhoto && guideCardPastelSurface(index),
+              transit && "flex flex-col shadow-md ring-1 ring-[color:var(--pastel-chrome-border)]",
+              !dense && "pc-viewport-card--scale",
+              transit
+                ? "h-auto min-h-[10.5rem] sm:min-h-[11.5rem] md:min-h-[12.5rem] lg:min-h-[13rem]"
+                : dense
+                ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
+                : fill
+                  ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
+                  : rainbow
+                    ? "min-h-[11rem] w-full sm:min-h-[11.5rem] md:min-h-0"
+                    : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
+            )}
+            style={
+              rainbow
+                ? ({ ["--fr-rotate" as string]: `${orientDeg}deg` } as CSSProperties)
+                : undefined
+            }
+          >
+            {rainbow ? (
+              <div className="feature-rainbow-card-inner relative h-full min-h-[inherit] w-full">
+                {cardContent}
+              </div>
+            ) : (
+              cardContent
+            )}
           </article>
         );
       })}

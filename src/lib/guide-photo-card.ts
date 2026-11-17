@@ -56,16 +56,13 @@ export function featureRainbowPastelClass(index: number) {
   return FEATURE_RAINBOW_PASTELS[index % FEATURE_RAINBOW_PASTELS.length]!;
 }
 
-/** 공원특징 2×2 — 사다리꼴 (우하 명절 교통·주차 형과 동일 계열) */
-const FEATURE_RAINBOW_SHAPES = [
-  "feature-rainbow-shape-tl",
-  "feature-rainbow-shape-tr",
-  "feature-rainbow-shape-bl",
-  "feature-rainbow-shape-br",
-] as const;
-
-export function featureRainbowShapeClass(index: number) {
-  return FEATURE_RAINBOW_SHAPES[index % FEATURE_RAINBOW_SHAPES.length]!;
+/**
+ * 우하(명절 교통·주차) 사다리꼴 하나를 회전만 바꿔 4칸에 배치.
+ * TL 180° · TR 270° · BL 90° · BR 0°
+ */
+export function featureRainbowOrientationDeg(index: number) {
+  const degs = [180, 270, 90, 0] as const;
+  return degs[index % degs.length]!;
 }
 
 export function guideCardTitleClass({

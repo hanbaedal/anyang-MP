@@ -395,10 +395,10 @@
   }
 
   .pc-viewport-card--features-rainbow.pc-viewport-card--scale {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 3 / 2;
     width: 100%;
     min-height: 0 !important;
-    max-height: none;
+    max-height: min(12.75rem, 38vw);
     margin-inline: 0;
   }
 
@@ -415,7 +415,7 @@
   }
 }
 
-/* 공원특징 4카드 — 사다리꼴 2×2 (우하 카드 형태 기준) */
+/* 공원특징 4카드 — 우하(4번) 사다리꼴을 회전만 바꿔 2×2 */
 .features-rainbow-grid {
   gap: 0.25rem;
 }
@@ -433,26 +433,20 @@
 }
 
 .feature-rainbow-card {
+  --fr-rotate: 0deg;
   overflow: hidden;
   border-radius: 0;
-  filter: drop-shadow(0 0 0 1.25px rgba(15, 23, 42, 0.92));
-}
-
-/* 우하(명절 교통·주차): polygon(0 0, 100% 0, 100% 84%, 16% 100%) */
-.feature-rainbow-shape-tl {
-  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
-}
-
-.feature-rainbow-shape-tr {
-  clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%);
-}
-
-.feature-rainbow-shape-bl {
-  clip-path: polygon(0 0, 84% 0, 100% 100%, 0 100%);
-}
-
-.feature-rainbow-shape-br {
   clip-path: polygon(0 0, 100% 0, 100% 84%, 16% 100%);
+  filter: drop-shadow(0 0 0 1.25px rgba(15, 23, 42, 0.92));
+  transform: rotate(var(--fr-rotate));
+  transform-origin: center center;
+}
+
+.feature-rainbow-card-inner {
+  height: 100%;
+  width: 100%;
+  transform: rotate(calc(-1 * var(--fr-rotate)));
+  transform-origin: center center;
 }
 
 /*
@@ -478,7 +472,8 @@
   }
 
   .pc-viewport-card--features-rainbow.pc-viewport-card--scale {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 3 / 2;
+    max-height: min(12.75rem, 38vw);
   }
 
   .pc-viewport-card--features-rainbow.pc-viewport-card--scale > .pc-viewport-card-body {
