@@ -4,7 +4,7 @@ import { t } from "@/lib/i18n";
 
 /** GNB 1차 메뉴 — 소메뉴 페이지 히어로 kicker */
 const PARENT_KICKER: Record<CmsSlug, string> = {
-  greeting: "nav.intro",
+  greeting: "nav.greeting",
   features: "nav.intro",
   directions: "nav.intro",
   burial: "nav.lots",
@@ -19,7 +19,7 @@ const PARENT_KICKER: Record<CmsSlug, string> = {
 };
 
 const TITLE_KEY: Record<CmsSlug, string> = {
-  greeting: "greeting.title",
+  greeting: "greeting.headline",
   features: "features.title",
   directions: "dir.title",
   burial: "burial.title",

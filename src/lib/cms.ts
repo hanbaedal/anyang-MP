@@ -24,7 +24,7 @@ export function defaultCmsPage(slug: CmsSlug): CmsPage {
     const sign = ko["greeting.signDated"] || ko["greeting.sign"];
     return {
       slug,
-      title: ko["greeting.title"],
+      title: ko["greeting.headline"],
       lead: ko["greeting.lead"],
       body: [ko["greeting.p1"], ko["greeting.p2"], ko["greeting.p3"], ko["greeting.thanks"], sign].join("\n\n"),
       items: [],
@@ -372,6 +372,7 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
 
 function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const bodyImage = String(doc.bodyImage ?? "").trim();
+  const heroImage = String(doc.heroImage ?? "").trim();
   const slug = doc.slug as CmsSlug;
   const funeralDocs = normalizeFuneralDocsKo(
     doc.funeralDocs && typeof doc.funeralDocs === "object" ? (doc.funeralDocs as CmsPage["funeralDocs"]) : undefined,
@@ -383,6 +384,7 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
     body: String(doc.body ?? ""),
     items: Array.isArray(doc.items) ? (doc.items as CmsItem[]) : [],
     updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt ?? ""),
+    ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
@@ -504,6 +506,7 @@ export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage
 
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
   const bodyImage = String(input.bodyImage ?? "").trim();
+  const heroImage = String(input.heroImage ?? "").trim();
   const funeralDocs = normalizeFuneralDocsKo(input.funeralDocs);
   const rawItems = (input.items ?? []).map((item) => {
     const image = String(item.image ?? "").trim();
@@ -525,6 +528,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     body: input.body,
     items: rawItems,
     updatedAt: new Date().toISOString(),
+    ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
   });
@@ -533,11 +537,12 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
   if (hasMongo()) {
     const db = await getDb();
     if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
-    const { bodyImage: _omit, ...rest } = page;
-    void _omit;
-    const update = page.bodyImage
-      ? { $set: { ...page, updatedAt: new Date(page.updatedAt) } }
-      : { $set: { ...rest, updatedAt: new Date(page.updatedAt) }, $unset: { bodyImage: "" } };
+    const $unset: Record<string, ""> = {};
+    if (!page.bodyImage) $unset.bodyImage = "";
+    if (!page.heroImage) $unset.heroImage = "";
+    const setDoc = { ...page, updatedAt: new Date(page.updatedAt) };
+    const update =
+      Object.keys($unset).length > 0 ? { $set: setDoc, $unset } : { $set: setDoc };
     await db.collection("cms").updateOne({ slug: page.slug }, update, { upsert: true });
     return page;
   }

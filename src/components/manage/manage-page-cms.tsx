@@ -14,6 +14,7 @@ import {
   isItemCardSlotKind,
   parsePageCmsSlotKey,
   pageSlotBodyImage,
+  pageSlotHeroImage,
   pageSlotItemImage,
   pageSlotItemText,
   pageSlotItemTitle,
@@ -110,6 +111,15 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     }
   }
 
+  function patchHeroImage(src: string) {
+    setPage((prev) => ({ ...prev, heroImage: src }));
+    markDirty();
+    setMessage("배경을 골랐습니다. 저장을 눌러 반영하세요.");
+    if (src) {
+      postToFrame({ type: "anyang-cms-patch", key: pageSlotHeroImage(slug), imageSrc: uploadOriginalUrl(src) });
+    }
+  }
+
   function patchItemImage(itemId: string, src: string, galleryId?: string) {
     setPage((prev) => ({
       ...prev,
@@ -147,6 +157,28 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
     }
   }
 
+  async function uploadHeroImage(file: File) {
+    setStatus("busy");
+    setMessage("");
+    const form = new FormData();
+    form.set("file", file);
+    try {
+      const res = await fetch("/api/manage/upload-image", { method: "POST", body: form });
+      const json = (await res.json()) as { ok?: boolean; src?: string; error?: string };
+      if (json.src) {
+        patchHeroImage(json.src);
+        setMessage("배경을 올렸습니다. 저장을 눌러 반영하세요.");
+        setStatus("idle");
+      } else {
+        setStatus("error");
+        setMessage(json.error || "업로드 실패");
+      }
+    } catch {
+      setStatus("error");
+      setMessage("네트워크 오류입니다.");
+    }
+  }
+
   async function save() {
     setStatus("busy");
     setMessage("");
@@ -160,6 +192,7 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
           lead: page.lead,
           body: page.body,
           bodyImage: page.bodyImage ?? "",
+          heroImage: page.heroImage ?? "",
           items: page.items ?? [],
           funeralDocs: page.funeralDocs,
         }),
@@ -284,6 +317,18 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
       activeMeta.kind === "body" ||
       activeMeta.kind === "itemText" ||
       (activeMeta.kind === "funeralDocText" && activeMeta.funeralDocField === "hint");
+    if (activeMeta.kind === "heroImage") {
+      return (
+        <ManageImagePicker
+          src={page.heroImage ?? ""}
+          disabled={busy}
+          enableLibrary
+          label="상단 배너 배경"
+          onFile={(file) => void uploadHeroImage(file)}
+          onPickSrc={patchHeroImage}
+        />
+      );
+    }
     if (activeMeta.kind === "bodyImage") {
       return (
         <ManageImagePicker

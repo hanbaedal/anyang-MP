@@ -1,10 +1,9 @@
 import Image from "next/image";
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsPageHeroBand } from "@/components/cms-page-hero-band";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
-import { Paragraphs } from "@/components/paragraphs";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { resolveCmsPageHero } from "@/lib/cms-page-hero";
@@ -15,7 +14,7 @@ import { uploadOriginalUrl } from "@/lib/media";
 
 export async function generateMetadata() {
   const locale = await readLocale();
-  return { title: t(locale, "greeting.title") };
+  return { title: t(locale, "nav.greeting") };
 }
 
 export default async function GreetingPage({
@@ -35,14 +34,18 @@ export default async function GreetingPage({
 
   return (
     <>
+      <CmsPageHeroBand
+        kicker={hero.kicker}
+        title={hero.title}
+        lead={hero.lead}
+        heroImage={cms.heroImage}
+        cmsSlug="greeting"
+        cmsEditMarkers={cmsEdit}
+        imageAlt={hero.title || t(locale, "nav.greeting")}
+        large
+      />
       <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
         <PastelBox>
-          <CmsPageIntro
-            title={hero.title}
-            lead={hero.lead}
-            cmsSlug="greeting"
-            cmsEditMarkers={cmsEdit}
-          />
           <div
             className={
               imageSrc
@@ -57,7 +60,7 @@ export default async function GreetingPage({
               >
                 <Image
                   src={imageSrc}
-                  alt={cms.title || t(locale, "greeting.title")}
+                  alt={cms.title || t(locale, "greeting.headline")}
                   fill
                   className="guest-photo-bright object-cover"
                   sizes="(max-width: 768px) 90vw, 22rem"

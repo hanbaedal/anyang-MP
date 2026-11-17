@@ -13,6 +13,7 @@ export type PageCmsSlotKind =
   | "title"
   | "lead"
   | "body"
+  | "heroImage"
   | "bodyImage"
   | "itemTitle"
   | "itemText"
@@ -41,6 +42,9 @@ export function pageSlotBody(slug: string) {
 export function pageSlotBodyImage(slug: string) {
   return `page.${slug}.bodyImage`;
 }
+export function pageSlotHeroImage(slug: string) {
+  return `page.${slug}.heroImage`;
+}
 export function pageSlotItemTitle(slug: string, itemId: string) {
   return `page.${slug}.item.${itemId}.title`;
 }
@@ -55,15 +59,18 @@ const LOTS_SLUGS = new Set<ManageVisualCmsSlug>(["burial", "lawn", "columbarium"
 
 export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotMeta> {
   const slug = page.slug as ManageVisualCmsSlug;
+  const titleLabel = slug === "greeting" ? "제목" : "페이지 제목";
+  const leadLabel = slug === "greeting" ? "요약" : "페이지 요약";
   const meta: Record<string, PageCmsSlotMeta> = {
-    [pageSlotTitle(slug)]: { label: "페이지 제목", kind: "title", slug },
-    [pageSlotLead(slug)]: { label: "페이지 요약", kind: "lead", slug },
+    [pageSlotTitle(slug)]: { label: titleLabel, kind: "title", slug },
+    [pageSlotLead(slug)]: { label: leadLabel, kind: "lead", slug },
   };
 
   if (LOTS_SLUGS.has(slug) || slug === "procedure" || slug === "funeral") {
     meta[pageSlotBody(slug)] = { label: "본문", kind: "body", slug };
   }
   if (slug === "greeting") {
+    meta[pageSlotHeroImage(slug)] = { label: "상단 배경", kind: "heroImage", slug };
     meta[pageSlotBodyImage(slug)] = { label: "본문 사진", kind: "bodyImage", slug };
     meta[pageSlotBody(slug)] = { label: "본문", kind: "body", slug };
   }
@@ -126,6 +133,9 @@ export function parsePageCmsSlotKey(key: string): PageCmsSlotMeta | null {
 
   const bodyM = /^page\.([a-z]+)\.body$/.exec(key);
   if (bodyM) return { label: "", kind: "body", slug: bodyM[1] as ManageVisualCmsSlug };
+
+  const heroImgM = /^page\.([a-z]+)\.heroImage$/.exec(key);
+  if (heroImgM) return { label: "", kind: "heroImage", slug: heroImgM[1] as ManageVisualCmsSlug };
 
   const imgM = /^page\.([a-z]+)\.bodyImage$/.exec(key);
   if (imgM) return { label: "", kind: "bodyImage", slug: imgM[1] as ManageVisualCmsSlug };

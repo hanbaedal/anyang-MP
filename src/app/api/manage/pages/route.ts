@@ -21,6 +21,7 @@ export async function PUT(request: Request) {
     lead?: string;
     body?: string;
     bodyImage?: string;
+    heroImage?: string;
     items?: CmsItem[];
     funeralDocs?: FuneralDocsKo;
   };
@@ -43,6 +44,7 @@ export async function PUT(request: Request) {
       lead: body.lead ?? "",
       body: body.body ?? "",
       bodyImage: body.bodyImage ?? "",
+      heroImage: body.heroImage ?? "",
       items: Array.isArray(body.items) ? body.items : [],
       funeralDocs: body.funeralDocs,
     });
