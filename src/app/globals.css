@@ -624,7 +624,8 @@
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
-  gap: 1rem 0.65rem;
+  gap: 1.15rem 0.75rem;
+  padding-bottom: 0.35rem;
   grid-template-columns:
     var(--procedure-orb-size)
     var(--procedure-orbs-arrow-col)
@@ -676,6 +677,10 @@
   --procedure-orb-title-top: 4.35rem; /* 4단계 카드 기준 제목 줄 */
   --procedure-orb-title-band: 2.6rem;
   --procedure-orb-blank-line: 1.25rem;
+  --orb-light: #fff6d4;
+  --orb-mid: #f5e8b0;
+  --orb-dark: #d9c878;
+  --orb-border: #e6d48a;
 
   box-sizing: border-box;
   flex-shrink: 0;
@@ -686,6 +691,77 @@
   padding: 1.1rem 1.1rem 1rem;
   overflow: hidden;
   position: relative;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--orb-border) 88%, #fff);
+  background: radial-gradient(
+    circle at 34% 30%,
+    var(--orb-light) 0%,
+    var(--orb-mid) 46%,
+    var(--orb-dark) 100%
+  );
+  box-shadow:
+    0 1.35rem 2.35rem rgba(15, 23, 42, 0.17),
+    0 0.45rem 0.95rem rgba(15, 23, 42, 0.11),
+    inset 0 -0.5rem 1rem rgba(15, 23, 42, 0.07),
+    inset 0 0.2rem 0.45rem rgba(255, 255, 255, 0.55);
+}
+
+.procedure-orb::before {
+  content: "";
+  position: absolute;
+  top: 11%;
+  left: 17%;
+  width: 44%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 38% 32%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0) 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.procedure-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 72% 78%, rgba(15, 23, 42, 0.12) 0%, transparent 48%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.procedure-orb--1 {
+  --orb-light: #fff6d4;
+  --orb-mid: #f5e8b0;
+  --orb-dark: #d9c878;
+  --orb-border: #e6d48a;
+}
+
+.procedure-orb--2 {
+  --orb-light: #f0f8fc;
+  --orb-mid: #dcecf4;
+  --orb-dark: #a8c8d8;
+  --orb-border: #c5dde8;
+}
+
+.procedure-orb--3 {
+  --orb-light: #ecf8ed;
+  --orb-mid: #d4edd6;
+  --orb-dark: #9ec9a2;
+  --orb-border: #b8d9bc;
+}
+
+.procedure-orb--4 {
+  --orb-light: #f8f0fc;
+  --orb-mid: #eadcf4;
+  --orb-dark: #c8aed8;
+  --orb-border: #d4c4e8;
+}
+
+.procedure-orb--5 {
+  --orb-light: #faf6e8;
+  --orb-mid: #f0eac8;
+  --orb-dark: #d4c890;
+  --orb-border: #ddd0a0;
 }
 
 .procedure-orb-step-label {
@@ -694,6 +770,7 @@
   left: 0;
   right: 0;
   margin: 0;
+  z-index: 1;
 }
 
 .procedure-orb-title {
@@ -706,6 +783,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  z-index: 1;
 }
 
 .procedure-orb-blank {
@@ -714,6 +792,7 @@
   left: 0;
   right: 0;
   height: var(--procedure-orb-blank-line);
+  z-index: 1;
 }
 
 .procedure-orb-desc {
@@ -726,6 +805,7 @@
   overflow: auto;
   text-align: center;
   scrollbar-width: thin;
+  z-index: 1;
 }
 
 @media (max-width: 767px) {

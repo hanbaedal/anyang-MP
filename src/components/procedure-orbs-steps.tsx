@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
 import { useLocale, useT } from "@/components/locale-provider";
-import { PROCEDURE_ORB_PASTELS } from "@/lib/procedure-orbs";
+import { PROCEDURE_ORB_COUNT } from "@/lib/procedure-orbs";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
@@ -36,17 +36,12 @@ function ProcedureOrb({
   const textStyleProps = textSlotKey ? pageCmsTextStyleProps(cmsTextStyles, textSlotKey, locale) : {};
   const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
   const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
-  const pastel = PROCEDURE_ORB_PASTELS[index % PROCEDURE_ORB_PASTELS.length]!;
+  const orbTone = (index % PROCEDURE_ORB_COUNT) + 1;
 
   return (
     <div
       role="listitem"
-      className={cn(
-        "procedure-orb",
-        "flex flex-col items-center border text-center",
-        "shadow-[inset_0_2px_0_rgba(255,255,255,0.45),0_6px_18px_rgba(15,23,42,0.08)]",
-        pastel,
-      )}
+      className={cn("procedure-orb", `procedure-orb--${orbTone}`, "flex flex-col items-center text-center")}
     >
       <p className="procedure-orb-step-label text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm">
         {stepLabel}
