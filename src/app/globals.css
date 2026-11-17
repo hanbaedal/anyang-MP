@@ -88,6 +88,11 @@
   font-size: 12px;
 }
 
+/* 홈 CMS 커스텀 글자색 — Tailwind text-* 보다 우선 */
+.hero-cms-slot-color > * {
+  color: inherit !important;
+}
+
 /* 갤러리 카드 — 글자·줄마다만 배경, 가장자리 블러 */
 .guide-card-photo-copy-wrap p {
   display: inline;

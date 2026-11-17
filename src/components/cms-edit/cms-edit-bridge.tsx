@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { homeLeadToInnerHTML, paragraphsToInnerHTML } from "@/lib/cms-edit-html";
 import {
   applyHomeHeroSlotStyleToElement,
+  patchHomeHeroCopyText,
   type HomeHeroFontPreset,
 } from "@/lib/home-hero-text-style";
 
@@ -33,6 +34,10 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
     wireSlots();
 
     function applyTextPatch(el: HTMLElement, key: string, text: string) {
+      if (key.startsWith("home.") && key !== "home.slides") {
+        patchHomeHeroCopyText(el, key, text, homeLeadToInnerHTML(text));
+        return;
+      }
       if (key === "home.lead") {
         el.innerHTML = homeLeadToInnerHTML(text);
         return;

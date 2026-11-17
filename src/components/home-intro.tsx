@@ -82,9 +82,15 @@ function CmsPick({
   children: ReactNode;
   slotStyle?: ReturnType<typeof buildHomeHeroSlotStyle>;
 }) {
+  const colorized = Boolean(slotStyle?.color);
   if (cmsEditMarkers && !cmsSlot) {
     return (
-      <span data-cms-key={slotKey} className={className} style={slotStyle}>
+      <span
+        data-cms-key={slotKey}
+        data-hero-custom-color={colorized ? "1" : undefined}
+        className={cn(colorized && "hero-cms-slot-color", className)}
+        style={slotStyle}
+      >
         {children}
       </span>
     );
@@ -96,7 +102,8 @@ function CmsPick({
       role="button"
       tabIndex={0}
       data-cms-key={slotKey}
-      className={cn("cms-editable-slot", active && "cms-slot-active", className)}
+      data-hero-custom-color={colorized ? "1" : undefined}
+      className={cn("cms-editable-slot", colorized && "hero-cms-slot-color", active && "cms-slot-active", className)}
       style={slotStyle}
       onClick={(e) => {
         e.preventDefault();

@@ -32,21 +32,44 @@ export function defaultHomeHeroTextColor(): HomeHeroTextColor {
   return { kicker: "", heroLine1: "", heroLine2: "", lead: "" };
 }
 
+/** CMS 글자 컬러 팔레트 (Carebase 스타일) — hex 저장, 빈 값 = 테마 기본 */
+export const HOME_HERO_COLOR_PALETTE = [
+  { id: "white", label: "흰색", hex: "#ffffff" },
+  { id: "yellow", label: "노랑", hex: "#f5e642" },
+  { id: "sky", label: "하늘", hex: "#5ec8e8" },
+  { id: "blue", label: "청색", hex: "#3b82f6" },
+  { id: "purple", label: "보라", hex: "#c026d3" },
+  { id: "red", label: "빨강", hex: "#ef4444" },
+  { id: "black", label: "검정", hex: "#1c1915" },
+] as const;
+
+export type HomeHeroColorId = (typeof HOME_HERO_COLOR_PALETTE)[number]["id"];
+
 const HERO_SLOT_KEYS = ["kicker", "heroLine1", "heroLine2", "lead"] as const;
 
 function isFontPreset(v: unknown): v is HomeHeroFontPreset {
   return typeof v === "string" && (HOME_HERO_FONT_PRESETS as readonly string[]).includes(v);
 }
 
-/** #rgb / #rrggbb 만 허용. 빈 문자열 = 테마 기본색 */
+/** 팔레트 hex / #rgb / #rrggbb. 빈 문자열 = 테마 기본색 */
 export function normalizeHeroTextColorValue(raw: unknown): string {
   if (raw === null || raw === undefined) return "";
   const s = String(raw).trim();
   if (!s || s === "default") return "";
+  const fromId = HOME_HERO_COLOR_PALETTE.find((p) => p.id === s);
+  if (fromId) return fromId.hex;
   const hex = s.startsWith("#") ? s : `#${s}`;
   if (/^#[0-9a-fA-F]{3}$/.test(hex)) return hex.toLowerCase();
   if (/^#[0-9a-fA-F]{6}$/.test(hex)) return hex.toLowerCase();
+  const fromHex = HOME_HERO_COLOR_PALETTE.find((p) => p.hex.toLowerCase() === hex.toLowerCase());
+  if (fromHex) return fromHex.hex;
   return "";
+}
+
+export function heroTextColorIsActive(saved: string, hex: string) {
+  const norm = normalizeHeroTextColorValue(saved);
+  if (!hex) return !norm;
+  return norm === hex;
 }
 
 export function normalizeHomeHeroTextFont(raw: unknown): HomeHeroTextFont {
@@ -103,25 +126,64 @@ export function buildHomeHeroSlotStyle(opts: {
 }
 
 /** iframe CMS 실시간 패치용 */
+function heroCopyTextEl(root: HTMLElement, key: string): HTMLElement | null {
+  if (key === "home.kicker" || key === "home.lead") return root.querySelector("p");
+  if (key === "home.heroLine1" || key === "home.heroLine2") return root.querySelector("span");
+  return null;
+}
+
+function syncHeroColorInheritance(root: HTMLElement, color: string) {
+  const c = normalizeHeroTextColorValue(color);
+  const paints = [root, ...Array.from(root.querySelectorAll<HTMLElement>("p, span"))];
+  if (!c) {
+    for (const node of paints) node.style.color = "";
+    root.removeAttribute("data-hero-custom-color");
+    return;
+  }
+  root.setAttribute("data-hero-custom-color", "1");
+  root.style.color = c;
+  for (const node of paints) {
+    if (node !== root) node.style.color = "inherit";
+  }
+}
+
 export function applyHomeHeroSlotStyleToElement(
   el: HTMLElement,
   opts: { scalePct?: number; font?: HomeHeroFontPreset; color?: string },
 ) {
+  const key = el.getAttribute("data-cms-key") ?? "";
+  const textEl = key.startsWith("home.") ? heroCopyTextEl(el, key) : null;
+
   if (typeof opts.scalePct === "number") {
-    el.style.fontSize = opts.scalePct === 100 ? "" : `${opts.scalePct}%`;
+    const target = textEl ?? el;
+    target.style.fontSize = opts.scalePct === 100 ? "" : `${opts.scalePct}%`;
   }
   if (opts.font !== undefined) {
+    const target = textEl ?? el;
     if (opts.font === "default") {
-      el.style.fontFamily = "";
-      el.style.fontWeight = "";
+      target.style.fontFamily = "";
+      target.style.fontWeight = "";
     } else {
       const css = homeHeroFontPresetCss(opts.font);
-      el.style.fontFamily = css.fontFamily ?? "";
-      el.style.fontWeight = css.fontWeight != null ? String(css.fontWeight) : "";
+      target.style.fontFamily = css.fontFamily ?? "";
+      target.style.fontWeight = css.fontWeight != null ? String(css.fontWeight) : "";
     }
   }
   if (opts.color !== undefined) {
-    const c = normalizeHeroTextColorValue(opts.color);
-    el.style.color = c || "";
+    syncHeroColorInheritance(el, opts.color);
   }
+}
+
+/** iframe 텍스트 패치 — wrapper가 아닌 내부 p/span만 갱신 */
+export function patchHomeHeroCopyText(root: HTMLElement, key: string, text: string, leadHtml: string) {
+  const inner = heroCopyTextEl(root, key);
+  if (!inner) {
+    root.textContent = text;
+    return;
+  }
+  if (key === "home.lead") {
+    inner.innerHTML = leadHtml;
+    return;
+  }
+  inner.textContent = text;
 }
