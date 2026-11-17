@@ -43,18 +43,18 @@ function ProcedureOrb({
       role="listitem"
       className={cn(
         "procedure-orb",
-        "flex flex-col items-center justify-center border text-center",
+        "flex flex-col items-center border text-center",
         "shadow-[inset_0_2px_0_rgba(255,255,255,0.45),0_6px_18px_rgba(15,23,42,0.08)]",
         pastel,
       )}
     >
-      <p className="text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm">
+      <p className="procedure-orb-step-label text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm">
         {stepLabel}
       </p>
       <h3
         {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
         className={cn(
-          "mt-1.5 px-3 text-base font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] sm:text-lg",
+          "procedure-orb-title px-3 text-base font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] sm:text-lg",
           titleStyleProps.className,
         )}
         style={titleStyleProps.style}
@@ -62,13 +62,14 @@ function ProcedureOrb({
       >
         <CmsInlineBreaks text={step.title} />
       </h3>
+      <div aria-hidden className="procedure-orb-blank" />
       {compact || !step.text ? null : (
         <div
           {...(cmsTextKey
             ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
             : { "data-cms-body-root": "1" as const })}
           className={cn(
-            "mt-2 px-3 text-xs leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 sm:text-sm sm:leading-6",
+            "procedure-orb-desc px-3 text-xs leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 sm:text-sm sm:leading-6",
             textStyleProps.className,
           )}
           style={textStyleProps.style}
