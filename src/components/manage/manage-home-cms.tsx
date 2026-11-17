@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CmsHomeSlidesPanel } from "@/components/manage/cms-home-slides-panel";
 import { CmsFontPick } from "@/components/manage/cms-font-pick";
 import { CmsFontScale } from "@/components/manage/cms-font-scale";
 import { CmsTextColor } from "@/components/manage/cms-text-color";
@@ -27,7 +28,6 @@ import {
 } from "@/lib/home-hero-text-style";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
-import { thumbUrl } from "@/lib/media";
 import {
   HOME_SOCIAL_ADD_SLOT,
   SITE_SOCIAL_ICON_LABELS,
@@ -97,7 +97,6 @@ export function ManageHomeCms({
   const [dirty, setDirty] = useState(false);
   const [frameRev, setFrameRev] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const galleryGridRef = useRef<HTMLUListElement>(null);
   const busy = status === "busy";
 
   const isHomeContentSlot = activeKey === "home.slides" || Boolean(activeKey && activeKey in HOME_CMS_SLOT_META);
@@ -358,11 +357,11 @@ export function ManageHomeCms({
     }
   }
 
-  function clearAll() {
-    if (!slides.length) return;
-    setSlides([]);
+  function removeSlideAt(index: number) {
+    const next = slides.filter((_, i) => i !== index).map((s, i) => ({ ...s, sort: i }));
+    setSlides(next);
     setDirty(true);
-    setMessage("모두 해제했습니다. 저장을 눌러 반영하세요.");
+    setMessage("슬라이드에서 제거했습니다. 저장을 눌러 반영하세요.");
     setStatus("idle");
   }
 
@@ -499,81 +498,21 @@ export function ManageHomeCms({
     ) : activeKey === "home.slides" ? (
       <>
         <HomeCmsSlotSelect />
-        <Button
-          type="button"
-          className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          disabled={busy}
-          onClick={() => galleryGridRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
-        >
-          배경 이미지 선택
-        </Button>
-        {slides.length > 0 ? (
-          <ul className="space-y-0.5 text-[11px] text-muted-foreground">
-            {slides.map((s) => (
-              <li key={s.id} className="truncate font-mono" title={s.src}>
-                {s.src}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-[11px] text-muted-foreground">선택된 전경 이미지가 없습니다.</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          클릭 순서 = 슬라이드 순서 (최대 {HOME_INTRO_SLIDES_MAX}장). 저장 후 iframe이 갱신됩니다.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          선택 {slides.length}/{HOME_INTRO_SLIDES_MAX}
-          {dirty ? " · 미저장" : ""}
-        </p>
-        <Button type="button" size="sm" variant="outline" disabled={busy || slides.length === 0} onClick={clearAll}>
-          모두 해제
-        </Button>
-        <div className="space-y-2 border-t pt-3">
-          <div className="flex flex-wrap gap-1.5">
-            {(["전체", ...GALLERY_TAGS] as Filter[]).map((tag) => (
-              <Button
-                key={tag}
-                type="button"
-                size="sm"
-                variant={filter === tag ? "default" : "outline"}
-                className="h-7 px-2 text-xs"
-                onClick={() => setFilter(tag)}
-              >
-                {tag}
-              </Button>
-            ))}
-          </div>
-          {loadingGallery ? <p className="text-xs text-muted-foreground">불러오는 중…</p> : null}
-          {galleryError ? <p className="text-xs text-destructive">{galleryError}</p> : null}
-          <ul ref={galleryGridRef} className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
-            {visible.map((item) => {
-              const id = slideIdForPhoto(item);
-              const order = orderById.get(id) ?? orderBySrc.get(item.src);
-              const selected = Boolean(order);
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    className={cn(
-                      "relative w-full rounded-lg border p-1.5 text-left transition",
-                      selected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary",
-                    )}
-                    onClick={() => togglePhoto(item)}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={thumbUrl(item.src)} alt="" className="aspect-[4/3] w-full rounded object-cover" />
-                    {selected ? (
-                      <span className="absolute left-2 top-2 rounded-full bg-primary px-1.5 text-[10px] font-bold text-white">
-                        {order}
-                      </span>
-                    ) : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <CmsHomeSlidesPanel
+          slides={slides}
+          busy={busy}
+          dirty={dirty}
+          filter={filter}
+          loadingGallery={loadingGallery}
+          galleryError={galleryError}
+          visible={visible}
+          onFilterChange={setFilter}
+          onTogglePhoto={togglePhoto}
+          onRemoveAt={removeSlideAt}
+          orderById={orderById}
+          orderBySrc={orderBySrc}
+          slideIdForPhoto={slideIdForPhoto}
+        />
       </>
     ) : activeKey && slotMeta && slotMeta.field !== "slides" ? (
       (() => {
