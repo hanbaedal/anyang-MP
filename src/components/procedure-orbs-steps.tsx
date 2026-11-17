@@ -134,6 +134,7 @@ export function ProcedureOrbsSteps({
           <div
             key={step.id || step.n}
             className={cn(
+              "procedure-orb-slot",
               index === 0 && "procedure-orb-slot--1",
               index === 1 && "procedure-orb-slot--2",
               index === 2 && "procedure-orb-slot--3",
