@@ -80,7 +80,7 @@ export function NoticesList({
           fill && "pc-notices-list-scroll",
         )}
       >
-        <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+        <table className="w-full min-w-0 border-collapse text-left text-sm sm:min-w-[32rem] lg:min-w-0">
           <thead>
             <tr className="border-b border-[#c4a574]/45 bg-[#e8f4fb] text-[color:var(--pastel-chrome-fg)]">
               <th scope="col" className="w-14 px-3 py-3 text-center text-xs font-semibold tracking-wide sm:w-16 sm:px-4">
@@ -89,7 +89,10 @@ export function NoticesList({
               <th scope="col" className="px-3 py-3 text-xs font-semibold tracking-wide sm:px-4">
                 {t("notices.col.subject")}
               </th>
-              <th scope="col" className="w-28 px-3 py-3 text-right text-xs font-semibold tracking-wide sm:w-32 sm:px-4">
+              <th
+                scope="col"
+                className="hidden w-28 px-3 py-3 text-right text-xs font-semibold tracking-wide sm:table-cell sm:w-32 sm:px-4"
+              >
                 {t("notices.col.date")}
               </th>
             </tr>
@@ -135,7 +138,7 @@ export function NoticesList({
                       ) : null}
                     </button>
                   </td>
-                  <td className="px-3 py-3 text-right align-middle sm:px-4">
+                  <td className="hidden px-3 py-3 text-right align-middle sm:table-cell sm:px-4">
                     <button
                       type="button"
                       className="w-full text-right text-xs text-muted-foreground hover:text-primary"

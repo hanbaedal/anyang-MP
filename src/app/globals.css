@@ -865,10 +865,20 @@
   text-align: center;
 }
 
-/* 공지 목록 — 게스트 본문 폭과 동일 */
+/* 공지 목록 — 본문 표 1120px 상한, 모바일은 100% + 좌우 패딩 */
 .pc-notices-fill {
+  --notices-board-max: 70rem; /* 1120px */
+
+  box-sizing: border-box;
   width: 100%;
-  max-width: var(--site-content-max);
+  max-width: min(var(--notices-board-max), 100%);
+  margin-inline: auto;
+}
+
+.pc-notices-fill-grid--text-only {
+  width: 100%;
+  max-width: min(var(--notices-board-max, 70rem), 100%);
+  margin-inline: auto;
 }
 
 @media (min-width: 768px) {
@@ -892,9 +902,11 @@
     gap: 1.25rem;
   }
 
-  .pc-notices-fill-grid--text-only {
+  .pc-notices-fill .pc-notices-fill-grid--text-only {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
+    width: 100%;
+    max-width: min(var(--notices-board-max, 70rem), 100%);
   }
 
   @media (min-width: 1024px) {
