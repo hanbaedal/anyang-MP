@@ -1,7 +1,7 @@
 import { CmsPageHeroBand } from "@/components/cms-page-hero-band";
 import { NoticesList } from "@/components/notices-list";
 import { listNoticesLocalized } from "@/lib/notices";
-import { clearNoticesListImage, getNoticesPageSettings } from "@/lib/notices-page";
+import { getNoticesPageSettings } from "@/lib/notices-page";
 import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -15,10 +15,7 @@ export async function generateMetadata() {
 
 export default async function NoticesPage() {
   const locale = await readLocale();
-  const [notices, page] = await Promise.all([
-    listNoticesLocalized(locale),
-    clearNoticesListImage().then(() => getNoticesPageSettings()),
-  ]);
+  const [notices, page] = await Promise.all([listNoticesLocalized(locale), getNoticesPageSettings()]);
 
   return (
     <>
