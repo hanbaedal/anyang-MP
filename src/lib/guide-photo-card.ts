@@ -58,10 +58,10 @@ export function featureRainbowPastelClass(index: number) {
 
 /**
  * 우하(명절 교통·주차) 사다리꼴 하나를 회전만 바꿔 4칸에 배치.
- * TL 180° · TR 270° · BL 90° · BR 0°
+ * TL 180° · TR 0° · BL 180° · BR 0° (2·3번은 기존 각도에서 시계 +90°)
  */
 export function featureRainbowOrientationDeg(index: number) {
-  const degs = [180, 270, 90, 0] as const;
+  const degs = [180, 0, 180, 0] as const;
   return degs[index % degs.length]!;
 }
 
