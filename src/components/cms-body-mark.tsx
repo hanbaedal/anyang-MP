@@ -30,21 +30,18 @@ export function CmsBodyMark({
   const editClass = key && cmsEditMarkers ? "cms-editable-slot rounded-sm" : undefined;
 
   return (
-    <div
-      className={cn(className, !key && styleProps.className)}
-      style={!key ? styleProps.style : undefined}
-      {...(!key && colorized ? { "data-hero-custom-color": "1" as const } : {})}
-    >
+    <div className={className}>
       <div
-        {...(key ? { "data-cms-key": key, "data-cms-body-root": "1" as const } : { "data-cms-body-root": "1" as const })}
+        {...(key ? { "data-cms-key": key } : {})}
+        data-cms-body-root="1"
         className={cn(
           "cms-rich-text max-w-none",
           editClass,
-          key && styleProps.className,
+          styleProps.className,
           colorized && "hero-cms-slot-color",
         )}
-        style={key ? styleProps.style : undefined}
-        {...(key && colorized ? { "data-hero-custom-color": "1" as const } : {})}
+        style={styleProps.style}
+        {...(colorized ? { "data-hero-custom-color": "1" as const } : {})}
       >
         {children ?? (text ? <Paragraphs text={text} /> : null)}
       </div>

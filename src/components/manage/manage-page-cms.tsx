@@ -13,6 +13,7 @@ import { CMS_GALLERY_LINK_ITEM_SLUGS } from "@/lib/cms-types";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 import {
   buildPageCmsSlotMeta,
+  buildPageCmsTextPatches,
   findCmsItemBySlotKey,
   isItemCardSlotKind,
   isPageCmsTextStyleSlot,
@@ -36,6 +37,7 @@ import {
   type PageCmsTextStyles,
 } from "@/lib/page-cms-text-style";
 import type { HomeHeroFontPreset } from "@/lib/home-hero-text-style";
+import { normalizeCmsMultilineText } from "@/lib/cms-multiline-text";
 import { cn } from "@/lib/utils";
 
 const GALLERY_TAG: Partial<Record<ManageVisualCmsSlug, string>> = {
@@ -66,6 +68,8 @@ export function ManagePageCms({
   const [dirty, setDirty] = useState(false);
   const [frameRev, setFrameRev] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const pageRef = useRef(page);
+  pageRef.current = page;
   const busy = status === "busy";
 
   const slotMetaMap = useMemo(() => buildPageCmsSlotMeta({ ...page, slug }), [page, slug]);
@@ -90,7 +94,8 @@ export function ManagePageCms({
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string; key?: string };
       if (data?.type === "anyang-cms-ready") {
-        const styles = page.textStyles ?? {};
+        const current = pageRef.current;
+        const styles = current.textStyles ?? {};
         for (const key of Object.keys(styles)) {
           const row = styles[key];
           if (!row) continue;
@@ -101,6 +106,9 @@ export function ManagePageCms({
             fontPreset: row.font,
             textColor: row.color,
           });
+        }
+        for (const patch of buildPageCmsTextPatches(current)) {
+          postToFrame({ type: "anyang-cms-patch", key: patch.key, text: patch.text });
         }
       }
       if (data?.type === "anyang-cms-select" && data.key) {
@@ -164,25 +172,29 @@ export function ManagePageCms({
   function patchText(key: string, text: string) {
     const parsed = parsePageCmsSlotKey(key);
     if (!parsed) return;
+    const normalized =
+      parsed.kind === "body" || parsed.kind === "itemText" || parsed.kind === "lead"
+        ? normalizeCmsMultilineText(text)
+        : text;
     setPage((prev) => {
       const next = { ...prev };
       if (parsed.kind === "title") next.title = text;
-      else if (parsed.kind === "lead") next.lead = text;
-      else if (parsed.kind === "body") next.body = text;
+      else if (parsed.kind === "lead") next.lead = normalized;
+      else if (parsed.kind === "body") next.body = normalized;
       else if (parsed.kind === "funeralDocText" && parsed.funeralDocField) {
         next.funeralDocs = { ...prev.funeralDocs, [parsed.funeralDocField]: text };
       } else if (parsed.itemId) {
         next.items = prev.items.map((item) => {
           if (item.id !== parsed.itemId) return item;
           if (parsed.kind === "itemTitle") return { ...item, title: text };
-          if (parsed.kind === "itemText") return { ...item, text };
+          if (parsed.kind === "itemText") return { ...item, text: normalized };
           return item;
         });
       }
       return next;
     });
     markDirty();
-    postToFrame({ type: "anyang-cms-patch", key, text });
+    postToFrame({ type: "anyang-cms-patch", key, text: normalized });
   }
 
   function patchBodyImage(src: string) {
@@ -440,6 +452,11 @@ export function ManagePageCms({
           disabled={busy}
           value={readTextValue(activeKey)}
           onChange={(value) => patchText(activeKey, value)}
+          hint={
+            activeMeta.kind === "body" || activeMeta.kind === "itemText"
+              ? "Enter 한 번: 같은 문단 안 줄바꿈 · 빈 줄(Enter 두 번): 새 문단 · 문단 앞 띄어쓰기도 그대로 반영됩니다."
+              : undefined
+          }
         />
       </>
     );

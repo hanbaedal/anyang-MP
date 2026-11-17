@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { normalizeCmsMultilineText } from "@/lib/cms-multiline-text";
 import { cn } from "@/lib/utils";
 
 /** CMS 한 블록(제목·카드 제목 등) — Enter 줄바꿈 */
@@ -30,8 +31,7 @@ export function Paragraphs({
   /** 각 문단 `<p>`에 적용 */
   className?: string;
 }) {
-  const blocks = text
-    .replace(/\r\n/g, "\n")
+  const blocks = normalizeCmsMultilineText(text)
     .split(/\n{2,}/)
     .map((block) => block.replace(/^\n+|\n+$/g, ""))
     .filter((block) => block.trim().length > 0);

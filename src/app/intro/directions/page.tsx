@@ -2,7 +2,8 @@ import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { DirectionsPageBody } from "@/components/directions-page-body";
-import { getCmsPageLocalized, getCmsPageOrDefault, stripDirectionsAddressItems } from "@/lib/cms";
+import { stripDirectionsAddressItems } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -26,16 +27,14 @@ export default async function DirectionsPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = cmsEdit
-    ? await getCmsPageOrDefault("directions")
-    : await getCmsPageLocalized("directions", locale);
+  const { cms, displayLocale } = await loadCmsPageForView("directions", locale, cmsEdit);
   const rawItems = stripDirectionsAddressItems(cms.items ?? []);
   const items = (rawItems.length
     ? rawItems
     : TRANSIT_FALLBACK.map((row) => ({
         id: row.titleKey,
-        title: t(locale, row.titleKey),
-        text: t(locale, row.bodyKey),
+        title: t(displayLocale, row.titleKey),
+        text: t(displayLocale, row.bodyKey),
         image: "",
       }))
   ).map((item) => ({
@@ -46,7 +45,7 @@ export default async function DirectionsPage({
 
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:space-y-8 md:py-10">
         <DirectionsPageBody
           items={items}

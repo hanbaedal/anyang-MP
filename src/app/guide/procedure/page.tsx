@@ -6,7 +6,7 @@ import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
-import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -56,9 +56,7 @@ export default async function ProcedurePage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = cmsEdit
-    ? await getCmsPageOrDefault("procedure")
-    : await getCmsPageLocalized("procedure", locale);
+  const { cms, displayLocale } = await loadCmsPageForView("procedure", locale, cmsEdit);
   const steps = (cms.items ?? []).map((item, index) => ({
     n: String(index + 1),
     id: item.id,
@@ -72,14 +70,14 @@ export default async function ProcedurePage({
       <div
         {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure"), "data-cms-body-root": "1" as const } : {})}
       >
-        {procedureNoteBlocks(locale, cms.body)}
+        {procedureNoteBlocks(displayLocale, cms.body)}
       </div>
     </PastelBox>
   );
 
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <SaleSteps
           steps={steps.length ? steps : undefined}

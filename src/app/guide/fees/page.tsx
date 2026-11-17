@@ -2,7 +2,7 @@ import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
-import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -27,13 +27,13 @@ export default async function FeesPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = cmsEdit ? await getCmsPageOrDefault("fees") : await getCmsPageLocalized("fees", locale);
+  const { cms, displayLocale } = await loadCmsPageForView("fees", locale, cmsEdit);
   const items = (cms.items?.length
     ? cms.items
     : FEE_FALLBACK.map((row) => ({
         id: row.titleKey,
-        title: t(locale, row.titleKey),
-        text: t(locale, row.bodyKey),
+        title: t(displayLocale, row.titleKey),
+        text: t(displayLocale, row.bodyKey),
         image: "",
       }))
   ).map((item) => ({
@@ -43,13 +43,13 @@ export default async function FeesPage({
 
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
         <FeaturesPhotoGrid
           items={items}
           cmsSlug="fees"
           cmsEditMarkers={cmsEdit}
-          locale={locale}
+          locale={displayLocale}
           cmsTextStyles={cms.textStyles}
         />
       </div>

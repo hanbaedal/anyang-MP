@@ -4,7 +4,7 @@ import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { Prose } from "@/components/page-hero";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
 import { t } from "@/lib/i18n";
@@ -24,21 +24,21 @@ export default async function LawnPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const [cms, items] = await Promise.all([
-    getCmsPageLocalized("lawn", locale),
+  const [{ cms, displayLocale }, items] = await Promise.all([
+    loadCmsPageForView("lawn", locale, cmsEdit),
     listLotsPhotosFromGallery("lawn", locale),
   ]);
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             {cms.body ? (
-              <CmsBodyMark cmsSlug="lawn" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
+              <CmsBodyMark cmsSlug="lawn" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
             ) : (
-              <CmsBodyMark cmsSlug="lawn" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
-                <p>{t(locale, "lawn.body")}</p>
+              <CmsBodyMark cmsSlug="lawn" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
+                <p>{t(displayLocale, "lawn.body")}</p>
               </CmsBodyMark>
             )}
           </Prose>

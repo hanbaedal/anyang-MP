@@ -1,4 +1,6 @@
 import type { CmsPage, FuneralDocsKoField } from "@/lib/cms-types";
+import { FUNERAL_DOCS_I18N } from "@/lib/funeral-docs-cms";
+import { t } from "@/lib/i18n";
 import { CMS_GALLERY_LINK_ITEM_SLUGS } from "@/lib/cms-types";
 import {
   FUNERAL_DOCS_KO_FIELDS,
@@ -200,4 +202,28 @@ export function findCmsItemBySlotKey(page: CmsPage, key: string) {
 
 export function isItemCardSlotKind(kind: PageCmsSlotKind) {
   return kind === "itemTitle" || kind === "itemText" || kind === "itemImage";
+}
+
+/** iframe `anyang-cms-ready` — 미리보기를 편집 패널(state)과 맞춤 */
+export function buildPageCmsTextPatches(page: CmsPage): { key: string; text: string }[] {
+  const slug = page.slug;
+  const patches: { key: string; text: string }[] = [
+    { key: pageSlotTitle(slug), text: page.title ?? "" },
+    { key: pageSlotLead(slug), text: page.lead ?? "" },
+    { key: pageSlotBody(slug), text: page.body ?? "" },
+  ];
+  for (const item of page.items ?? []) {
+    patches.push({ key: pageSlotItemTitle(slug, item.id), text: item.title ?? "" });
+    patches.push({ key: pageSlotItemText(slug, item.id), text: item.text ?? "" });
+  }
+  if (slug === "funeral" && page.funeralDocs) {
+    for (const field of FUNERAL_DOCS_KO_FIELDS) {
+      const custom = page.funeralDocs[field];
+      patches.push({
+        key: pageSlotFuneralDocsField(slug, field),
+        text: custom ?? t("ko", FUNERAL_DOCS_I18N[field]),
+      });
+    }
+  }
+  return patches;
 }

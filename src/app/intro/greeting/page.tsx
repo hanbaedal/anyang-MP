@@ -4,7 +4,7 @@ import { CmsBodyMark } from "@/components/cms-body-mark";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
-import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -25,15 +25,13 @@ export default async function GreetingPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = cmsEdit
-    ? await getCmsPageOrDefault("greeting")
-    : await getCmsPageLocalized("greeting", locale);
+  const { cms, displayLocale } = await loadCmsPageForView("greeting", locale, cmsEdit);
   const bodyImage = cms.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
 
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
         <PastelBox>
           <div
@@ -67,15 +65,21 @@ export default async function GreetingPage({
             ) : null}
             <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
               {cms.body ? (
-                <CmsBodyMark cmsSlug="greeting" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
+                <CmsBodyMark
+                  cmsSlug="greeting"
+                  locale={displayLocale}
+                  textStyles={cms.textStyles}
+                  cmsEditMarkers={cmsEdit}
+                  text={cms.body}
+                />
               ) : (
-                <CmsBodyMark cmsSlug="greeting" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
+                <CmsBodyMark cmsSlug="greeting" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
                   <>
-                    <p>{t(locale, "greeting.p1")}</p>
-                    <p>{t(locale, "greeting.p2")}</p>
-                    <p>{t(locale, "greeting.p3")}</p>
-                    <p>{t(locale, "greeting.thanks")}</p>
-                    <p className="font-medium">{t(locale, "greeting.sign")}</p>
+                    <p>{t(displayLocale, "greeting.p1")}</p>
+                    <p>{t(displayLocale, "greeting.p2")}</p>
+                    <p>{t(displayLocale, "greeting.p3")}</p>
+                    <p>{t(displayLocale, "greeting.thanks")}</p>
+                    <p className="font-medium">{t(displayLocale, "greeting.sign")}</p>
                   </>
                 </CmsBodyMark>
               )}

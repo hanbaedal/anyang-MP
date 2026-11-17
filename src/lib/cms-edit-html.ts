@@ -1,7 +1,8 @@
+import { normalizeCmsMultilineText } from "@/lib/cms-multiline-text";
+
 /** iframe 실시간 패치용 — `Paragraphs`와 동일 규칙 */
 export function paragraphsToInnerHTML(text: string) {
-  const blocks = text
-    .replace(/\r\n/g, "\n")
+  const blocks = normalizeCmsMultilineText(text)
     .split(/\n{2,}/)
     .map((block) => block.replace(/^\n+|\n+$/g, ""))
     .filter((block) => block.trim().length > 0);

@@ -6,7 +6,7 @@ import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
-import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
+import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { SITE } from "@/lib/site";
@@ -34,17 +34,17 @@ export default async function FuneralPage({
 }) {
   const locale = await readLocale();
   const cmsEdit = await readCmsEditEnabled(searchParams);
-  const cms = cmsEdit
-    ? await getCmsPageOrDefault("funeral")
-    : await getCmsPageLocalized("funeral", locale);
+  const { cms, displayLocale } = await loadCmsPageForView("funeral", locale, cmsEdit);
   const docs = await funeralDocsById();
   const items = (cms.items?.length
     ? cms.items
     : FUNERAL_FALLBACK.map((row) => ({
         id: row.id,
-        title: t(locale, row.titleKey),
+        title: t(displayLocale, row.titleKey),
         text:
-          row.bodyKey === "fun.s1d" ? t(locale, row.bodyKey, { phone: SITE.phone }) : t(locale, row.bodyKey),
+          row.bodyKey === "fun.s1d"
+            ? t(displayLocale, row.bodyKey, { phone: SITE.phone })
+            : t(displayLocale, row.bodyKey),
         image: "",
       }))
   ).map((item) => ({
@@ -52,26 +52,26 @@ export default async function FuneralPage({
     image: item.image?.trim() || undefined,
   }));
 
-  const docLabels = resolveFuneralDocsDisplay(locale, cms.funeralDocs);
+  const docLabels = resolveFuneralDocsDisplay(displayLocale, cms.funeralDocs);
 
   return (
     <>
-      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
+      <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
         <FeaturesPhotoGrid
           items={items}
           cmsSlug="funeral"
           cmsEditMarkers={cmsEdit}
-          locale={locale}
+          locale={displayLocale}
           cmsTextStyles={cms.textStyles}
         />
-      <FuneralDocList locale={locale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
+      <FuneralDocList locale={displayLocale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
       <Prose>
         {cms.body?.trim() ? (
-          <CmsBodyMark cmsSlug="funeral" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
+          <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
         ) : (
-          <CmsBodyMark cmsSlug="funeral" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
-            <p className="break-keep">{t(locale, "fun.more")}</p>
+          <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
+            <p className="break-keep">{t(displayLocale, "fun.more")}</p>
           </CmsBodyMark>
         )}
         <p>

@@ -68,6 +68,7 @@ export function CmsFieldKo({
   disabled,
   maxLength,
   label = "내용 (한국어)",
+  hint,
 }: {
   multiline?: boolean;
   value: string;
@@ -75,6 +76,7 @@ export function CmsFieldKo({
   disabled?: boolean;
   maxLength?: number;
   label?: string;
+  hint?: string;
 }) {
   const fieldClass =
     "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -101,6 +103,7 @@ export function CmsFieldKo({
           onChange={(e) => onChange(e.target.value)}
         />
       )}
+      {hint ? <p className="text-xs leading-snug text-muted-foreground">{hint}</p> : null}
     </label>
   );
 }
