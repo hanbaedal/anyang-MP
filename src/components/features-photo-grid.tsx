@@ -196,7 +196,9 @@ export function FeaturesPhotoGrid({
                   ) : null}
                   {showText ? (
                     <div
-                      {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
+                      {...(cmsTextKey
+                        ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
+                        : { "data-cms-body-root": "1" as const })}
                       className={cn(
                         guideCardBodyTextClass({ onPhoto: false, dense }),
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",

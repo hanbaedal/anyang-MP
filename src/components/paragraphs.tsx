@@ -37,11 +37,11 @@ export function Paragraphs({
     .filter((block) => block.trim().length > 0);
 
   return (
-    <>
+    <div className={cn("cms-paragraphs flex flex-col gap-[0.85em]", className)}>
       {blocks.map((block, index) => {
         const lines = block.split("\n");
         return (
-          <p key={`${index}-${block.slice(0, 24)}`} className={cn(className)}>
+          <p key={`${index}-${block.slice(0, 24)}`} className="m-0 leading-relaxed">
             {lines.map((line, lineIndex) => (
               <Fragment key={`${lineIndex}-${line.slice(0, 16)}`}>
                 {lineIndex > 0 ? <br /> : null}
@@ -51,6 +51,6 @@ export function Paragraphs({
           </p>
         );
       })}
-    </>
+    </div>
   );
 }

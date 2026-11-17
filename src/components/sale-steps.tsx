@@ -131,7 +131,9 @@ export function SaleSteps({
                 </h3>
                 {compact || !step.text ? null : (
                   <div
-                    {...(cmsTextKey ? { "data-cms-key": cmsTextKey } : {})}
+                    {...(cmsTextKey
+                      ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
+                      : { "data-cms-body-root": "1" as const })}
                     className={cn(
                       guideCardBodyTextClass({ onPhoto: false }),
                       hasPhoto && guideCardPhotoTextHighlight(),

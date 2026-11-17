@@ -69,7 +69,11 @@ export default async function ProcedurePage({
 
   const noteAside = (
     <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
-      <div {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure") } : {})}>{procedureNoteBlocks(locale, cms.body)}</div>
+      <div
+        {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure"), "data-cms-body-root": "1" as const } : {})}
+      >
+        {procedureNoteBlocks(locale, cms.body)}
+      </div>
     </PastelBox>
   );
 

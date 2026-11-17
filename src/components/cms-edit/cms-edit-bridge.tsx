@@ -35,7 +35,18 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
     const mo = new MutationObserver(() => wireSlots());
     mo.observe(document.body, { childList: true, subtree: true });
 
+    function richTextPatchTarget(el: HTMLElement, key: string) {
+      if (key.endsWith(".body") || key.endsWith(".text")) {
+        return el.querySelector<HTMLElement>("[data-cms-body-root]") ?? el;
+      }
+      return el;
+    }
+
     function applyTextPatch(el: HTMLElement, key: string, text: string) {
+      if (key.endsWith(".body") || key.endsWith(".text")) {
+        richTextPatchTarget(el, key).innerHTML = paragraphsToInnerHTML(text);
+        return;
+      }
       if (key.startsWith("home.") && key !== "home.slides") {
         patchHomeHeroCopyText(el, key, text, homeLeadToInnerHTML(text));
         return;
@@ -45,18 +56,10 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
         return;
       }
       if (key.startsWith("page.")) {
-        if (key.endsWith(".body") || key.endsWith(".text")) {
-          el.innerHTML = paragraphsToInnerHTML(text);
-          return;
-        }
         if (key.endsWith(".title") || key.endsWith(".lead") || key.includes(".funeral.docs.")) {
           el.innerHTML = inlineBreaksToInnerHTML(text);
           return;
         }
-      }
-      if (key.endsWith(".body") || key.endsWith(".text")) {
-        el.innerHTML = paragraphsToInnerHTML(text);
-        return;
       }
       if (key.endsWith(".lead")) {
         el.textContent = text;

@@ -8,7 +8,7 @@ export function paragraphsToInnerHTML(text: string) {
 
   if (!blocks.length) return "";
 
-  return blocks
+  const paras = blocks
     .map((block) => {
       const lines = block.split("\n");
       const inner = lines
@@ -17,9 +17,10 @@ export function paragraphsToInnerHTML(text: string) {
           return lineIndex > 0 ? `<br>${safe}` : safe;
         })
         .join("");
-      return `<p>${inner}</p>`;
+      return `<p class="m-0 leading-relaxed">${inner}</p>`;
     })
     .join("");
+  return `<div class="cms-paragraphs flex flex-col gap-[0.85em]">${paras}</div>`;
 }
 
 /** home.lead 패치(단일 p, 모바일 br) */

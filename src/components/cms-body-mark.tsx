@@ -27,14 +27,27 @@ export function CmsBodyMark({
   const key = cmsEditMarkers ? slotKey : undefined;
   const styleProps = pageCmsTextStyleProps(textStyles, slotKey, locale);
   const colorized = pageCmsTextStyleColorized(textStyles, slotKey, locale);
+  const editClass = key && cmsEditMarkers ? "cms-editable-slot rounded-sm" : undefined;
+
   return (
     <div
-      {...(key ? { "data-cms-key": key } : {})}
-      className={cn(className, styleProps.className)}
-      style={styleProps.style}
-      {...(colorized ? { "data-hero-custom-color": "1" as const } : {})}
+      className={cn(className, !key && styleProps.className)}
+      style={!key ? styleProps.style : undefined}
+      {...(!key && colorized ? { "data-hero-custom-color": "1" as const } : {})}
     >
-      {children ?? (text ? <Paragraphs text={text} /> : null)}
+      <div
+        {...(key ? { "data-cms-key": key, "data-cms-body-root": "1" as const } : { "data-cms-body-root": "1" as const })}
+        className={cn(
+          "cms-rich-text max-w-none",
+          editClass,
+          key && styleProps.className,
+          colorized && "hero-cms-slot-color",
+        )}
+        style={key ? styleProps.style : undefined}
+        {...(key && colorized ? { "data-hero-custom-color": "1" as const } : {})}
+      >
+        {children ?? (text ? <Paragraphs text={text} /> : null)}
+      </div>
     </div>
   );
 }
