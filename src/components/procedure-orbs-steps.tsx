@@ -12,7 +12,6 @@ import type { SaleStepView } from "@/components/sale-steps";
 function ProcedureOrb({
   step,
   index,
-  lead,
   cmsSlug,
   cmsEditMarkers,
   cmsTextStyles,
@@ -21,7 +20,6 @@ function ProcedureOrb({
 }: {
   step: SaleStepView;
   index: number;
-  lead?: boolean;
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
   cmsTextStyles?: PageCmsTextStyles;
@@ -45,7 +43,6 @@ function ProcedureOrb({
       role="listitem"
       className={cn(
         "procedure-orb",
-        lead && "procedure-orb--lead",
         "flex flex-col items-center justify-center border text-center",
         "shadow-[inset_0_2px_0_rgba(255,255,255,0.45),0_6px_18px_rgba(15,23,42,0.08)]",
         pastel,
@@ -147,7 +144,6 @@ export function ProcedureOrbsSteps({
             <ProcedureOrb
               step={step}
               index={index}
-              lead={index === 0}
               cmsSlug={cmsSlug}
               cmsEditMarkers={cmsEditMarkers}
               cmsTextStyles={cmsTextStyles}

@@ -670,12 +670,6 @@
   padding: 1.15rem;
 }
 
-.procedure-orb--lead {
-  width: min(100%, 22.5rem);
-  height: min(100%, 22.5rem);
-  max-width: 22.5rem;
-}
-
 .procedure-orbs-arrow {
   display: block;
   width: min(11rem, 100%);
@@ -704,8 +698,7 @@
     display: none;
   }
 
-  .procedure-orb,
-  .procedure-orb--lead {
+  .procedure-orb {
     width: min(100%, 21rem);
     height: min(100%, 21rem);
     max-width: 21rem;
