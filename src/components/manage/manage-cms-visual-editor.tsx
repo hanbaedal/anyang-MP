@@ -261,6 +261,7 @@ export function ManageCmsVisualEditor({
               />
             </PastelBox>
             <SaleSteps
+              variant="orbs"
               steps={steps}
               aside={
                 <PastelBox className="min-h-[8rem] p-4">

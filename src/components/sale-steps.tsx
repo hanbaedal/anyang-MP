@@ -19,6 +19,7 @@ import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { useLocale } from "@/components/locale-provider";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
+import { ProcedureOrbsSteps } from "@/components/procedure-orbs-steps";
 import { cn } from "@/lib/utils";
 
 export type SaleStepView = { n: string; title: string; text: string; image?: string; id?: string };
@@ -37,6 +38,8 @@ export function SaleSteps({
   cmsSlug,
   cmsEditMarkers = false,
   cmsTextStyles,
+  /** 분양 절차 상세 — 파스텔 원 5개 */
+  variant = "cards",
 }: {
   compact?: boolean;
   /** CMS에서 넘긴 단계. 없으면 i18n 기본 5단계 */
@@ -48,6 +51,7 @@ export function SaleSteps({
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
   cmsTextStyles?: PageCmsTextStyles;
+  variant?: "cards" | "orbs";
 }) {
   const locale = useLocale();
   const t = useT();
@@ -59,6 +63,20 @@ export function SaleSteps({
           title: t(step.titleKey),
           text: t(step.textKey),
         }));
+
+  if (variant === "orbs") {
+    return (
+      <ProcedureOrbsSteps
+        steps={rows}
+        className={className}
+        aside={aside}
+        compact={compact}
+        cmsSlug={cmsSlug}
+        cmsEditMarkers={cmsEditMarkers}
+        cmsTextStyles={cmsTextStyles}
+      />
+    );
+  }
 
   return (
     <ol
