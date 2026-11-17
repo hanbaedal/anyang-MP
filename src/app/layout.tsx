@@ -20,7 +20,7 @@ import "./globals.css";
 export const dynamic = "force-dynamic";
 
 const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@400;500;600;700&display=swap";
 
 export const metadata: Metadata = {
   metadataBase: metadataBase(),

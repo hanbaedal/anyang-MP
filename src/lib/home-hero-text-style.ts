@@ -1,7 +1,22 @@
 import type { CSSProperties } from "react";
 
-export const HOME_HERO_FONT_PRESETS = ["default", "sans", "serif", "headline"] as const;
+export const HOME_HERO_FONT_PRESETS = [
+  "default",
+  "gothic",
+  "gothicBold",
+  "myeongjo",
+  "shinMyeongjo",
+  "myeongjoBold",
+  "gungsuh",
+  "headlineM",
+] as const;
 export type HomeHeroFontPreset = (typeof HOME_HERO_FONT_PRESETS)[number];
+
+const LEGACY_FONT_PRESET: Record<string, HomeHeroFontPreset> = {
+  sans: "gothic",
+  serif: "myeongjo",
+  headline: "headlineM",
+};
 
 export type HomeHeroTextFont = {
   kicker: HomeHeroFontPreset;
@@ -18,11 +33,17 @@ export type HomeHeroTextColor = {
 };
 
 export const HOME_HERO_FONT_OPTIONS: { id: HomeHeroFontPreset; label: string }[] = [
-  { id: "default", label: "기본 (디자인 기본값)" },
-  { id: "sans", label: "고딕 (Noto Sans KR)" },
-  { id: "serif", label: "명조 (Noto Serif KR)" },
-  { id: "headline", label: "헤드라인 (명조·강조)" },
+  { id: "default", label: "기본" },
+  { id: "gothic", label: "고딕" },
+  { id: "gothicBold", label: "견고딕" },
+  { id: "myeongjo", label: "명조" },
+  { id: "shinMyeongjo", label: "신명조" },
+  { id: "myeongjoBold", label: "견명조" },
+  { id: "gungsuh", label: "궁서" },
+  { id: "headlineM", label: "헤드라인M" },
 ];
+
+export const HOME_HERO_FONT_PREVIEW = "가나다 ABC";
 
 export function defaultHomeHeroTextFont(): HomeHeroTextFont {
   return { kicker: "default", heroLine1: "default", heroLine2: "default", lead: "default" };
@@ -49,6 +70,13 @@ const HERO_SLOT_KEYS = ["kicker", "heroLine1", "heroLine2", "lead"] as const;
 
 function isFontPreset(v: unknown): v is HomeHeroFontPreset {
   return typeof v === "string" && (HOME_HERO_FONT_PRESETS as readonly string[]).includes(v);
+}
+
+function coerceFontPreset(v: unknown): HomeHeroFontPreset {
+  if (typeof v !== "string") return "default";
+  if (LEGACY_FONT_PRESET[v]) return LEGACY_FONT_PRESET[v];
+  if (isFontPreset(v)) return v;
+  return "default";
 }
 
 /** 팔레트 hex / #rgb / #rrggbb. 빈 문자열 = 테마 기본색 */
@@ -78,8 +106,7 @@ export function normalizeHomeHeroTextFont(raw: unknown): HomeHeroTextFont {
   const row = raw as Record<string, unknown>;
   const next = { ...base };
   for (const key of HERO_SLOT_KEYS) {
-    const v = row[key];
-    if (isFontPreset(v)) next[key] = v;
+    next[key] = coerceFontPreset(row[key]);
   }
   return next;
 }
@@ -96,16 +123,36 @@ export function normalizeHomeHeroTextColor(raw: unknown): HomeHeroTextColor {
   };
 }
 
-export function homeHeroFontPresetCss(preset: HomeHeroFontPreset): Pick<CSSProperties, "fontFamily" | "fontWeight"> {
+const SANS_STACK = 'var(--font-sans), "Noto Sans KR", sans-serif';
+const SERIF_STACK = 'var(--font-serif), "Noto Serif KR", serif';
+
+export function homeHeroFontPresetCss(
+  preset: HomeHeroFontPreset,
+): Pick<CSSProperties, "fontFamily" | "fontWeight" | "letterSpacing"> {
   switch (preset) {
-    case "sans":
-      return { fontFamily: 'var(--font-sans), "Noto Sans KR", sans-serif' };
-    case "serif":
-      return { fontFamily: 'var(--font-serif), "Noto Serif KR", serif' };
-    case "headline":
+    case "gothic":
+      return { fontFamily: SANS_STACK, fontWeight: 400 };
+    case "gothicBold":
+      return { fontFamily: SANS_STACK, fontWeight: 700 };
+    case "myeongjo":
+      return { fontFamily: SERIF_STACK, fontWeight: 400 };
+    case "shinMyeongjo":
       return {
-        fontFamily: 'var(--font-serif), "Noto Serif KR", serif',
-        fontWeight: 600,
+        fontFamily: `"Nanum Myeongjo", ${SERIF_STACK}`,
+        fontWeight: 400,
+      };
+    case "myeongjoBold":
+      return { fontFamily: SERIF_STACK, fontWeight: 700 };
+    case "gungsuh":
+      return {
+        fontFamily: 'Gungsuh, "Batang", "궁서", serif',
+        fontWeight: 400,
+      };
+    case "headlineM":
+      return {
+        fontFamily: SANS_STACK,
+        fontWeight: 800,
+        letterSpacing: "-0.02em",
       };
     default:
       return {};
@@ -163,10 +210,13 @@ export function applyHomeHeroSlotStyleToElement(
     if (opts.font === "default") {
       target.style.fontFamily = "";
       target.style.fontWeight = "";
+      target.style.letterSpacing = "";
     } else {
       const css = homeHeroFontPresetCss(opts.font);
       target.style.fontFamily = css.fontFamily ?? "";
       target.style.fontWeight = css.fontWeight != null ? String(css.fontWeight) : "";
+      target.style.letterSpacing =
+        css.letterSpacing != null && css.letterSpacing !== "" ? String(css.letterSpacing) : "";
     }
   }
   if (opts.color !== undefined) {
