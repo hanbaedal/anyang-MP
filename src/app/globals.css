@@ -883,7 +883,6 @@
     padding-bottom: 1.25rem;
   }
 
-  /* AMP-59/60: 세로는 유지(stretch), 사진·리스트 가로 확대 */
   .pc-notices-fill-grid {
     display: grid;
     min-height: 0;
@@ -891,6 +890,11 @@
     grid-template-columns: minmax(20rem, 0.95fr) minmax(0, 1.25fr);
     align-items: stretch;
     gap: 1.25rem;
+  }
+
+  .pc-notices-fill-grid--text-only {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 
   @media (min-width: 1024px) {

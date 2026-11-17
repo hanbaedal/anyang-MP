@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getNoticesPageSettings, saveNoticesPageSettings } from "@/lib/notices-page";
 import { requireStaffApi } from "@/lib/manage-guard";
@@ -18,6 +19,8 @@ export async function PUT(request: Request) {
       listImage: body.listImage,
       galleryId: body.galleryId,
     });
+    revalidatePath("/support/notices", "layout");
+    revalidatePath("/guide", "layout");
     return NextResponse.json({ ok: true, settings });
   } catch (error) {
     return NextResponse.json(

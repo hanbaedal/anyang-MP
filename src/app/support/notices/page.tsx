@@ -1,12 +1,10 @@
-import Image from "next/image";
 import { CmsPageHeroBand } from "@/components/cms-page-hero-band";
 import { NoticesList } from "@/components/notices-list";
 import { listNoticesLocalized } from "@/lib/notices";
-import { getNoticesPageSettings } from "@/lib/notices-page";
+import { clearNoticesListImage, getNoticesPageSettings } from "@/lib/notices-page";
 import { SITE } from "@/lib/site";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { uploadOriginalUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +15,10 @@ export async function generateMetadata() {
 
 export default async function NoticesPage() {
   const locale = await readLocale();
-  const [notices, page] = await Promise.all([listNoticesLocalized(locale), getNoticesPageSettings()]);
-  const src = page.listImage?.trim() ? uploadOriginalUrl(page.listImage) : "";
+  const [notices, page] = await Promise.all([
+    listNoticesLocalized(locale),
+    clearNoticesListImage().then(() => getNoticesPageSettings()),
+  ]);
 
   return (
     <>
@@ -31,28 +31,8 @@ export default async function NoticesPage() {
         large
       />
       <div className="site-container pc-notices-fill py-8 md:py-0">
-        <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
-        <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm md:mx-0 md:max-w-none md:aspect-auto">
-          {src ? (
-            <Image
-              src={src}
-              alt=""
-              fill
-              className="guest-photo-bright object-cover object-center"
-              sizes="(max-width: 767px) 90vw, (min-width: 2560px) 48rem, 42rem"
-              unoptimized={src.includes("/api/uploads/")}
-              priority
-            />
-          ) : (
-            <span className="sr-only">{t(locale, "notices.listImageEmpty")}</span>
-          )}
-          {/* AMP-61/62: cream mist · AMP-63: soft feathered edges (no hard border) */}
-          <div className="pc-notices-mist" aria-hidden />
-          <div className="pc-notices-mist pc-notices-mist--drift" aria-hidden />
-        </aside>
-        <div className="pc-notices-list min-w-0">
+        <div className="pc-notices-fill-grid pc-notices-fill-grid--text-only">
           <NoticesList items={notices} empty={t(locale, "notices.empty", { phone: SITE.phone })} fill />
-        </div>
         </div>
       </div>
     </>

@@ -10,7 +10,7 @@ export default async function ManageNoticesPage() {
       <PageHero
         kicker="관리"
         title="공지사항"
-        lead="등록한 글이 공원소개 공지 목록에 올라갑니다. 목록 좌측 큰 사진은 갤러리에서 한 장만 연결합니다(글별 썸네일 없음)."
+        lead="등록한 글이 이용안내 공지 목록에 올라갑니다. 본문에는 글만 표시되며, 상단 배너 배경만 별도로 지정할 수 있습니다."
       />
       <ManageNotices initial={items} initialPage={page} />
     </>

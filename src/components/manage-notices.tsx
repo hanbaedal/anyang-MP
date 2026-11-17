@@ -20,8 +20,6 @@ export function ManageNotices({
 }) {
   const [items, setItems] = useState(initial);
   const [heroImage, setHeroImage] = useState(initialPage.heroImage);
-  const [listImage, setListImage] = useState(initialPage.listImage);
-  const [galleryId, setGalleryId] = useState(initialPage.galleryId);
   const [pageBusy, setPageBusy] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -35,7 +33,7 @@ export function ManageNotices({
     if (json.items) setItems(json.items);
   }
 
-  async function savePageSettings(partial: { heroImage?: string; listImage?: string; galleryId?: string }) {
+  async function savePageSettings(partial: { heroImage?: string }) {
     setPageBusy(true);
     setMessage("");
     try {
@@ -44,8 +42,8 @@ export function ManageNotices({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           heroImage: partial.heroImage !== undefined ? partial.heroImage : heroImage,
-          listImage: partial.listImage !== undefined ? partial.listImage : listImage,
-          galleryId: partial.galleryId !== undefined ? partial.galleryId : galleryId,
+          listImage: "",
+          galleryId: "",
         }),
       });
       const json = (await res.json()) as { ok?: boolean; error?: string; settings?: NoticesPageSettings };
@@ -54,8 +52,6 @@ export function ManageNotices({
         return;
       }
       setHeroImage(json.settings.heroImage);
-      setListImage(json.settings.listImage);
-      setGalleryId(json.settings.galleryId);
       setMessage("저장했습니다.");
     } catch {
       setMessage("네트워크 오류입니다.");
@@ -144,48 +140,6 @@ export function ManageNotices({
           {pageBusy ? "저장 중…" : "배너 저장"}
         </Button>
       </div>
-      <div className="space-y-3 rounded-xl border bg-card p-5">
-        <h2 className="font-medium">공지 목록 좌측 사진</h2>
-        <p className="text-sm text-muted-foreground">
-          공개 공지 목록 페이지 왼쪽에 크게 보입니다. 글마다 붙는 썸네일이 아니라, 목록 전체용 한 장입니다. 갤러리에서만
-          고르며 새 파일 업로드는 없습니다.
-        </p>
-        <div className="space-y-2 rounded-lg border border-dashed border-input bg-muted/30 p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-medium">갤러리 연결</p>
-            {listImage || galleryId ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={pageBusy}
-                onClick={() => {
-                  setListImage("");
-                  setGalleryId("");
-                  setMessage("연결을 해제했습니다. 「목록 사진 저장」을 눌러 반영하세요.");
-                }}
-              >
-                연결 해제
-              </Button>
-            ) : null}
-          </div>
-          <ManageImagePicker
-            src={listImage}
-            disabled={pageBusy}
-            libraryOnly
-            label="갤러리에서 고르기"
-            onPickSrc={(src, photo) => {
-              setListImage(src);
-              setGalleryId(photo?.id ?? "");
-              setMessage("갤러리 사진을 골랐습니다. 「목록 사진 저장」을 눌러 반영하세요.");
-            }}
-          />
-        </div>
-        <Button type="button" disabled={pageBusy} onClick={() => void savePageSettings({})}>
-          {pageBusy ? "저장 중…" : "목록 사진 저장"}
-        </Button>
-      </div>
-
       <form onSubmit={onCreate} className="space-y-3 rounded-xl border bg-card p-5">
         <h2 className="font-medium">새 공지</h2>
         <input className={field} placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)} />

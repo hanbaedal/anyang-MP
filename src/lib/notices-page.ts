@@ -49,6 +49,13 @@ export async function getNoticesPageSettings(): Promise<NoticesPageSettings> {
   return fromDoc(await readJsonFile<NoticesPageSettings | null>(localFile, null));
 }
 
+/** 공지 본문(목록) 좌측 사진 제거 — DB에 남아 있으면 한 번 비움 */
+export async function clearNoticesListImage(): Promise<void> {
+  const prev = await getNoticesPageSettings();
+  if (!prev.listImage?.trim() && !prev.galleryId?.trim()) return;
+  await saveNoticesPageSettings({ listImage: "", galleryId: "" });
+}
+
 export async function saveNoticesPageSettings(input: {
   heroImage?: string;
   listImage?: string;
@@ -70,6 +77,8 @@ export async function saveNoticesPageSettings(input: {
     if (!db) throw new Error("데이터베이스에 연결하지 못했습니다.");
     const $unset: Record<string, ""> = {};
     if (!next.heroImage) $unset.heroImage = "";
+    if (!next.listImage) $unset.listImage = "";
+    if (!next.galleryId) $unset.galleryId = "";
     const setDoc = { id: DOC_ID, ...next, updatedAt: new Date(next.updatedAt) };
     const update = Object.keys($unset).length ? { $set: setDoc, $unset } : { $set: setDoc };
     await db.collection("notices_page").updateOne({ id: DOC_ID }, update, { upsert: true });
