@@ -51,13 +51,13 @@ function ProcedureOrb({
         pastel,
       )}
     >
-      <p className="text-[10px] font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-[11px]">
+      <p className="text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm">
         {stepLabel}
       </p>
       <h3
         {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
         className={cn(
-          "mt-1 px-2 text-sm font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] sm:text-[0.9375rem]",
+          "mt-1.5 px-3 text-base font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] sm:text-lg",
           titleStyleProps.className,
         )}
         style={titleStyleProps.style}
@@ -71,7 +71,7 @@ function ProcedureOrb({
             ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
             : { "data-cms-body-root": "1" as const })}
           className={cn(
-            "mt-1.5 max-h-[5.5rem] overflow-auto px-2.5 text-[11px] leading-5 text-[color:var(--pastel-chrome-fg)]/90 sm:max-h-none sm:text-xs sm:leading-[1.45]",
+            "mt-2 px-3 text-xs leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 sm:text-sm sm:leading-6",
             textStyleProps.className,
           )}
           style={textStyleProps.style}
