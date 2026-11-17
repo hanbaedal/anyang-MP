@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CmsWorkspaceSelect, type CmsWorkspace } from "@/components/manage/cms-workspace-select";
 import { ManageFuneralDocs } from "@/components/manage-funeral-docs";
 import { ManageHomeCms } from "@/components/manage/manage-home-cms";
@@ -9,15 +10,7 @@ import type { CmsPage } from "@/lib/cms-types";
 import type { FuneralDocFile } from "@/lib/funeral-docs-types";
 import type { HomeIntroSlidesSettings } from "@/lib/home-intro-slides-types";
 import { isManageVisualCmsSlug, type ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
-import { pageSlotHeroImage } from "@/lib/page-cms-slots";
-
-function syncCmsUrl(ws: CmsWorkspace) {
-  if (typeof window === "undefined") return;
-  const url = ws.kind === "home" ? "/manage/cms" : `/manage/cms?slug=${ws.slug}`;
-  const current = `${window.location.pathname}${window.location.search}`;
-  if (current === url || current === `${url}/`) return;
-  window.history.replaceState(window.history.state, "", url);
-}
+import { pageSlotTitle } from "@/lib/page-cms-slots";
 
 export function ManageCmsShell({
   homeInitial,
@@ -30,6 +23,7 @@ export function ManageCmsShell({
   initialPage?: CmsPage | null;
   initialFuneralDocs?: FuneralDocFile[] | null;
 }) {
+  const router = useRouter();
   const [workspace, setWorkspace] = useState<CmsWorkspace>(
     initialSlug ? { kind: "page", slug: initialSlug } : { kind: "home" },
   );
@@ -74,6 +68,8 @@ export function ManageCmsShell({
       if (slug === "funeral" && funeralCache.current) {
         setFuneralDocs(funeralCache.current);
       }
+    } else if (!background) {
+      setDisplaySlug(slug);
     }
 
     setPageFetching(true);
@@ -106,20 +102,30 @@ export function ManageCmsShell({
     }
   }, [workspace.kind, homeSettings, loadHomeSettings]);
 
+  const syncWorkspaceUrl = useCallback(
+    (ws: CmsWorkspace) => {
+      const url = ws.kind === "home" ? "/manage/cms" : `/manage/cms?slug=${ws.slug}`;
+      router.replace(url);
+    },
+    [router],
+  );
+
   function onWorkspaceChange(next: CmsWorkspace) {
     setWorkspace(next);
-    syncCmsUrl(next);
-    if (next.kind === "page") {
-      const cached = pageCache.current.get(next.slug);
-      if (cached) {
-        setPage(cached);
-        setDisplaySlug(next.slug);
-        setPageFetching(true);
-        void loadPage(next.slug, { background: true });
-      } else if (next.slug !== page?.slug) {
-        void loadPage(next.slug);
-      }
+    syncWorkspaceUrl(next);
+    if (next.kind === "home") {
+      setPageFetching(false);
+      return;
     }
+    const cached = pageCache.current.get(next.slug);
+    if (cached) {
+      setPage(cached);
+      setDisplaySlug(next.slug);
+      void loadPage(next.slug, { background: true });
+      return;
+    }
+    setDisplaySlug(next.slug);
+    void loadPage(next.slug);
   }
 
   const pageReady =
@@ -131,7 +137,7 @@ export function ManageCmsShell({
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] min-h-0 flex-1 flex-col bg-background">
       <div className="shrink-0 border-b bg-[#fffcf7] px-3 py-2 md:px-4">
-        <CmsWorkspaceSelect value={workspace} disabled={pageFetching && !pageReady} onChange={onWorkspaceChange} />
+        <CmsWorkspaceSelect value={workspace} disabled={false} onChange={onWorkspaceChange} />
       </div>
       {workspace.kind === "home" ? (
         homeSettings ? (
@@ -154,7 +160,7 @@ export function ManageCmsShell({
               key={page.slug}
               initial={page}
               slug={page.slug as ManageVisualCmsSlug}
-              defaultSlotKey={pageSlotHeroImage(page.slug)}
+              defaultSlotKey={pageSlotTitle(page.slug)}
               onPersisted={(saved) => {
                 if (isManageVisualCmsSlug(saved.slug)) {
                   pageCache.current.set(saved.slug, saved);

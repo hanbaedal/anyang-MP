@@ -4,9 +4,14 @@ export const MANAGE_HOME = "/manage";
 
 export type ManageNavItem = { href: string; i18n: string };
 
+export function manageCmsHref(slug?: string | null) {
+  const s = slug?.trim();
+  return s ? `/manage/cms?slug=${encodeURIComponent(s)}` : "/manage/cms";
+}
+
 function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
   const item = CMS_SLUGS.find((row) => row.slug === slug)!;
-  return { href: `/manage/cms?slug=${item.slug}`, i18n: item.i18n };
+  return { href: manageCmsHref(item.slug), i18n: item.i18n };
 }
 
 /**

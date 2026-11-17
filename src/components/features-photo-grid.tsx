@@ -10,7 +10,9 @@ import {
   guideCardPhotoTextHighlight,
 } from "@/lib/guide-photo-card";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
+import type { Locale } from "@/lib/i18n";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
+import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
 
 export type FeaturePhotoItem = {
@@ -57,6 +59,8 @@ export function FeaturesPhotoGrid({
   viewportFill = false,
   cmsSlug,
   cmsEditMarkers = false,
+  locale = "ko" as Locale,
+  cmsTextStyles,
 }: {
   items: FeaturePhotoItem[];
   className?: string;
@@ -68,6 +72,8 @@ export function FeaturesPhotoGrid({
   viewportFill?: boolean;
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
+  locale?: Locale;
+  cmsTextStyles?: PageCmsTextStyles;
 }) {
   if (!items.length) return null;
   const fill = viewportFill && !dense;
@@ -93,11 +99,14 @@ export function FeaturesPhotoGrid({
         const hasPhoto = cardHasGalleryImage(item.image);
         const alt = title || text || "photo";
         const itemId = item.id || item.title || String(index);
-        const cmsTitleKey =
-          cmsSlug && cmsEditMarkers && !hideTitle && !captionFirstLine
-            ? pageSlotItemTitle(cmsSlug, itemId)
-            : undefined;
-        const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, itemId) : undefined;
+        const titleSlotKey = cmsSlug && !hideTitle && !captionFirstLine ? pageSlotItemTitle(cmsSlug, itemId) : "";
+        const textSlotKey = cmsSlug ? pageSlotItemText(cmsSlug, itemId) : "";
+        const cmsTitleKey = cmsEditMarkers && titleSlotKey ? titleSlotKey : undefined;
+        const cmsTextKey = cmsEditMarkers && textSlotKey ? textSlotKey : undefined;
+        const titleStyleProps = titleSlotKey ? pageCmsTextStyleProps(cmsTextStyles, titleSlotKey, locale) : {};
+        const textStyleProps = textSlotKey ? pageCmsTextStyleProps(cmsTextStyles, textSlotKey, locale) : {};
+        const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
+        const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
         const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
 
         return (
@@ -152,7 +161,13 @@ export function FeaturesPhotoGrid({
                   >
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
-                      className="text-base font-semibold tracking-tight text-[color:var(--pastel-chrome-fg)] sm:text-[1.05rem]"
+                      className={cn(
+                        "text-base font-semibold tracking-tight sm:text-[1.05rem]",
+                        !titleColored && "text-[color:var(--pastel-chrome-fg)]",
+                        titleStyleProps.className,
+                      )}
+                      style={titleStyleProps.style}
+                      {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
                       {title}
                     </h3>
@@ -171,7 +186,10 @@ export function FeaturesPhotoGrid({
                       className={cn(
                         guideCardTitleClass({ onPhoto: false, dense }),
                         hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                        titleStyleProps.className,
                       )}
+                      style={titleStyleProps.style}
+                      {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
                       {title}
                     </h3>
@@ -183,7 +201,10 @@ export function FeaturesPhotoGrid({
                         guideCardBodyTextClass({ onPhoto: false, dense }),
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
                         transit && hasPhoto && "w-fit max-w-full",
+                        textStyleProps.className,
                       )}
+                      style={textStyleProps.style}
+                      {...(textColored ? { "data-hero-custom-color": "1" as const } : {})}
                     >
                     {captionFirstLine ? (
                       /* 첫 줄 전체 표시 — line-clamp/truncate/ellipsis 금지(중간 절단 없음). 길면 줄바꿈만. */

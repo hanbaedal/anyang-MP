@@ -35,9 +35,9 @@ export default async function LawnPage({
         <PastelBox className="p-5 md:p-6">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             {cms.body ? (
-              <CmsBodyMark cmsSlug="lawn" cmsEditMarkers={cmsEdit} text={cms.body} />
+              <CmsBodyMark cmsSlug="lawn" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
             ) : (
-              <CmsBodyMark cmsSlug="lawn" cmsEditMarkers={cmsEdit}>
+              <CmsBodyMark cmsSlug="lawn" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
                 <p>{t(locale, "lawn.body")}</p>
               </CmsBodyMark>
             )}

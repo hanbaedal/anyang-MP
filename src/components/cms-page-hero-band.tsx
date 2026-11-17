@@ -1,7 +1,13 @@
 import Image from "next/image";
 import { PAGE_HERO_IMAGE } from "@/components/page-hero";
 import { mediaUrl, uploadOriginalUrl } from "@/lib/media";
+import type { Locale } from "@/lib/i18n";
 import { pageSlotHeroImage, pageSlotLead, pageSlotTitle } from "@/lib/page-cms-slots";
+import {
+  pageCmsTextStyleColorized,
+  pageCmsTextStyleProps,
+  type PageCmsTextStyles,
+} from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
 
 /** 소메뉴 상단 — 배경·제목·요약 (인사말 등) */
@@ -12,6 +18,8 @@ export function CmsPageHeroBand({
   heroImage,
   cmsSlug,
   cmsEditMarkers = false,
+  locale = "ko" as Locale,
+  textStyles,
   imageAlt,
   large = false,
 }: {
@@ -22,6 +30,8 @@ export function CmsPageHeroBand({
   heroImage?: string;
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
+  locale?: Locale;
+  textStyles?: PageCmsTextStyles;
   imageAlt: string;
   large?: boolean;
 }) {
@@ -32,6 +42,12 @@ export function CmsPageHeroBand({
   const leadKey = cmsSlug && cmsEditMarkers ? pageSlotLead(cmsSlug) : undefined;
   const headline = title.trim();
   const leadText = lead?.trim();
+  const titleStyleKey = cmsSlug ? pageSlotTitle(cmsSlug) : "";
+  const leadStyleKey = cmsSlug ? pageSlotLead(cmsSlug) : "";
+  const titleStyleProps = titleStyleKey ? pageCmsTextStyleProps(textStyles, titleStyleKey, locale) : {};
+  const leadStyleProps = leadStyleKey ? pageCmsTextStyleProps(textStyles, leadStyleKey, locale) : {};
+  const titleColored = titleStyleKey && pageCmsTextStyleColorized(textStyles, titleStyleKey, locale);
+  const leadColored = leadStyleKey && pageCmsTextStyleColorized(textStyles, leadStyleKey, locale);
 
   return (
     <section
@@ -60,9 +76,13 @@ export function CmsPageHeroBand({
           <h1
             {...(titleKey ? { "data-cms-key": titleKey } : {})}
             className={cn(
-              "mt-2 font-serif font-semibold tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
+              "mt-2 font-serif font-semibold tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
+              !titleColored && "text-white",
+              titleStyleProps.className,
               large ? "text-2xl md:text-3xl lg:text-[2.125rem] lg:leading-tight" : "text-xl md:text-2xl",
             )}
+            style={titleStyleProps.style}
+            {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
           >
             {headline}
           </h1>
@@ -71,11 +91,15 @@ export function CmsPageHeroBand({
           <p
             {...(leadKey ? { "data-cms-key": leadKey } : {})}
             className={cn(
-              "max-w-2xl text-white/98 [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
+              "max-w-2xl [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
+              !leadColored && "text-white/98",
+              leadStyleProps.className,
               large
                 ? "mt-3 text-sm leading-relaxed md:mt-4 md:text-base md:leading-7"
                 : "mt-1.5 text-sm leading-snug md:mt-2 md:leading-6",
             )}
+            style={leadStyleProps.style}
+            {...(leadColored ? { "data-hero-custom-color": "1" as const } : {})}
           >
             {leadText}
           </p>

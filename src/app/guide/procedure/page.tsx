@@ -82,6 +82,7 @@ export default async function ProcedurePage({
           aside={noteAside}
           cmsSlug="procedure"
           cmsEditMarkers={cmsEdit}
+          cmsTextStyles={cms.textStyles}
         />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}

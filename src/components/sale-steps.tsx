@@ -16,7 +16,9 @@ import {
 import { SALE_STEPS } from "@/lib/site";
 import { useT } from "@/components/locale-provider";
 import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
+import { useLocale } from "@/components/locale-provider";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
+import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
 
 export type SaleStepView = { n: string; title: string; text: string; image?: string; id?: string };
@@ -34,6 +36,7 @@ export function SaleSteps({
   aside = null,
   cmsSlug,
   cmsEditMarkers = false,
+  cmsTextStyles,
 }: {
   compact?: boolean;
   /** CMS에서 넘긴 단계. 없으면 i18n 기본 5단계 */
@@ -44,7 +47,9 @@ export function SaleSteps({
   aside?: ReactNode;
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
+  cmsTextStyles?: PageCmsTextStyles;
 }) {
+  const locale = useLocale();
   const t = useT();
   const rows: SaleStepView[] =
     steps && steps.length
@@ -66,8 +71,14 @@ export function SaleSteps({
       {rows.map((step, index) => {
         const hasPhoto = cardHasGalleryImage(step.image);
         const stepId = step.id || `step-${step.n}`;
-        const cmsTitleKey = cmsSlug && cmsEditMarkers ? pageSlotItemTitle(cmsSlug, stepId) : undefined;
-        const cmsTextKey = cmsSlug && cmsEditMarkers ? pageSlotItemText(cmsSlug, stepId) : undefined;
+        const titleSlotKey = cmsSlug ? pageSlotItemTitle(cmsSlug, stepId) : "";
+        const textSlotKey = cmsSlug ? pageSlotItemText(cmsSlug, stepId) : "";
+        const cmsTitleKey = cmsEditMarkers && titleSlotKey ? titleSlotKey : undefined;
+        const cmsTextKey = cmsEditMarkers && textSlotKey ? textSlotKey : undefined;
+        const titleStyleProps = titleSlotKey ? pageCmsTextStyleProps(cmsTextStyles, titleSlotKey, locale) : {};
+        const textStyleProps = textSlotKey ? pageCmsTextStyleProps(cmsTextStyles, textSlotKey, locale) : {};
+        const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
+        const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
         const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
 
         return (
@@ -111,7 +122,10 @@ export function SaleSteps({
                   className={cn(
                     guideCardTitleClass({ onPhoto: false }),
                     hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                    titleStyleProps.className,
                   )}
+                  style={titleStyleProps.style}
+                  {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
                 >
                   {step.title}
                 </h3>
@@ -122,7 +136,10 @@ export function SaleSteps({
                       guideCardBodyTextClass({ onPhoto: false }),
                       hasPhoto && guideCardPhotoTextHighlight(),
                       "overflow-auto",
+                      textStyleProps.className,
                     )}
+                    style={textStyleProps.style}
+                    {...(textColored ? { "data-hero-custom-color": "1" as const } : {})}
                   >
                     <Paragraphs text={step.text} className="text-inherit" />
                   </div>

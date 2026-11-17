@@ -67,9 +67,9 @@ export default async function GreetingPage({
             ) : null}
             <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
               {cms.body ? (
-                <CmsBodyMark cmsSlug="greeting" cmsEditMarkers={cmsEdit} text={cms.body} />
+                <CmsBodyMark cmsSlug="greeting" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
               ) : (
-                <CmsBodyMark cmsSlug="greeting" cmsEditMarkers={cmsEdit}>
+                <CmsBodyMark cmsSlug="greeting" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
                   <>
                     <p>{t(locale, "greeting.p1")}</p>
                     <p>{t(locale, "greeting.p2")}</p>

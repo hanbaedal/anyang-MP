@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Briefcase, ChevronRight, FileText, Folder, FolderOpen, Home, LayoutTemplate, Map, Shield } from "lucide-react";
 import { NAV, NAV_TONE_SURFACE, type NavTone } from "@/lib/site";
 import { WORK_NAV } from "@/lib/work-nav";
@@ -14,10 +14,29 @@ import { useT } from "@/components/locale-provider";
 import { tKo } from "@/lib/i18n";
 import { isCmsStaff, isStatusStaff, isStaffRole, type Role } from "@/lib/auth-types";
 
-export function isNavActive(pathname: string, href: string) {
+export function isNavActive(pathname: string, href: string, search = "") {
   if (href === "/") return pathname === "/";
   if (href.startsWith("/account")) return pathname === "/account" || pathname.startsWith("/account/");
+  if (href.startsWith("/manage/cms")) {
+    if (pathname !== "/manage/cms") return false;
+    const want = href.includes("?") ? href.slice(href.indexOf("?")) : "";
+    const cur = search || "";
+    if (want === "?slug=services" || want.includes("slug=")) {
+      return want === cur || href === `/manage/cms${cur}`;
+    }
+    return !cur || cur === "";
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function isManageCmsLinkActive(pathname: string, searchParams: URLSearchParams | null, href: string) {
+  if (!href.startsWith("/manage/cms")) return isNavActive(pathname, href, searchParams?.toString() ? `?${searchParams.toString()}` : "");
+  if (pathname !== "/manage/cms") return false;
+  const slug = searchParams?.get("slug")?.trim() ?? "";
+  if (href === "/manage/cms" || href === "/manage/cms/") return !slug;
+  const m = /[?&]slug=([^&]+)/.exec(href);
+  const hrefSlug = m?.[1] ? decodeURIComponent(m[1]) : "";
+  return Boolean(hrefSlug && slug === hrefSlug);
 }
 
 function groupOpen(pathname: string, href: string, children?: { href: string }[]) {
@@ -46,6 +65,7 @@ export function NavTree({
     fit ? "w-max max-w-full whitespace-nowrap" : "w-full",
   );
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useT();
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const staff = isStaffRole(role);
@@ -269,7 +289,7 @@ export function NavTree({
             {manageExpanded ? (
               <ul className="divide-y divide-black/5 border-t border-black/10">
                 {manageLinks.map((child) => {
-                  const current = isNavActive(pathname, child.href);
+                  const current = isManageCmsLinkActive(pathname, searchParams, child.href);
                   return (
                     <li key={child.href}>
                       <Link

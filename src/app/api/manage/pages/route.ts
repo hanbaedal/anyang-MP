@@ -3,6 +3,7 @@ import { getCmsPageOrDefault, isCmsSlug, saveCmsPage, type CmsItem } from "@/lib
 
 export const dynamic = "force-dynamic";
 import type { FuneralDocsKo } from "@/lib/cms-types";
+import type { PageCmsTextStyles } from "@/lib/page-cms-text-style";
 import { requireStaffApi } from "@/lib/manage-guard";
 
 export async function GET(request: Request) {
@@ -26,6 +27,7 @@ export async function PUT(request: Request) {
     heroImage?: string;
     items?: CmsItem[];
     funeralDocs?: FuneralDocsKo;
+    textStyles?: PageCmsTextStyles;
   };
   try {
     const raw = await request.text();
@@ -49,6 +51,7 @@ export async function PUT(request: Request) {
       heroImage: body.heroImage ?? "",
       items: Array.isArray(body.items) ? body.items : [],
       funeralDocs: body.funeralDocs,
+      textStyles: body.textStyles,
     });
     return NextResponse.json({ ok: true, page });
   } catch (error) {

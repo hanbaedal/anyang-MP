@@ -6,6 +6,7 @@ import { getDb, hasMongo } from "./mongo";
 import { FEATURES, SALE_STEPS, SITE } from "./site";
 import { PRICES, REMAINING } from "./facts";
 import { normalizeFuneralDocsKo } from "./funeral-docs-cms";
+import { normalizePageCmsTextStyles } from "./page-cms-text-style";
 import { type CmsItem, type CmsLocaleFields, type CmsPage, type CmsSlug } from "./cms-types";
 import { CONTENT_LOCALES, stillHasHangul, translateText, type ContentLocale } from "./translate-content";
 
@@ -354,6 +355,7 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
   const funeralDocs = normalizeFuneralDocsKo(page.funeralDocs);
   const heroImage = String(page.heroImage ?? "").trim();
   const bodyImage = String(page.bodyImage ?? "").trim();
+  const textStyles = normalizePageCmsTextStyles(page.textStyles);
   return {
     ...page,
     title: String(page.title ?? ""),
@@ -361,6 +363,7 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
     body: String(page.body ?? ""),
     ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
+    ...(textStyles ? { textStyles } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
     items: (page.items ?? []).map((item, index) => ({
       id: String(item?.id ?? `item-${index}`),
@@ -381,6 +384,7 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
   const funeralDocs = normalizeFuneralDocsKo(
     doc.funeralDocs && typeof doc.funeralDocs === "object" ? (doc.funeralDocs as CmsPage["funeralDocs"]) : undefined,
   );
+  const textStyles = normalizePageCmsTextStyles(doc.textStyles);
   return normalizeCmsPage({
     slug,
     title: currentCmsTitle(slug, String(doc.title ?? "")),
@@ -391,6 +395,7 @@ function fromDocRaw(doc: Record<string, unknown>): CmsPage {
     ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
+    ...(textStyles ? { textStyles } : {}),
     i18n: doc.i18n && typeof doc.i18n === "object" ? (doc.i18n as CmsPage["i18n"]) : undefined,
   });
 }
@@ -549,6 +554,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     };
   });
   const existing = await getCmsPage(input.slug);
+  const textStyles = normalizePageCmsTextStyles(input.textStyles);
   const page: CmsPage = sanitizeDirectionsPage({
     slug: input.slug,
     title: input.title.trim(),
@@ -558,6 +564,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     updatedAt: new Date().toISOString(),
     ...(heroImage ? { heroImage } : {}),
     ...(bodyImage ? { bodyImage } : {}),
+    ...(textStyles ? { textStyles } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
     ...(existing?.i18n ? { i18n: existing.i18n } : {}),
   });

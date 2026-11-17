@@ -48,7 +48,12 @@ export default async function DirectionsPage({
     <>
       <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:space-y-8 md:py-10">
-        <DirectionsPageBody items={items} cmsSlug="directions" cmsEditMarkers={cmsEdit} />
+        <DirectionsPageBody
+          items={items}
+          cmsSlug="directions"
+          cmsEditMarkers={cmsEdit}
+          cmsTextStyles={cms.textStyles}
+        />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>

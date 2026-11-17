@@ -35,9 +35,9 @@ export default async function ColumbariumPage({
         <PastelBox className="p-5 md:p-6">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             {cms.body ? (
-              <CmsBodyMark cmsSlug="columbarium" cmsEditMarkers={cmsEdit} text={cms.body} />
+              <CmsBodyMark cmsSlug="columbarium" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
             ) : (
-              <CmsBodyMark cmsSlug="columbarium" cmsEditMarkers={cmsEdit}>
+              <CmsBodyMark cmsSlug="columbarium" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
                 <p>{t(locale, "col.body")}</p>
               </CmsBodyMark>
             )}

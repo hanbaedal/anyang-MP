@@ -21,6 +21,19 @@ export type PageCmsSlotKind =
   | "funeralDocText"
   | "funeralDocPdf";
 
+const PAGE_TEXT_STYLE_KINDS = new Set<PageCmsSlotKind>([
+  "title",
+  "lead",
+  "body",
+  "itemTitle",
+  "itemText",
+  "funeralDocText",
+]);
+
+export function isPageCmsTextStyleSlot(kind: PageCmsSlotKind) {
+  return PAGE_TEXT_STYLE_KINDS.has(kind);
+}
+
 export type PageCmsSlotMeta = {
   label: string;
   kind: PageCmsSlotKind;

@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CmsFontPick } from "@/components/manage/cms-font-pick";
+import { CmsFontScale } from "@/components/manage/cms-font-scale";
 import { CmsPageSlotSelect } from "@/components/manage/cms-page-slot-select";
+import { CmsTextColor } from "@/components/manage/cms-text-color";
 import { CmsFieldKo, CmsSlotPanel } from "@/components/manage/cms-slot-panel";
 import { ManageImagePicker } from "@/components/manage-image-picker";
 import { Button } from "@/components/ui/button";
@@ -12,6 +15,7 @@ import {
   buildPageCmsSlotMeta,
   findCmsItemBySlotKey,
   isItemCardSlotKind,
+  isPageCmsTextStyleSlot,
   parsePageCmsSlotKey,
   pageSlotBodyImage,
   pageSlotHeroImage,
@@ -25,6 +29,13 @@ import { FUNERAL_DOCS_I18N } from "@/lib/funeral-docs-cms";
 import { PAGE_CMS_PUBLIC_PATH } from "@/lib/page-cms-path";
 import { t } from "@/lib/i18n";
 import { uploadOriginalUrl } from "@/lib/media";
+import {
+  defaultPageCmsTextStyle,
+  mergePageCmsTextStyle,
+  type PageCmsTextStyle,
+  type PageCmsTextStyles,
+} from "@/lib/page-cms-text-style";
+import type { HomeHeroFontPreset } from "@/lib/home-hero-text-style";
 import { cn } from "@/lib/utils";
 
 const GALLERY_TAG: Partial<Record<ManageVisualCmsSlug, string>> = {
@@ -78,6 +89,20 @@ export function ManagePageCms({
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string; key?: string };
+      if (data?.type === "anyang-cms-ready") {
+        const styles = page.textStyles ?? {};
+        for (const key of Object.keys(styles)) {
+          const row = styles[key];
+          if (!row) continue;
+          postToFrame({
+            type: "anyang-cms-patch",
+            key,
+            fontScale: row.scale,
+            fontPreset: row.font,
+            textColor: row.color,
+          });
+        }
+      }
       if (data?.type === "anyang-cms-select" && data.key) {
         if (data.key in slotMetaMap || data.key.startsWith("page.")) {
           setActiveKey(data.key);
@@ -86,11 +111,54 @@ export function ManagePageCms({
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [slotMetaMap]);
+  }, [slotMetaMap, page.textStyles, postToFrame]);
 
   function markDirty() {
     setDirty(true);
     setStatus("idle");
+  }
+
+  function slotTextStyle(key: string): PageCmsTextStyle {
+    return page.textStyles?.[key] ?? defaultPageCmsTextStyle();
+  }
+
+  function patchSlotTextStyle(key: string, patch: Partial<PageCmsTextStyle>) {
+    markDirty();
+    setPage((prev) => {
+      const textStyles = mergePageCmsTextStyle(prev.textStyles, key, patch);
+      const row = textStyles[key] ?? defaultPageCmsTextStyle();
+      postToFrame({
+        type: "anyang-cms-patch",
+        key,
+        fontScale: row.scale,
+        fontPreset: row.font,
+        textColor: row.color,
+      });
+      return { ...prev, textStyles };
+    });
+  }
+
+  function renderTextStyleControls(slotKey: string) {
+    const style = slotTextStyle(slotKey);
+    return (
+      <>
+        <CmsFontPick
+          value={style.font}
+          disabled={busy}
+          onChange={(preset: HomeHeroFontPreset) => patchSlotTextStyle(slotKey, { font: preset })}
+        />
+        <CmsFontScale
+          value={style.scale}
+          disabled={busy}
+          onChange={(scale) => patchSlotTextStyle(slotKey, { scale })}
+        />
+        <CmsTextColor
+          value={style.color}
+          disabled={busy}
+          onChange={(color) => patchSlotTextStyle(slotKey, { color })}
+        />
+      </>
+    );
   }
 
   function patchText(key: string, text: string) {
@@ -210,6 +278,7 @@ export function ManagePageCms({
           heroImage: page.heroImage ?? "",
           items: page.items ?? [],
           funeralDocs: page.funeralDocs,
+          textStyles: page.textStyles,
         }),
       });
       const json = (await res.json()) as { ok?: boolean; error?: string; page?: CmsPage };
@@ -223,8 +292,9 @@ export function ManagePageCms({
         onPersisted?.(json.page);
       }
       setDirty(false);
-      setMessage("저장했습니다. 공개 페이지를 새로고침하면 반영됩니다.");
+      setMessage("저장했습니다. 미리보기와 공개 페이지에 반영됩니다.");
       setStatus("ok");
+      setFrameRev((n) => n + 1);
     } catch {
       setMessage("네트워크 오류입니다. 저장되지 않았을 수 있습니다.");
       setStatus("error");
@@ -273,6 +343,7 @@ export function ManagePageCms({
     const textKey = pageSlotItemText(slug, itemId);
     return (
       <div className="space-y-3">
+        {renderTextStyleControls(titleKey)}
         <label className="block space-y-1.5 text-sm">
           <span className="font-medium text-foreground">
             {slug === "directions" ? "교통 수단 이름 (ko)" : "카드 제목 (ko)"}
@@ -284,6 +355,7 @@ export function ManagePageCms({
             onChange={(e) => patchText(titleKey, e.target.value)}
           />
         </label>
+        {renderTextStyleControls(textKey)}
         <CmsFieldKo
           multiline
           disabled={busy}
@@ -360,13 +432,17 @@ export function ManagePageCms({
         />
       );
     }
+    const styleSlot = isPageCmsTextStyleSlot(activeMeta.kind);
     return (
-      <CmsFieldKo
-        multiline={multiline}
-        disabled={busy}
-        value={readTextValue(activeKey)}
-        onChange={(value) => patchText(activeKey, value)}
-      />
+      <>
+        {styleSlot ? renderTextStyleControls(activeKey) : null}
+        <CmsFieldKo
+          multiline={multiline}
+          disabled={busy}
+          value={readTextValue(activeKey)}
+          onChange={(value) => patchText(activeKey, value)}
+        />
+      </>
     );
   })();
 

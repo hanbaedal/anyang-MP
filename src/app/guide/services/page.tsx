@@ -48,7 +48,13 @@ export default async function ServicesPage({
     <>
       <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
-        <FeaturesPhotoGrid items={items} cmsSlug="services" cmsEditMarkers={cmsEdit} />
+        <FeaturesPhotoGrid
+          items={items}
+          cmsSlug="services"
+          cmsEditMarkers={cmsEdit}
+          locale={locale}
+          cmsTextStyles={cms.textStyles}
+        />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>

@@ -10,7 +10,7 @@ export function CmsManagedPageHero({
   cmsEdit,
 }: {
   locale: Locale;
-  cms: Pick<CmsPage, "slug" | "title" | "lead" | "heroImage">;
+  cms: Pick<CmsPage, "slug" | "title" | "lead" | "heroImage" | "textStyles">;
   cmsEdit: boolean;
 }) {
   const hero = resolveCmsPageHero(locale, cms);
@@ -22,6 +22,8 @@ export function CmsManagedPageHero({
       heroImage={cms.heroImage}
       cmsSlug={cms.slug}
       cmsEditMarkers={cmsEdit}
+      locale={locale}
+      textStyles={cms.textStyles}
       imageAlt={hero.title}
       large
     />

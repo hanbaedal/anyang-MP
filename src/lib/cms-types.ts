@@ -57,6 +57,8 @@ export type CmsPage = {
   heroImage?: string;
   /** 인사말 본문 좌측 이미지. 미등록 시 공개에서 숨김. */
   bodyImage?: string;
+  /** 슬롯 키(page.{slug}.title 등)별 글꼴·크기·색 (한국어 공개용) */
+  textStyles?: import("./page-cms-text-style").PageCmsTextStyles;
   /** 이용절차 하단 공공서류 카드 문구 (ko). */
   funeralDocs?: FuneralDocsKo;
   /** 손님용 영어·중국어 본문. 한글은 위 필드. */

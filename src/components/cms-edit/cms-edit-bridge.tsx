@@ -97,7 +97,7 @@ export function CmsEditBridge({ enabled }: { enabled: boolean }) {
       }
       if (data?.type === "anyang-cms-patch" && data.key) {
         if (
-          data.key.startsWith("home.") &&
+          (data.key.startsWith("home.") || data.key.startsWith("page.")) &&
           (typeof data.fontScale === "number" ||
             data.fontPreset !== undefined ||
             data.textColor !== undefined)

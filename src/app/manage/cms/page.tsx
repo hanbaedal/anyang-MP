@@ -21,6 +21,7 @@ export default async function ManageCmsPage({
 
   return (
     <ManageCmsShell
+      key={slug ?? "home"}
       homeInitial={homeInitial}
       initialSlug={slug}
       initialPage={initialPage}

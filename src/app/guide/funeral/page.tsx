@@ -58,13 +58,19 @@ export default async function FuneralPage({
     <>
       <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
-        <FeaturesPhotoGrid items={items} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
+        <FeaturesPhotoGrid
+          items={items}
+          cmsSlug="funeral"
+          cmsEditMarkers={cmsEdit}
+          locale={locale}
+          cmsTextStyles={cms.textStyles}
+        />
       <FuneralDocList locale={locale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
       <Prose>
         {cms.body?.trim() ? (
-          <CmsBodyMark cmsSlug="funeral" cmsEditMarkers={cmsEdit} text={cms.body} />
+          <CmsBodyMark cmsSlug="funeral" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
         ) : (
-          <CmsBodyMark cmsSlug="funeral" cmsEditMarkers={cmsEdit}>
+          <CmsBodyMark cmsSlug="funeral" locale={locale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
             <p className="break-keep">{t(locale, "fun.more")}</p>
           </CmsBodyMark>
         )}
