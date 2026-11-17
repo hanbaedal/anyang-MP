@@ -394,14 +394,28 @@
     max-width: 90%;
   }
 
+  .pc-viewport-card--features-rainbow.pc-viewport-card--scale {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    min-height: 0 !important;
+    max-height: none;
+    margin-inline: 0;
+  }
+
   .pc-viewport-card--features-rainbow.pc-viewport-card--scale > .pc-viewport-card-body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    height: 100%;
     max-width: 100%;
     align-items: center;
+    justify-content: center;
+    padding-top: 0 !important;
     text-align: center;
   }
 }
 
-/* 공원특징 4카드 — 첨부 목업형 사다리꼴·중앙 마름모 여백 */
+/* 공원특징 4카드 — 사다리꼴 2×2 (우하 카드 형태 기준) */
 .features-rainbow-grid {
   gap: 0.25rem;
 }
@@ -424,6 +438,7 @@
   filter: drop-shadow(0 0 0 1.25px rgba(15, 23, 42, 0.92));
 }
 
+/* 우하(명절 교통·주차): polygon(0 0, 100% 0, 100% 84%, 16% 100%) */
 .feature-rainbow-shape-tl {
   clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
 }
@@ -460,6 +475,18 @@
     inset: auto;
     height: auto;
     max-width: 90%;
+  }
+
+  .pc-viewport-card--features-rainbow.pc-viewport-card--scale {
+    aspect-ratio: 16 / 10;
+  }
+
+  .pc-viewport-card--features-rainbow.pc-viewport-card--scale > .pc-viewport-card-body {
+    position: absolute !important;
+    inset: 0 !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    justify-content: center !important;
   }
 }
 

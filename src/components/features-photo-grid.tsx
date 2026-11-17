@@ -138,7 +138,9 @@ export function FeaturesPhotoGrid({
                 ? "min-h-[9.5rem] sm:min-h-[10.5rem] md:min-h-[11.5rem]"
                 : fill
                   ? "min-h-[12rem] sm:min-h-[13rem] md:h-full md:min-h-0"
-                  : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
+                  : rainbow
+                    ? "min-h-[15.5rem] w-full sm:min-h-[17rem] md:min-h-[18.5rem]"
+                    : "min-h-[15.5rem] sm:min-h-[17rem] md:min-h-[18.5rem]",
             )}
           >
             {hasPhoto ? (
@@ -162,10 +164,9 @@ export function FeaturesPhotoGrid({
                   transit
                     ? "min-h-0 flex-1 justify-start gap-0 p-0"
                     : rainbow
-                      ? "items-center justify-start text-center md:max-w-full"
+                      ? "h-full min-h-0 items-center justify-center text-center md:max-w-full"
                       : "justify-end md:max-w-[92%]",
-                  rainbow &&
-                    "min-h-[15.5rem] gap-0 px-4 pt-8 sm:min-h-[17rem] sm:px-5 sm:pt-9 md:min-h-[18.5rem] md:px-6 md:pt-10",
+                  rainbow && "gap-0 px-6 py-4 sm:px-7 sm:py-5 md:px-8 md:py-6",
                   !rainbow &&
                     (dense && !transit
                       ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
@@ -229,7 +230,7 @@ export function FeaturesPhotoGrid({
                         : { "data-cms-body-root": "1" as const })}
                       className={cn(
                         guideCardBodyTextClass({ onPhoto: copyOnPhoto, dense }),
-                        rainbow && "mt-4 w-full max-w-[34rem] text-center",
+                        rainbow && "mt-3 w-full max-w-[min(100%,32rem)] text-center",
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
                         transit && hasPhoto && "w-fit max-w-full",
                         textStyleProps.className,
