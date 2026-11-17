@@ -13,9 +13,11 @@ export default async function ManageCmsPage({
   const slugRaw = sp.slug?.trim() ?? "";
   const slug: ManageVisualCmsSlug | null = isManageVisualCmsSlug(slugRaw) ? slugRaw : null;
 
-  const homeInitial = await getHomeIntroSlidesSettingsForWrite();
-  const initialPage = slug ? await getCmsPageOrDefault(slug) : null;
-  const initialFuneralDocs = slug === "funeral" ? await listFuneralDocs() : null;
+  const [homeInitial, initialPage, initialFuneralDocs] = await Promise.all([
+    slug ? Promise.resolve(null) : getHomeIntroSlidesSettingsForWrite(),
+    slug ? getCmsPageOrDefault(slug) : Promise.resolve(null),
+    slug === "funeral" ? listFuneralDocs() : Promise.resolve(null),
+  ]);
 
   return (
     <ManageCmsShell

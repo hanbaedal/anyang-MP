@@ -348,9 +348,8 @@ export function ManageHomeCms({
       if (json.settings.heroTextColor) setHeroTextColor(json.settings.heroTextColor);
       if (json.settings.socialLinks?.length) setSocialLinks(json.settings.socialLinks);
       setDirty(false);
-      setMessage("저장했습니다. 공개 홈에 반영됩니다.");
+      setMessage("저장했습니다. 공개 홈을 새로고침하면 반영됩니다.");
       setStatus("ok");
-      setFrameRev((n) => n + 1);
     } catch {
       setMessage("네트워크 오류입니다.");
       setStatus("error");

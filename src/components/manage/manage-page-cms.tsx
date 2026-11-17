@@ -37,10 +37,12 @@ export function ManagePageCms({
   initial,
   slug,
   defaultSlotKey,
+  onPersisted,
 }: {
   initial: CmsPage;
   slug: ManageVisualCmsSlug;
   defaultSlotKey?: string;
+  onPersisted?: (page: CmsPage) => void;
 }) {
   const [page, setPage] = useState(initial);
   const [activeKey, setActiveKey] = useState<string | null>(
@@ -216,11 +218,13 @@ export function ManagePageCms({
         setStatus("error");
         return;
       }
-      if (json.page) setPage(json.page);
+      if (json.page) {
+        setPage(json.page);
+        onPersisted?.(json.page);
+      }
       setDirty(false);
       setMessage("저장했습니다. 공개 페이지를 새로고침하면 반영됩니다.");
       setStatus("ok");
-      setFrameRev((n) => n + 1);
     } catch {
       setMessage("네트워크 오류입니다. 저장되지 않았을 수 있습니다.");
       setStatus("error");
