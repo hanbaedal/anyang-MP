@@ -77,10 +77,12 @@ export function CmsPageHeroBand({
           <h1
             {...(titleKey ? { "data-cms-key": titleKey } : {})}
             className={cn(
-              "mt-2 font-serif font-semibold tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
+              "max-w-2xl font-serif font-semibold tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,.92),0_0_2px_rgba(0,0,0,1),0_0_32px_rgba(0,0,0,.55)]",
               !titleColored && "text-white",
               titleStyleProps.className,
-              large ? "text-2xl md:text-3xl lg:text-[2.125rem] lg:leading-tight" : "text-xl md:text-2xl",
+              large
+                ? "mt-3 text-2xl leading-tight md:mt-4 md:text-3xl lg:text-[2.125rem]"
+                : "mt-1.5 text-xl md:mt-2 md:text-2xl",
             )}
             style={titleStyleProps.style}
             {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
@@ -93,11 +95,11 @@ export function CmsPageHeroBand({
             {...(leadKey ? { "data-cms-key": leadKey } : {})}
             className={cn(
               "max-w-2xl [text-shadow:0_1px_6px_rgba(0,0,0,.9),0_0_2px_rgba(0,0,0,1),0_0_28px_rgba(0,0,0,.5)]",
-              !leadColored && "text-white/98",
+              !leadColored && "text-amber-200/95",
               leadStyleProps.className,
               large
-                ? "mt-3 text-sm leading-relaxed md:mt-4 md:text-base md:leading-7"
-                : "mt-1.5 text-sm leading-snug md:mt-2 md:leading-6",
+                ? "mt-2 text-sm leading-relaxed md:mt-2.5 md:text-base md:leading-7"
+                : "mt-1.5 text-sm leading-snug md:leading-6",
             )}
             style={leadStyleProps.style}
             {...(leadColored ? { "data-hero-custom-color": "1" as const } : {})}

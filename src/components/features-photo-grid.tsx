@@ -184,7 +184,7 @@ export function FeaturesPhotoGrid({
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
                       className={cn(
-                        guideCardTitleClass({ onPhoto: false, dense }),
+                        guideCardTitleClass({ onPhoto: hasPhoto, dense }),
                         hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
                         titleStyleProps.className,
                       )}
@@ -200,7 +200,7 @@ export function FeaturesPhotoGrid({
                         ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
                         : { "data-cms-body-root": "1" as const })}
                       className={cn(
-                        guideCardBodyTextClass({ onPhoto: false, dense }),
+                        guideCardBodyTextClass({ onPhoto: hasPhoto, dense }),
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
                         transit && hasPhoto && "w-fit max-w-full",
                         textStyleProps.className,

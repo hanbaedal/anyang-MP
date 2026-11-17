@@ -53,10 +53,17 @@ export function PageHero({
           {kicker}
         </p>
         {headline ? (
-          <h1 className="mt-1 font-serif text-xl text-primary-foreground md:mt-1.5 md:text-2xl">{headline}</h1>
+          <h1
+            className={cn(
+              "max-w-2xl font-serif font-semibold text-primary-foreground",
+              compact ? "mt-1.5 text-xl md:mt-2 md:text-2xl" : "mt-1.5 text-xl md:mt-2 md:text-2xl",
+            )}
+          >
+            {headline}
+          </h1>
         ) : null}
         {lead ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/95 md:mt-2 md:text-sm md:leading-6">
+          <p className="mt-1.5 max-w-2xl text-sm leading-snug text-primary-foreground/90 md:mt-2 md:text-sm md:leading-6">
             {lead}
           </p>
         ) : null}

@@ -23,12 +23,10 @@ export function guideCardPhotoCopyWrap({ dense }: { dense?: boolean } = {}) {
   );
 }
 
-/** 제목·문단 한 덩어리용 — 블러·얇은 링·둥근 모서리 */
+/** 사진 위 제목·문단 — 배경·그림자 없음(투명) */
 export function guideCardPhotoTextHighlight() {
   return cn(
-    "rounded-lg bg-[#fffcf7]/88 px-2.5 py-1.5",
-    "shadow-[0_4px_22px_rgba(0,43,80,0.14),0_0_0_1px_rgba(255,255,255,0.55)]",
-    "backdrop-blur-[12px] backdrop-saturate-150",
+    "bg-transparent shadow-none",
     "[box-decoration-break:clone] [-webkit-box-decoration-break:clone]",
   );
 }
@@ -55,7 +53,6 @@ export function guideCardTitleClass({
 }) {
   return cn(
     "font-semibold leading-snug tracking-tight text-[color:var(--pastel-chrome-fg)]",
-    onPhoto && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.88)]",
     dense ? "text-base sm:text-lg" : "text-lg sm:text-xl md:text-[1.35rem]",
   );
 }
@@ -63,7 +60,6 @@ export function guideCardTitleClass({
 export function guideCardEyebrowClass(onPhoto: boolean) {
   return cn(
     "font-serif tracking-wide text-[color:var(--pastel-chrome-fg)]/90",
-    onPhoto && "drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]",
     "text-sm sm:text-base",
   );
 }
@@ -71,7 +67,6 @@ export function guideCardEyebrowClass(onPhoto: boolean) {
 export function guideCardBodyTextClass({ onPhoto, dense }: { onPhoto: boolean; dense?: boolean }) {
   return cn(
     "text-[color:var(--pastel-chrome-fg)]/95",
-    onPhoto && "drop-shadow-[0_1px_1px_rgba(255,255,255,0.75)]",
     dense
       ? "space-y-1 text-[12px] leading-5 sm:text-[13px] sm:leading-6"
       : "space-y-1.5 text-[13px] leading-6 sm:text-sm sm:leading-7",

@@ -217,6 +217,27 @@
   padding-inline: var(--site-content-pad-x);
 }
 
+/* 헤더·풋터 색 띠 = 본문 site-container와 같은 박스 폭·패딩 */
+.site-chrome-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--site-content-max);
+  margin-inline: auto;
+  padding-inline: var(--site-content-pad-x);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --site-content-pad-x: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  :root {
+    --site-content-pad-x: clamp(0.875rem, 1.5vw, 1rem);
+  }
+}
+
 /* 모바일: 얇은 헤더·햄버거 시트에서 본문이 비칠 때 대비 여유 */
 @media (max-width: 767px) {
   :root {

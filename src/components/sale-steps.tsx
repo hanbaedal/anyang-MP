@@ -120,7 +120,7 @@ export function SaleSteps({
                 <h3
                   {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
                   className={cn(
-                    guideCardTitleClass({ onPhoto: false }),
+                    guideCardTitleClass({ onPhoto: hasPhoto }),
                     hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
                     titleStyleProps.className,
                   )}
