@@ -91,7 +91,7 @@ export default async function IntroHubPage() {
           href="/intro/features"
           moreLabel={t(locale, "more.detail")}
         >
-          <FeaturesPhotoGrid items={featureItems} />
+          <FeaturesPhotoGrid items={featureItems} featureRainbow />
         </MenuHubSection>
 
         <MenuHubSection

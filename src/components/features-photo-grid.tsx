@@ -2,6 +2,7 @@ import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
 import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
+  featureRainbowPastelClass,
   guideCardBodyTextClass,
   guideCardPastelSurface,
   guideCardTitleClass,
@@ -57,6 +58,8 @@ export function FeaturesPhotoGrid({
   captionFirstLine = false,
   /** PC 잔여 높이 2×2 fill (AMP-79) — dense와 병행하지 않음 */
   viewportFill = false,
+  /** 공원특징 4카드 — 연한 무지개 파스텔·상단 가운데 정렬 */
+  featureRainbow = false,
   cmsSlug,
   cmsEditMarkers = false,
   locale = "ko" as Locale,
@@ -70,6 +73,7 @@ export function FeaturesPhotoGrid({
   titleBar?: boolean;
   captionFirstLine?: boolean;
   viewportFill?: boolean;
+  featureRainbow?: boolean;
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
   locale?: Locale;
@@ -108,13 +112,16 @@ export function FeaturesPhotoGrid({
         const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
         const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
         const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
+        const rainbow = featureRainbow && !dense && !transit;
+        const copyOnPhoto = hasPhoto && !rainbow;
 
         return (
           <article
             key={itemId}
             className={cn(
               "pc-viewport-card relative isolate overflow-hidden rounded-2xl shadow-sm",
-              !hasPhoto && guideCardPastelSurface(index),
+              rainbow && cn(featureRainbowPastelClass(index), "pc-viewport-card--features-rainbow"),
+              !rainbow && !hasPhoto && guideCardPastelSurface(index),
               transit && "flex flex-col shadow-md ring-1 ring-[color:var(--pastel-chrome-border)]",
               !dense && "pc-viewport-card--scale",
               transit
@@ -127,10 +134,16 @@ export function FeaturesPhotoGrid({
             )}
           >
             {hasPhoto ? (
-              <GuideCardCoverImage imagePath={item.image!.trim()} alt={alt} index={index} dense={dense} />
+              <GuideCardCoverImage
+                imagePath={item.image!.trim()}
+                alt={alt}
+                index={index}
+                dense={dense}
+                className={rainbow ? "opacity-[0.14]" : undefined}
+              />
             ) : null}
             {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={itemId} /> : null}
-            {hasPhoto && showCopy && !transit ? (
+            {hasPhoto && showCopy && !transit && !rainbow ? (
               <div className={GUIDE_CARD_PHOTO_FOOT_SCRIM} aria-hidden />
             ) : null}
 
@@ -140,14 +153,19 @@ export function FeaturesPhotoGrid({
                   "pc-viewport-card-body relative z-[25] flex w-full flex-col md:max-w-full",
                   transit
                     ? "min-h-0 flex-1 justify-start gap-0 p-0"
-                    : "justify-end md:max-w-[92%]",
-                  dense && !transit
-                    ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
-                    : transit
-                      ? undefined
-                      : fill
-                      ? "min-h-[12rem] gap-2.5 p-5 sm:min-h-[13rem] sm:p-6 md:h-full md:min-h-0 md:justify-center md:p-7"
-                      : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-end",
+                    : rainbow
+                      ? "items-center justify-start text-center md:max-w-full"
+                      : "justify-end md:max-w-[92%]",
+                  rainbow &&
+                    "min-h-[15.5rem] gap-0 px-4 pt-8 sm:min-h-[17rem] sm:px-5 sm:pt-9 md:min-h-[18.5rem] md:px-6 md:pt-10",
+                  !rainbow &&
+                    (dense && !transit
+                      ? "min-h-[9.5rem] gap-1 p-4 sm:min-h-[10.5rem] sm:p-4 md:min-h-[11.5rem] md:p-5"
+                      : transit
+                        ? undefined
+                        : fill
+                          ? "min-h-[12rem] gap-2.5 p-5 sm:min-h-[13rem] sm:p-6 md:h-full md:min-h-0 md:justify-center md:p-7"
+                          : "min-h-[15.5rem] gap-2.5 p-5 sm:min-h-[17rem] sm:p-6 md:min-h-[18.5rem] md:p-7 md:justify-end"),
                 )}
               >
                 {showTitle && transit ? (
@@ -175,8 +193,9 @@ export function FeaturesPhotoGrid({
                 ) : null}
                 <div
                   className={cn(
-                    hasPhoto && guideCardPhotoCopyWrap({ dense }),
-                    !hasPhoto && "flex w-full flex-col",
+                    copyOnPhoto && guideCardPhotoCopyWrap({ dense }),
+                    (!hasPhoto || rainbow) && "flex w-full flex-col",
+                    rainbow && "items-center",
                     transit && hasPhoto && showText && "mx-3 mb-3 mt-0 sm:mx-4",
                   )}
                 >
@@ -184,8 +203,9 @@ export function FeaturesPhotoGrid({
                     <h3
                       {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
                       className={cn(
-                        guideCardTitleClass({ onPhoto: hasPhoto, dense }),
-                        hasPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                        guideCardTitleClass({ onPhoto: copyOnPhoto, dense }),
+                        copyOnPhoto && cn(guideCardPhotoTextHighlight(), "w-fit max-w-full"),
+                        rainbow && "w-full text-center",
                         titleStyleProps.className,
                       )}
                       style={titleStyleProps.style}
@@ -200,7 +220,8 @@ export function FeaturesPhotoGrid({
                         ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
                         : { "data-cms-body-root": "1" as const })}
                       className={cn(
-                        guideCardBodyTextClass({ onPhoto: hasPhoto, dense }),
+                        guideCardBodyTextClass({ onPhoto: copyOnPhoto, dense }),
+                        rainbow && "mt-4 w-full max-w-[34rem] text-center",
                         transit && !hasPhoto && "flex-1 p-4 pt-3 sm:p-4 sm:pt-3.5 md:p-4 md:pt-3",
                         transit && hasPhoto && "w-fit max-w-full",
                         textStyleProps.className,
@@ -213,7 +234,7 @@ export function FeaturesPhotoGrid({
                       <p
                         className={cn(
                           "whitespace-normal break-words text-inherit",
-                          hasPhoto && guideCardPhotoTextHighlight(),
+                          copyOnPhoto && guideCardPhotoTextHighlight(),
                         )}
                       >
                         {text}
@@ -221,7 +242,7 @@ export function FeaturesPhotoGrid({
                     ) : (
                       <Paragraphs
                         text={text}
-                        className={cn("text-inherit", hasPhoto && guideCardPhotoTextHighlight())}
+                        className={cn("text-inherit", copyOnPhoto && guideCardPhotoTextHighlight())}
                       />
                     )}
                     </div>

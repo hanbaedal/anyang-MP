@@ -393,6 +393,12 @@
     height: 100%;
     max-width: 90%;
   }
+
+  .pc-viewport-card--features-rainbow.pc-viewport-card--scale > .pc-viewport-card-body {
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+  }
 }
 
 /*

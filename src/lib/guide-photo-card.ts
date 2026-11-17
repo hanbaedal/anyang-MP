@@ -44,6 +44,18 @@ export function guideCardPastelSurface(index: number) {
   return cn("border", pastelCardClass(index));
 }
 
+/** 공원특징 2×2 — 무지개 파스텔 4색 (연한 톤, 좌상·우상·좌하·우하) */
+export const FEATURE_RAINBOW_PASTELS = [
+  "border-[#d4ebf2] bg-[#eef9fc]",
+  "border-[#ddd9f0] bg-[#f0eff9]",
+  "border-[#e6ecc8] bg-[#f4f7e8]",
+  "border-[#d0e8f4] bg-[#eaf6fc]",
+] as const;
+
+export function featureRainbowPastelClass(index: number) {
+  return cn("border", FEATURE_RAINBOW_PASTELS[index % FEATURE_RAINBOW_PASTELS.length]!);
+}
+
 export function guideCardTitleClass({
   onPhoto,
   dense,

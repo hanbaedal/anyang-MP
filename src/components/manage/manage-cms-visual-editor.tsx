@@ -319,7 +319,7 @@ export function ManageCmsVisualEditor({
             <div className="grid gap-6 md:grid-cols-2">
               {page.items.map((item, index) => (
                 <div key={item.id} className="space-y-2">
-                  <FeaturesPhotoGrid items={[gridItems[index]!]} />
+                  <FeaturesPhotoGrid items={[gridItems[index]!]} featureRainbow={slug === "features"} />
                   <ManageCmsItemEditor
                     slug={slug}
                     item={item}

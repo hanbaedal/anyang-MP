@@ -41,6 +41,7 @@ export default async function FeaturesPage({
       <div className="site-container pc-soft-card-fill space-y-8 py-8 md:py-10">
         <FeaturesPhotoGrid
           items={items}
+          featureRainbow
           cmsSlug="features"
           cmsEditMarkers={cmsEdit}
           locale={displayLocale}
