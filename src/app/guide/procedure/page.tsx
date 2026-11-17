@@ -3,9 +3,9 @@ import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { pageSlotBody } from "@/lib/page-cms-slots";
 import { Prose } from "@/components/page-hero";
-import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
+import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -17,19 +17,12 @@ export async function generateMetadata() {
   return { title: t(locale, "proc.title") };
 }
 
-/** AMP-81: 5번 옆 칸 — 안내 2문 (CMS body 끝 2블록 · 기본=계좌·2일 전) */
+/** 분양 절차 하단 — CMS 본문 단락 전체 (빈 줄로 구분) */
 function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, body?: string) {
-  const fromCms = body?.trim()
-    ? body
-        .replace(/\r\n/g, "\n")
-        .split(/\n{2,}/)
-        .map((block) => block.trim())
-        .filter(Boolean)
-        .slice(-2)
-    : [];
+  const fromCms = cmsBodyBlocks(body);
 
   const proseClass =
-    "max-w-none space-y-3 text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]";
+    "max-w-none space-y-3 text-center text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]";
 
   if (fromCms.length) {
     return fromCms.map((block, index) => (
@@ -66,13 +59,13 @@ export default async function ProcedurePage({
   }));
 
   const noteAside = (
-    <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
+    <div className="pc-procedure-note procedure-orbs-aside-text w-full">
       <div
         {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure"), "data-cms-body-root": "1" as const } : {})}
       >
         {procedureNoteBlocks(displayLocale, cms.body)}
       </div>
-    </PastelBox>
+    </div>
   );
 
   return (

@@ -71,7 +71,9 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
         lead: snapshot.lead,
         body: snapshot.body,
         bodyImage: snapshot.bodyImage ?? "",
+        heroImage: snapshot.heroImage ?? "",
         items: snapshot.items ?? [],
+        textStyles: snapshot.textStyles,
       }),
     });
     const json = (await res.json()) as { ok?: boolean; error?: string; page?: CmsPage };

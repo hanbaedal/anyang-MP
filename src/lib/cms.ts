@@ -537,9 +537,10 @@ async function writeCmsPageDocument(page: CmsPage) {
 }
 
 export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedAt?: string }): Promise<CmsPage> {
-  const bodyImage = String(input.bodyImage ?? "").trim();
-  const heroImage = String(input.heroImage ?? "").trim();
-  const funeralDocs = normalizeFuneralDocsKo(input.funeralDocs);
+  const existing = await getCmsPage(input.slug);
+  const bodyImage = String(input.bodyImage ?? existing?.bodyImage ?? "").trim();
+  const heroImage = String(input.heroImage ?? existing?.heroImage ?? "").trim();
+  const funeralDocs = normalizeFuneralDocsKo(input.funeralDocs ?? existing?.funeralDocs);
   const rawItems = (input.items ?? []).map((item) => {
     const image = String(item.image ?? "").trim();
     const galleryId = String(item.galleryId ?? "").trim();
@@ -553,8 +554,7 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
       remaining: item.remaining,
     };
   });
-  const existing = await getCmsPage(input.slug);
-  const textStyles = normalizePageCmsTextStyles(input.textStyles);
+  const textStyles = normalizePageCmsTextStyles(input.textStyles ?? existing?.textStyles);
   const page: CmsPage = sanitizeDirectionsPage({
     slug: input.slug,
     title: input.title.trim(),

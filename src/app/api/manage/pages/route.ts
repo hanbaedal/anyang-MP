@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCmsPageOrDefault, isCmsSlug, saveCmsPage, type CmsItem } from "@/lib/cms";
+import { revalidateCmsPublicPages } from "@/lib/cms-revalidate";
 
 export const dynamic = "force-dynamic";
 import type { FuneralDocsKo } from "@/lib/cms-types";
@@ -53,6 +54,7 @@ export async function PUT(request: Request) {
       funeralDocs: body.funeralDocs,
       textStyles: body.textStyles,
     });
+    revalidateCmsPublicPages(body.slug);
     return NextResponse.json({ ok: true, page });
   } catch (error) {
     console.error("[cms] save failed", error);

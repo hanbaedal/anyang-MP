@@ -6,6 +6,7 @@ import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
+import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
@@ -46,15 +47,10 @@ export default async function GuideHubPage() {
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
   }));
-  /** AMP-81: 5번 옆 칸 — CMS body 끝 2블록 · 기본 계좌·2일 전 */
-  const procedureNoteParts = procedure.body?.trim()
-    ? procedure.body
-        .replace(/\r\n/g, "\n")
-        .split(/\n{2,}/)
-        .map((block) => block.trim())
-        .filter(Boolean)
-        .slice(-2)
-    : [t(locale, "proc.account"), t(locale, "proc.twoDays")];
+  const procedureNoteParts = (() => {
+    const blocks = cmsBodyBlocks(procedure.body);
+    return blocks.length ? blocks : [t(locale, "proc.account"), t(locale, "proc.twoDays")];
+  })();
   const procedureNoteAside = (
     <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
       {procedureNoteParts.map((block) => (

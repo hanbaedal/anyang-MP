@@ -766,6 +766,25 @@
   }
 }
 
+/* 분양 절차 — 원형 아래 안내 (배경 없음 · 가운데 정렬) */
+.procedure-orbs-aside {
+  width: 100%;
+  max-width: var(--site-content-max);
+  margin-inline: auto;
+}
+
+.procedure-orbs-aside-text {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0.75rem 0 0;
+  text-align: center;
+}
+
+.procedure-orbs-aside-text p {
+  text-align: center;
+}
+
 /* 공지 목록 — 게스트 본문 폭과 동일 */
 .pc-notices-fill {
   width: 100%;
