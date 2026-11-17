@@ -1,5 +1,5 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { pageSlotBody } from "@/lib/page-cms-slots";
 import { Prose } from "@/components/page-hero";
@@ -7,7 +7,6 @@ import { PastelBox } from "@/components/pastel-box";
 import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -72,14 +71,10 @@ export default async function ProcedurePage({
     </PastelBox>
   );
 
-  const hero = resolveCmsPageHero(locale, cms);
-
   return (
     <>
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
-        <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="procedure" cmsEditMarkers={cmsEdit} />
-        </PastelBox>
         <SaleSteps
           steps={steps.length ? steps : undefined}
           aside={noteAside}

@@ -1,12 +1,11 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { Prose } from "@/components/page-hero";
 import { getCmsPageLocalized } from "@/lib/cms";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { listLotsPhotosFromGallery } from "@/lib/gallery";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -29,13 +28,11 @@ export default async function BurialPage({
     getCmsPageLocalized("burial", locale),
     listLotsPhotosFromGallery("burial", locale),
   ]);
-  const hero = resolveCmsPageHero(locale, cms);
-
   return (
     <>
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="burial" cmsEditMarkers={cmsEdit} />
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             {cms.body ? (
               <CmsBodyMark cmsSlug="burial" cmsEditMarkers={cmsEdit} text={cms.body} />

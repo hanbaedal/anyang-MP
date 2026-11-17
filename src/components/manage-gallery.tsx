@@ -8,6 +8,8 @@ import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ensureImageWithinMaxBytes } from "@/lib/compress-image-client";
 import type { GalleryTag } from "@/lib/content";
 import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import type { GalleryPageSettings } from "@/lib/gallery-page";
+import { ManageImagePicker } from "@/components/manage-image-picker";
 import { MANAGE_IMAGE_MAX_BYTES, MANAGE_IMAGE_MAX_MB } from "@/lib/image-upload-limits";
 import { thumbUrl, uploadOriginalUrl } from "@/lib/media";
 
@@ -22,8 +24,16 @@ function formatMb(bytes: number) {
 
 const STRIP_SIZE = 5;
 
-export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
+export function ManageGallery({
+  initial,
+  initialPage,
+}: {
+  initial: GalleryPhoto[];
+  initialPage: GalleryPageSettings;
+}) {
   const [items, setItems] = useState(initial);
+  const [heroImage, setHeroImage] = useState(initialPage.heroImage);
+  const [pageBusy, setPageBusy] = useState(false);
   const [alt, setAlt] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<GalleryTag[]>(["일반"]);
@@ -47,6 +57,29 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
     const res = await fetch("/api/manage/gallery");
     const json = (await res.json()) as { items?: GalleryPhoto[] };
     if (json.items) setItems(json.items);
+  }
+
+  async function saveGalleryHero() {
+    setPageBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/manage/gallery-page", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ heroImage }),
+      });
+      const json = (await res.json()) as { ok?: boolean; error?: string; settings?: GalleryPageSettings };
+      if (!res.ok || !json.ok || !json.settings) {
+        setMessage(json.error || "배너 저장에 실패했습니다.");
+        return;
+      }
+      setHeroImage(json.settings.heroImage);
+      setMessage("갤러리 상단 배너 배경을 저장했습니다.");
+    } catch {
+      setMessage("네트워크 오류입니다.");
+    } finally {
+      setPageBusy(false);
+    }
   }
 
   function pickFile(next: File | null) {
@@ -304,6 +337,42 @@ export function ManageGallery({ initial }: { initial: GalleryPhoto[] }) {
 
   return (
     <div className="mx-auto min-w-0 max-w-6xl space-y-8 overflow-x-hidden px-4 py-8 md:py-10">
+      <div className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-medium">갤러리 페이지 상단 배너 배경</h2>
+        <p className="text-sm text-muted-foreground">
+          공개 갤러리(<code>/gallery</code>) 헤더 아래 배경입니다. 제목·요약은 다국어 기본 문구를 사용합니다.
+        </p>
+        <ManageImagePicker
+          src={heroImage}
+          disabled={pageBusy || busy}
+          enableLibrary
+          label="배너 배경"
+          onPickSrc={(src) => {
+            setHeroImage(src);
+            setMessage("배경을 골랐습니다. 「배너 저장」을 눌러 반영하세요.");
+          }}
+          onFile={async (file) => {
+            setPageBusy(true);
+            const form = new FormData();
+            form.set("file", file);
+            try {
+              const res = await fetch("/api/manage/upload-image", { method: "POST", body: form });
+              const json = (await res.json()) as { src?: string; error?: string };
+              if (json.src) {
+                setHeroImage(json.src);
+                setMessage("배경을 올렸습니다. 「배너 저장」을 눌러 반영하세요.");
+              } else {
+                setMessage(json.error || "업로드 실패");
+              }
+            } finally {
+              setPageBusy(false);
+            }
+          }}
+        />
+        <Button type="button" disabled={pageBusy || busy} onClick={() => void saveGalleryHero()}>
+          {pageBusy ? "저장 중…" : "배너 저장"}
+        </Button>
+      </div>
       {/* 1. 사진 올리기 */}
       <form
         onSubmit={onUpload}

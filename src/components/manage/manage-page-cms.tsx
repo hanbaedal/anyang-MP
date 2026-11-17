@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CmsPageSlotSelect } from "@/components/manage/cms-page-slot-select";
 import { CmsFieldKo, CmsSlotPanel } from "@/components/manage/cms-slot-panel";
 import { ManageImagePicker } from "@/components/manage-image-picker";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
   pageSlotItemImage,
   pageSlotItemText,
   pageSlotItemTitle,
+  pageSlotTitle,
 } from "@/lib/page-cms-slots";
 import { ManageFuneralDocPdfPanel } from "@/components/manage/manage-funeral-doc-pdf-panel";
 import { FUNERAL_DOCS_I18N } from "@/lib/funeral-docs-cms";
@@ -32,9 +33,21 @@ const GALLERY_TAG: Partial<Record<ManageVisualCmsSlug, string>> = {
   columbarium: "봉안묘",
 };
 
-export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: ManageVisualCmsSlug }) {
+export function ManagePageCms({
+  initial,
+  slug,
+  defaultSlotKey,
+}: {
+  initial: CmsPage;
+  slug: ManageVisualCmsSlug;
+  defaultSlotKey?: string;
+}) {
   const [page, setPage] = useState(initial);
-  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<string | null>(
+    defaultSlotKey && defaultSlotKey in buildPageCmsSlotMeta({ ...initial, slug })
+      ? defaultSlotKey
+      : pageSlotTitle(slug),
+  );
   const [status, setStatus] = useState<"idle" | "busy" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -367,35 +380,22 @@ export function ManagePageCms({ initial, slug }: { initial: CmsPage; slug: Manag
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
-      <p className="cms-orders-lead">
-        실제 페이지(<code>{publicPath}</code>)와 동일한 배치입니다. 편집할 영역을 <strong>클릭</strong>한 뒤
-        오른쪽에서 수정하세요. 갤러리·공지는 기존 관리 메뉴를 사용합니다.
-      </p>
       <div className="cms-layout mx-auto w-full max-w-[100rem] flex-1 gap-4 p-3 md:p-4">
         <div className="cms-preview-wrap flex min-h-0 min-w-0 flex-col">
-          <div className="cms-preview-toolbar">
-            <span className="text-muted-foreground">미리보기 언어</span>
-            <select
-              className="h-8 rounded-md border border-input bg-card px-2 text-xs"
-              value="ko"
-              disabled
-              aria-label="미리보기 언어"
-            >
-              <option value="ko">한국어</option>
-            </select>
-            <Link
-              href={publicPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto rounded-md border border-input bg-card px-2.5 py-1 text-xs font-medium hover:bg-accent"
-            >
-              공개 페이지 새 창
-            </Link>
-          </div>
           <iframe ref={iframeRef} key={iframeSrc} title="페이지 미리보기" src={iframeSrc} className="cms-frame flex-1" />
         </div>
         <CmsSlotPanel
           slotKey={activeKey ?? undefined}
+          slotSelector={
+            activeKey ? (
+              <CmsPageSlotSelect
+                page={{ ...page, slug }}
+                value={activeKey}
+                disabled={busy}
+                onChange={setActiveKey}
+              />
+            ) : null
+          }
           onSave={() => void save()}
           saveDisabled={busy}
           saving={busy}

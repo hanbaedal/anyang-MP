@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { CmsPageIntro } from "@/components/cms-page-intro";
-import { PastelBox } from "@/components/pastel-box";
+import { CmsPageHeroBand } from "@/components/cms-page-hero-band";
 import { NoticesList } from "@/components/notices-list";
 import { listNoticesLocalized } from "@/lib/notices";
 import { getNoticesPageSettings } from "@/lib/notices-page";
@@ -22,11 +21,16 @@ export default async function NoticesPage() {
   const src = page.listImage?.trim() ? uploadOriginalUrl(page.listImage) : "";
 
   return (
-  <>
+    <>
+      <CmsPageHeroBand
+        kicker={t(locale, "notices.kicker")}
+        title={t(locale, "notices.title")}
+        lead={t(locale, "notices.lead")}
+        heroImage={page.heroImage}
+        imageAlt={t(locale, "notices.title")}
+        large
+      />
       <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
-        <PastelBox className="mb-4 p-4 md:mb-5 md:p-5">
-          <CmsPageIntro title={t(locale, "notices.title")} lead={t(locale, "notices.lead")} />
-        </PastelBox>
         <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
         <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm md:mx-0 md:max-w-none md:aspect-auto">
           {src ? (

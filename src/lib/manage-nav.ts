@@ -6,7 +6,7 @@ export type ManageNavItem = { href: string; i18n: string };
 
 function cmsPage(slug: (typeof CMS_SLUGS)[number]["slug"]): ManageNavItem {
   const item = CMS_SLUGS.find((row) => row.slug === slug)!;
-  return { href: `/manage/pages/${item.slug}`, i18n: item.i18n };
+  return { href: `/manage/cms?slug=${item.slug}`, i18n: item.i18n };
 }
 
 /**
@@ -31,7 +31,7 @@ export function manageNavItems(): ManageNavItem[] {
     // 이용안내: 분양 절차 → 관리비 → 이용안내 → 이용절차 → 공지사항
     cmsPage("procedure"),
     cmsPage("fees"),
-    { href: "/manage/pages/services", i18n: "manage.servicesPage" },
+    { href: "/manage/cms?slug=services", i18n: "manage.servicesPage" },
     cmsPage("funeral"),
     { href: "/manage/notices", i18n: "manage.noticesPage" },
     // 갤러리

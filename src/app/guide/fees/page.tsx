@@ -1,10 +1,8 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -41,14 +39,10 @@ export default async function FeesPage({
     image: item.image?.trim() || undefined,
   }));
 
-  const hero = resolveCmsPageHero(locale, cms);
-
   return (
     <>
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
-        <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="fees" cmsEditMarkers={cmsEdit} />
-        </PastelBox>
         <FeaturesPhotoGrid items={items} cmsSlug="fees" cmsEditMarkers={cmsEdit} />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}

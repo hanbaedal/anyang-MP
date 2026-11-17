@@ -1,12 +1,11 @@
 import Image from "next/image";
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
-import { CmsPageHeroBand } from "@/components/cms-page-hero-band";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 import { pageSlotBodyImage } from "@/lib/page-cms-slots";
@@ -30,20 +29,9 @@ export default async function GreetingPage({
   const bodyImage = cms.bodyImage?.trim() || "";
   const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
 
-  const hero = resolveCmsPageHero(locale, cms);
-
   return (
     <>
-      <CmsPageHeroBand
-        kicker={hero.kicker}
-        title={hero.title}
-        lead={hero.lead}
-        heroImage={cms.heroImage}
-        cmsSlug="greeting"
-        cmsEditMarkers={cmsEdit}
-        imageAlt={hero.title || t(locale, "nav.greeting")}
-        large
-      />
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
         <PastelBox>
           <div

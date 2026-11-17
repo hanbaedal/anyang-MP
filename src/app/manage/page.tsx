@@ -8,7 +8,7 @@ import { manageNavItems } from "@/lib/manage-nav";
 const CARD_COPY: Record<string, { title: string; lead: string }> = {
   "manage.homeCms": {
     title: "홈페이지 CMS",
-    lead: "메인·소메뉴를 공개 화면과 같이 보고 클릭해 편집합니다.",
+    lead: "메인 홈과 소메뉴(인사말·특징·묘역·이용안내 등)를 한 화면에서 미리 보며 편집합니다.",
   },
   "manage.homeSlides": {
     title: "메인 이미지 등록",
@@ -50,7 +50,7 @@ export default async function ManageHomePage() {
         <ManageI18nMigrate />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {manageNavItems().map((item) => {
-            const cms = CMS_SLUGS.find((row) => item.href === `/manage/pages/${row.slug}`);
+            const cms = CMS_SLUGS.find((row) => item.href === `/manage/cms?slug=${row.slug}`);
             const copy = CARD_COPY[item.i18n];
             const title = copy?.title ?? cms?.label ?? item.i18n;
             const lead =

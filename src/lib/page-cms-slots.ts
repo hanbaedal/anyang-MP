@@ -7,7 +7,7 @@ import {
   pageSlotFuneralDocsField,
 } from "@/lib/funeral-docs-cms";
 import { FUNERAL_DOC_IDS, FUNERAL_DOC_META, type FuneralDocId } from "@/lib/funeral-docs-types";
-import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
+import { MANAGE_VISUAL_CMS_SLUGS, type ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
 
 export type PageCmsSlotKind =
   | "title"
@@ -56,21 +56,26 @@ export function pageSlotItemImage(slug: string, itemId: string) {
 }
 
 const LOTS_SLUGS = new Set<ManageVisualCmsSlug>(["burial", "lawn", "columbarium"]);
+const HERO_MENU_SLUGS = new Set<string>(MANAGE_VISUAL_CMS_SLUGS);
 
 export function buildPageCmsSlotMeta(page: CmsPage): Record<string, PageCmsSlotMeta> {
   const slug = page.slug as ManageVisualCmsSlug;
-  const titleLabel = slug === "greeting" ? "제목" : "페이지 제목";
-  const leadLabel = slug === "greeting" ? "요약" : "페이지 요약";
+  const menuHero = HERO_MENU_SLUGS.has(slug);
+  const titleLabel = menuHero ? "제목" : "페이지 제목";
+  const leadLabel = menuHero ? "요약" : "페이지 요약";
   const meta: Record<string, PageCmsSlotMeta> = {
     [pageSlotTitle(slug)]: { label: titleLabel, kind: "title", slug },
     [pageSlotLead(slug)]: { label: leadLabel, kind: "lead", slug },
   };
 
+  if (menuHero) {
+    meta[pageSlotHeroImage(slug)] = { label: "상단 배경", kind: "heroImage", slug };
+  }
+
   if (LOTS_SLUGS.has(slug) || slug === "procedure" || slug === "funeral") {
     meta[pageSlotBody(slug)] = { label: "본문", kind: "body", slug };
   }
   if (slug === "greeting") {
-    meta[pageSlotHeroImage(slug)] = { label: "상단 배경", kind: "heroImage", slug };
     meta[pageSlotBodyImage(slug)] = { label: "본문 사진", kind: "bodyImage", slug };
     meta[pageSlotBody(slug)] = { label: "본문", kind: "body", slug };
   }

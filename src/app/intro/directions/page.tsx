@@ -1,10 +1,8 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { PastelBox } from "@/components/pastel-box";
 import { DirectionsPageBody } from "@/components/directions-page-body";
 import { getCmsPageLocalized, getCmsPageOrDefault, stripDirectionsAddressItems } from "@/lib/cms";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
 
@@ -44,19 +42,10 @@ export default async function DirectionsPage({
     image: item.image?.trim() || undefined,
   }));
 
-  const hero = resolveCmsPageHero(locale, cms);
-
   return (
     <>
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:space-y-8 md:py-10">
-        <PastelBox className="p-4 md:p-5">
-          <CmsPageIntro
-            title={hero.title}
-            lead={hero.lead}
-            cmsSlug="directions"
-            cmsEditMarkers={cmsEdit}
-          />
-        </PastelBox>
         <DirectionsPageBody items={items} cmsSlug="directions" cmsEditMarkers={cmsEdit} />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}

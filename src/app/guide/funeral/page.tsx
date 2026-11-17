@@ -1,13 +1,12 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
-import { CmsPageIntro } from "@/components/cms-page-intro";
+import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
 import { PastelBox } from "@/components/pastel-box";
 import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
 import { getCmsPageLocalized, getCmsPageOrDefault } from "@/lib/cms";
-import { resolveCmsPageHero } from "@/lib/cms-page-hero";
 import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
 import { SITE } from "@/lib/site";
@@ -51,15 +50,12 @@ export default async function FuneralPage({
     image: item.image?.trim() || undefined,
   }));
 
-  const hero = resolveCmsPageHero(locale, cms);
   const docLabels = resolveFuneralDocsDisplay(locale, cms.funeralDocs);
 
   return (
     <>
+      <CmsManagedPageHero locale={locale} cms={cms} cmsEdit={cmsEdit} />
       <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
-        <PastelBox className="p-5 md:p-6">
-          <CmsPageIntro title={hero.title} lead={hero.lead} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
-        </PastelBox>
         <FeaturesPhotoGrid items={items} cmsSlug="funeral" cmsEditMarkers={cmsEdit} />
       <FuneralDocList locale={locale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
       <Prose>

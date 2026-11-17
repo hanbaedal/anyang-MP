@@ -11,9 +11,10 @@ export async function GET() {
 export async function PUT(request: Request) {
   const guard = await requireStaffApi();
   if (guard.error) return guard.error;
-  const body = (await request.json()) as { listImage?: string; galleryId?: string };
+  const body = (await request.json()) as { heroImage?: string; listImage?: string; galleryId?: string };
   try {
     const settings = await saveNoticesPageSettings({
+      heroImage: body.heroImage,
       listImage: body.listImage,
       galleryId: body.galleryId,
     });

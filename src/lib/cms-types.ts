@@ -53,7 +53,7 @@ export type CmsPage = {
   body: string;
   items: CmsItem[];
   updatedAt: string;
-  /** 인사말 상단 배너 배경. 미등록 시 공통 기본 이미지. */
+  /** 소메뉴 상단 배너 배경. 미등록 시 공통 기본 이미지. */
   heroImage?: string;
   /** 인사말 본문 좌측 이미지. 미등록 시 공개에서 숨김. */
   bodyImage?: string;

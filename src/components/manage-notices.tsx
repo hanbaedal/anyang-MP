@@ -19,6 +19,7 @@ export function ManageNotices({
   initialPage: NoticesPageSettings;
 }) {
   const [items, setItems] = useState(initial);
+  const [heroImage, setHeroImage] = useState(initialPage.heroImage);
   const [listImage, setListImage] = useState(initialPage.listImage);
   const [galleryId, setGalleryId] = useState(initialPage.galleryId);
   const [pageBusy, setPageBusy] = useState(false);
@@ -34,23 +35,28 @@ export function ManageNotices({
     if (json.items) setItems(json.items);
   }
 
-  async function savePageImage() {
+  async function savePageSettings(partial: { heroImage?: string; listImage?: string; galleryId?: string }) {
     setPageBusy(true);
     setMessage("");
     try {
       const res = await fetch("/api/manage/notices-page", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listImage, galleryId }),
+        body: JSON.stringify({
+          heroImage: partial.heroImage !== undefined ? partial.heroImage : heroImage,
+          listImage: partial.listImage !== undefined ? partial.listImage : listImage,
+          galleryId: partial.galleryId !== undefined ? partial.galleryId : galleryId,
+        }),
       });
       const json = (await res.json()) as { ok?: boolean; error?: string; settings?: NoticesPageSettings };
       if (!res.ok || !json.ok || !json.settings) {
         setMessage(json.error || "목록 사진 저장에 실패했습니다.");
         return;
       }
+      setHeroImage(json.settings.heroImage);
       setListImage(json.settings.listImage);
       setGalleryId(json.settings.galleryId);
-      setMessage("공지 목록 좌측 사진을 저장했습니다.");
+      setMessage("저장했습니다.");
     } catch {
       setMessage("네트워크 오류입니다.");
     } finally {
@@ -103,6 +109,42 @@ export function ManageNotices({
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
       <div className="space-y-3 rounded-xl border bg-card p-5">
+        <h2 className="font-medium">공지 페이지 상단 배너 배경</h2>
+        <p className="text-sm text-muted-foreground">
+          공개 공지 목록(<code>/support/notices</code>) 헤더 아래 배경입니다. 제목·요약은 다국어 기본 문구를 사용합니다.
+        </p>
+        <ManageImagePicker
+          src={heroImage}
+          disabled={pageBusy}
+          enableLibrary
+          label="배너 배경"
+          onPickSrc={(src) => {
+            setHeroImage(src);
+            setMessage("배경을 골랐습니다. 「배너 저장」을 눌러 반영하세요.");
+          }}
+          onFile={async (file) => {
+            setPageBusy(true);
+            const form = new FormData();
+            form.set("file", file);
+            try {
+              const res = await fetch("/api/manage/upload-image", { method: "POST", body: form });
+              const json = (await res.json()) as { src?: string; error?: string };
+              if (json.src) {
+                setHeroImage(json.src);
+                setMessage("배경을 올렸습니다. 「배너 저장」을 눌러 반영하세요.");
+              } else {
+                setMessage(json.error || "업로드 실패");
+              }
+            } finally {
+              setPageBusy(false);
+            }
+          }}
+        />
+        <Button type="button" disabled={pageBusy} onClick={() => void savePageSettings({})}>
+          {pageBusy ? "저장 중…" : "배너 저장"}
+        </Button>
+      </div>
+      <div className="space-y-3 rounded-xl border bg-card p-5">
         <h2 className="font-medium">공지 목록 좌측 사진</h2>
         <p className="text-sm text-muted-foreground">
           공개 공지 목록 페이지 왼쪽에 크게 보입니다. 글마다 붙는 썸네일이 아니라, 목록 전체용 한 장입니다. 갤러리에서만
@@ -139,7 +181,7 @@ export function ManageNotices({
             }}
           />
         </div>
-        <Button type="button" disabled={pageBusy} onClick={() => void savePageImage()}>
+        <Button type="button" disabled={pageBusy} onClick={() => void savePageSettings({})}>
           {pageBusy ? "저장 중…" : "목록 사진 저장"}
         </Button>
       </div>
