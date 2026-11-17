@@ -157,18 +157,20 @@ export function HomeViewSlides({
   const rawPos = n < 2 ? 0 : reduceMotion ? 1 : pos;
   const showPos = n < 2 ? 0 : clampTrackPos(rawPos, n);
 
+  const slideBasis = `${100 / trackCount}%`;
+
   return (
     <div className={cn("absolute inset-0 z-[5]", cmsEdit && "pointer-events-none")}>
-      <div className="absolute inset-0 overflow-hidden bg-primary" aria-hidden>
+      <div className="absolute inset-0 overflow-clip bg-primary" aria-hidden>
         <div
           key={`track-${paintKey}`}
           className={cn(
-            "flex h-full ease-out motion-reduce:transition-none",
+            "flex h-full min-w-0 ease-out motion-reduce:transition-none",
             animating && !reduceMotion && "transition-transform",
           )}
           style={{
             width: `${trackCount * 100}%`,
-            transform: `translateX(-${(showPos * 100) / trackCount}%)`,
+            transform: `translate3d(-${(showPos * 100) / trackCount}%, 0, 0)`,
             transitionDuration: animating && !reduceMotion ? `${TRANSITION_MS}ms` : "0ms",
           }}
           onTransitionEnd={onTransitionEnd}
@@ -176,8 +178,8 @@ export function HomeViewSlides({
           {track.map((photo, i) => (
             <div
               key={`${photo.src}-t${i}-p${paintKey}`}
-              className="relative h-full shrink-0"
-              style={{ width: `${100 / trackCount}%` }}
+              className="relative h-full min-w-0 shrink-0 grow-0"
+              style={{ flex: `0 0 ${slideBasis}` }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

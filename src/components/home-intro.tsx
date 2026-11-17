@@ -99,6 +99,19 @@ function CmsPick({
       </span>
     );
   }
+  if (!cmsSlot && !cmsEditMarkers) {
+    if (!slotStyle) return <>{children}</>;
+    const colorizedPublic = Boolean(slotStyle.color);
+    return (
+      <span
+        className={cn(colorizedPublic && "hero-cms-slot-color", className)}
+        style={slotStyle}
+        data-hero-custom-color={colorizedPublic ? "1" : undefined}
+      >
+        {children}
+      </span>
+    );
+  }
   if (!cmsSlot) return <>{children}</>;
   const active = cmsSlot.activeKey === slotKey;
   return (
@@ -213,6 +226,7 @@ export function HomeIntro({
                     cmsEditMarkers && "m-0",
                     !koCustomColor("kicker") && "text-primary-foreground/85",
                   )}
+                  style={koSlotStyle("kicker")}
                 >
                   {kicker}
                 </p>
@@ -235,6 +249,7 @@ export function HomeIntro({
                       "block break-keep text-[1.125rem] tracking-tight sm:text-xl md:text-[2.15rem] lg:text-[2.35rem] md:whitespace-nowrap",
                       cmsEditMarkers && "pointer-events-none",
                     )}
+                    style={koSlotStyle("heroLine1")}
                   >
                     {hero1}
                   </span>
@@ -251,6 +266,7 @@ export function HomeIntro({
                       "block break-keep text-2xl md:text-4xl lg:text-[2.75rem]",
                       cmsEditMarkers && "pointer-events-none",
                     )}
+                    style={koSlotStyle("heroLine2")}
                   >
                     {hero2}
                   </span>
@@ -269,6 +285,7 @@ export function HomeIntro({
                     cmsEditMarkers && "pointer-events-none m-0",
                     !koCustomColor("lead") && "text-primary-foreground/85",
                   )}
+                  style={koSlotStyle("lead")}
                 >
                   {locale === "ko" ? renderLeadKo(heroCopy.lead) : tStatic(locale, "home.lead")}
                 </p>

@@ -65,8 +65,10 @@ function slideIdForPhoto(photo: GalleryPhoto) {
 
 export function ManageHomeCms({
   initial,
+  onPersisted,
 }: {
   initial: HomeIntroSlidesSettings;
+  onPersisted?: (settings: HomeIntroSlidesSettings) => void;
   /** @deprecated iframe이 공개 / 를 직접 로드합니다 */
   heroMedia?: { videoSrc: string; audioSrc: string; posterSrc: string };
 }) {
@@ -347,9 +349,11 @@ export function ManageHomeCms({
       if (json.settings.heroTextFont) setHeroTextFont(json.settings.heroTextFont);
       if (json.settings.heroTextColor) setHeroTextColor(json.settings.heroTextColor);
       if (json.settings.socialLinks?.length) setSocialLinks(json.settings.socialLinks);
+      onPersisted?.(json.settings);
       setDirty(false);
-      setMessage("저장했습니다. 공개 홈을 새로고침하면 반영됩니다.");
+      setMessage("저장했습니다. 미리보기와 공개 홈에 반영됩니다.");
       setStatus("ok");
+      bumpFrame();
     } catch {
       setMessage("네트워크 오류입니다.");
       setStatus("error");

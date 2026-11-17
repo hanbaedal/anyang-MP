@@ -135,7 +135,10 @@ export function ManageCmsShell({
       </div>
       {workspace.kind === "home" ? (
         homeSettings ? (
-          <ManageHomeCms initial={homeSettings} />
+          <ManageHomeCms
+            initial={homeSettings}
+            onPersisted={(settings) => setHomeSettings(settings)}
+          />
         ) : (
           <p className="p-6 text-sm text-muted-foreground">{homeLoading ? "메인 설정을 불러오는 중…" : ""}</p>
         )

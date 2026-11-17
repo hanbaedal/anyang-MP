@@ -36,7 +36,6 @@ export {
 
 const localFile = dataFile("home-intro-slides.local.json");
 const SETTINGS_KEY = "home_intro_slides";
-const READ_MS = 2_500;
 
 export function defaultHomeIntroSlidesSettings(): HomeIntroSlidesSettings {
   return {
@@ -146,19 +145,18 @@ async function readFromMongo(): Promise<HomeIntroSlidesSettings | null> {
   return row ? fromDoc(row as Record<string, unknown>) : null;
 }
 
-/** 공개 홈용. 느리면 빈 설정 → 폴백 장. 저장 API에서는 쓰지 말 것. */
+/** 공개 홈용. Mongo 읽기 실패 시에만 로컬·기본값. 저장 API에서는 쓰지 말 것. */
 export async function getHomeIntroSlidesSettings(): Promise<HomeIntroSlidesSettings> {
   if (hasMongo()) {
-    try {
-      const fromMongo = await Promise.race([
-        readFromMongo(),
-        new Promise<null>((resolve) => {
-          setTimeout(() => resolve(null), READ_MS);
-        }),
-      ]);
-      if (fromMongo) return fromMongo;
-    } catch (error) {
-      console.error("[home-intro-slides] mongo read failed", error);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const fromMongo = await readFromMongo();
+        if (fromMongo) return fromMongo;
+      } catch (error) {
+        console.error("[home-intro-slides] mongo read failed", error);
+        if (attempt === 1) break;
+      }
+      await new Promise((r) => setTimeout(r, 250));
     }
   }
   const local = await readLocal();
@@ -225,11 +223,15 @@ export async function removeHomeIntroSlideFile(src: string) {
   await deleteUploadObject(key);
 }
 
-/** 공개 홈에 넘길 ViewSlide[] — 등록 없으면 05.jpg 한 장 */
-export async function getHomeIntroSlidesForPublic(): Promise<ViewSlide[]> {
-  const settings = await getHomeIntroSlidesSettings();
+export function homeIntroSlidesToViewSlides(settings: HomeIntroSlidesSettings): ViewSlide[] {
   if (settings.slides.length > 0) {
     return settings.slides.map((s) => ({ src: s.src, alt: s.alt }));
   }
   return [{ src: HOME_INTRO_SLIDE_FALLBACK_SRC, alt: HOME_INTRO_SLIDE_FALLBACK_ALT }];
+}
+
+/** 공개 홈에 넘길 ViewSlide[] — 등록 없으면 05.jpg 한 장 */
+export async function getHomeIntroSlidesForPublic(): Promise<ViewSlide[]> {
+  const settings = await getHomeIntroSlidesSettings();
+  return homeIntroSlidesToViewSlides(settings);
 }
