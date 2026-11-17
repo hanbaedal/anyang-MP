@@ -31,7 +31,7 @@ export default async function PricesPage() {
     : REMAINING.map((row) => ({ name: t(locale, row.nameKey), seats: row.seats === UNCONFIRMED ? unconfirmed : row.seats }));
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-12">
+    <div className="site-container space-y-8 py-12">
       <h1 className="sr-only">{cms.title || t(locale, "prices.title")}</h1>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">

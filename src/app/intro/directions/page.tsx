@@ -46,7 +46,7 @@ export default async function DirectionsPage({
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:space-y-8 md:py-10">
+      <div className="site-container w-full space-y-6 py-8 md:space-y-8 md:py-10">
         <DirectionsPageBody
           items={items}
           cmsSlug="directions"

@@ -59,7 +59,7 @@ function SitemapColumnGrid({
 
 export function SitemapSections({ sections, locale }: { sections: SitemapSection[]; locale: Locale }) {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-3 py-5 pb-8 sm:px-4 sm:py-6">
+    <div className="site-container w-full space-y-8 py-5 pb-8 sm:py-6">
       {sections.map((section) => (
         <section key={section.titleI18n} aria-labelledby={`sitemap-${section.titleI18n}`}>
           <h2

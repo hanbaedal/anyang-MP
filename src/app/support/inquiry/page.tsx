@@ -17,7 +17,7 @@ export default async function InquiryPage() {
   return (
     <>
       <PageHero kicker={t(locale, "inquiry.kicker")} title={t(locale, "inquiry.title")} />
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="site-container py-12">
         <InquiryBoard initial={items} locale={locale} />
       </div>
     </>

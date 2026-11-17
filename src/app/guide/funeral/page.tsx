@@ -57,7 +57,7 @@ export default async function FuneralPage({
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <div className="pc-soft-card-fill mx-auto space-y-10 px-4 py-8 md:py-10">
+      <div className="site-container pc-soft-card-fill space-y-10 py-8 md:py-10">
         <FeaturesPhotoGrid
           items={items}
           cmsSlug="funeral"

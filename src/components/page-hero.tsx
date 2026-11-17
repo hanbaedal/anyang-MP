@@ -40,7 +40,7 @@ export function PageHero({
       />
       <div
         className={cn(
-          "relative mx-auto max-w-6xl px-4",
+          "site-container relative",
           kickerOnly ? "py-1.5 md:py-2" : compact ? "py-2 md:py-2.5" : "py-4 md:py-6",
         )}
       >

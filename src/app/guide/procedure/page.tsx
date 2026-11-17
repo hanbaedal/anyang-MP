@@ -78,7 +78,7 @@ export default async function ProcedurePage({
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <div className="pc-soft-card-fill mx-auto space-y-8 px-4 py-8 md:py-10">
+      <div className="site-container pc-soft-card-fill space-y-8 py-8 md:py-10">
         <SaleSteps
           steps={steps.length ? steps : undefined}
           aside={noteAside}

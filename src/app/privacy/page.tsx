@@ -13,7 +13,7 @@ export default async function PrivacyPage() {
   return (
     <>
       <PageHero kicker={t(locale, "privacy.kicker")} title={t(locale, "privacy.title")} lead={t(locale, "privacy.lead")} />
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="site-container py-12">
         <Prose>
           <p>{t(locale, "privacy.p1")}</p>
           <p>{t(locale, "privacy.p2")}</p>

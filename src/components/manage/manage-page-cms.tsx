@@ -477,8 +477,8 @@ export function ManagePageCms({
       : undefined;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-background">
-      <div className="cms-layout mx-auto w-full max-w-[100rem] flex-1 gap-4 p-3 md:p-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="cms-layout mx-auto w-full max-w-[100rem] gap-4 p-3 md:p-4">
         <div className="cms-preview-wrap flex min-h-0 min-w-0 flex-col">
           <iframe ref={iframeRef} key={iframeSrc} title="페이지 미리보기" src={iframeSrc} className="cms-frame flex-1" />
         </div>

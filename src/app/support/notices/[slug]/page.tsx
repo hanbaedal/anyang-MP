@@ -22,7 +22,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ s
   if (!notice) notFound();
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-12">
+    <article className="site-container py-12">
       <h1 className="font-serif text-2xl text-foreground md:text-3xl">{notice.title}</h1>
       <Prose className="mt-6">
         <Paragraphs text={notice.body} />

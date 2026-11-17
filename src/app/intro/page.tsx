@@ -40,7 +40,7 @@ export default async function IntroHubPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+    <div className="site-container space-y-16 py-12">
       <h1 className="sr-only">{t(locale, "nav.intro")}</h1>
         <MenuHubSection
           id="greeting"

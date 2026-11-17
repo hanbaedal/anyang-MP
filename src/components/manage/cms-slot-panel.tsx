@@ -31,31 +31,31 @@ export function CmsSlotPanel({
   }, [slotKey]);
 
   return (
-    <aside className="cms-panel sticky top-3">
+    <aside className="cms-panel">
       <div className="cms-panel-head">
         <strong>슬롯 편집</strong>
       </div>
-      <div ref={bodyRef} className="cms-panel-body space-y-3">
+      <div ref={bodyRef} className="cms-panel-body">
         {!slotKey ? null : (
-          <>
+          <div className="cms-panel-fields space-y-3">
             {slotSelector ? <div className="pb-1">{slotSelector}</div> : null}
             {children}
-          </>
+          </div>
         )}
-        <div className="space-y-2 border-t border-border pt-3">
-          <Button
-            type="button"
-            className={cn(
-              "w-full bg-emerald-800 text-white hover:bg-emerald-900",
-              saving && "opacity-80",
-            )}
-            disabled={saveDisabled || saving}
-            onClick={onSave}
-          >
-            {saving ? "저장 중…" : "저장"}
-          </Button>
-          {footer}
-        </div>
+      </div>
+      <div className="cms-panel-foot space-y-2">
+        <Button
+          type="button"
+          className={cn(
+            "w-full bg-emerald-800 text-white hover:bg-emerald-900",
+            saving && "opacity-80",
+          )}
+          disabled={saveDisabled || saving}
+          onClick={onSave}
+        >
+          {saving ? "저장 중…" : "저장"}
+        </Button>
+        {footer}
       </div>
     </aside>
   );
@@ -81,7 +81,7 @@ export function CmsFieldKo({
   const fieldClass =
     "h-9 w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const areaClass =
-    "min-h-28 w-full resize-y rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "cms-field-area min-h-28 w-full resize-y rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
     <label className="block space-y-1.5 text-sm">
       <span className="font-medium text-foreground">{label}</span>

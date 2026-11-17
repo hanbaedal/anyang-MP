@@ -16,7 +16,8 @@ export default async function PayPage() {
   return (
     <>
       <PageHero kicker={t(locale, "pay.kicker")} title={t(locale, "pay.title")} lead={t(locale, "pay.lead")} />
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-12">
+      <div className="site-container py-12">
+        <div className="mx-auto max-w-3xl space-y-6">
         <ConfirmNote>{BANK.note}</ConfirmNote>
         <div className="rounded-xl border bg-card p-5 text-sm">
           <p>
@@ -51,6 +52,7 @@ export default async function PayPage() {
         <Button asChild>
           <a href={SITE.phoneTel}>{t(locale, "pay.cta")}</a>
         </Button>
+        </div>
       </div>
     </>
   );

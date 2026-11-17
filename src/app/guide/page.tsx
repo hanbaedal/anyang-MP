@@ -116,7 +116,7 @@ export default async function GuideHubPage() {
   }));
 
   return (
-    <div className="pc-soft-card-fill mx-auto space-y-16 px-4 py-12">
+    <div className="site-container pc-soft-card-fill space-y-16 py-12">
       <h1 className="sr-only">{t(locale, "nav.guide")}</h1>
         <MenuHubSection
           id="procedure"

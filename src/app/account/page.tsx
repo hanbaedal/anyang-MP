@@ -23,7 +23,7 @@ export default async function AccountPage() {
   return (
     <>
       <PageHero kicker={t(locale, "nav.account")} title={t(locale, "account.myTitle")} lead={t(locale, "account.myLead")} />
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-12">
+      <div className="site-container space-y-6 py-12">
         <Prose>
           <p>{t(locale, "account.hello", { name: session.name })}</p>
           <p>

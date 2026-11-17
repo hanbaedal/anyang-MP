@@ -169,7 +169,7 @@ export function DirectionsMap({
           ref={figureRef}
           className={cn(
             "relative overflow-hidden rounded-xl border bg-muted",
-            fill ? "mx-auto w-full max-w-[min(100%,96rem)]" : "w-full",
+            fill ? "mx-auto w-full max-w-[var(--site-content-max)]" : "w-full",
             compact && !fill && "max-h-56",
           )}
           style={fill ? { aspectRatio: `${MAP_W} / ${MAP_H}` } : undefined}

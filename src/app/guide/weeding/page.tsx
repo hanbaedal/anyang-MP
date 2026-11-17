@@ -12,7 +12,7 @@ export async function generateMetadata() {
 export default async function WeedingPage() {
   const locale = await readLocale();
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2">
+    <div className="site-container grid gap-10 py-12 md:grid-cols-2">
       <h1 className="sr-only">{t(locale, "weeding.title")}</h1>
       <Prose>
         <p>{t(locale, "weeding.body")}</p>

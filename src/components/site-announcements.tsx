@@ -125,7 +125,7 @@ export function SiteAnnouncements() {
     >
       <div
         className={cn(
-          "pointer-events-auto mx-auto flex max-w-6xl flex-wrap justify-center gap-2.5 sm:gap-3",
+          "site-container pointer-events-auto flex flex-wrap justify-center gap-2.5 sm:gap-3",
           "max-md:grid max-md:grid-cols-2 max-md:justify-items-center max-md:gap-x-2 max-md:gap-y-2.5",
         )}
       >

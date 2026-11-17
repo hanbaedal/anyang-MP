@@ -15,7 +15,8 @@ export default async function KakaoPage() {
   return (
     <>
       <PageHero kicker={t(locale, "kakao.kicker")} title={t(locale, "kakao.title")} lead={t(locale, "kakao.lead")} />
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-12">
+      <div className="site-container py-12">
+        <div className="mx-auto max-w-3xl space-y-6">
         <ConfirmNote>{KAKAO_CHANNEL.note}</ConfirmNote>
         <Prose>
           <p>
@@ -38,6 +39,7 @@ export default async function KakaoPage() {
               )}
           </p>
         </Prose>
+        </div>
       </div>
     </>
   );

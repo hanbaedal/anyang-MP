@@ -30,7 +30,7 @@ export default async function NoticesPage() {
         imageAlt={t(locale, "notices.title")}
         large
       />
-      <div className="pc-notices-fill mx-auto px-4 py-8 md:py-0">
+      <div className="site-container pc-notices-fill py-8 md:py-0">
         <div className="pc-notices-fill-grid grid gap-6 md:gap-0">
         <aside className="pc-notices-aside relative mx-auto aspect-[4/5] w-full max-w-sm md:mx-0 md:max-w-none md:aspect-auto">
           {src ? (

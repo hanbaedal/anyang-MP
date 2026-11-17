@@ -38,8 +38,21 @@
 
 .cms-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 340px);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 26rem);
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+@media (min-width: 1200px) {
+  .cms-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 30rem);
+  }
+}
+@media (min-width: 1440px) {
+  .cms-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 34rem);
+  }
 }
 .cms-preview-toolbar {
   flex-shrink: 0;
@@ -47,12 +60,18 @@
 .cms-frame {
   display: block;
   width: 100%;
-  min-height: min(75vh, 900px);
+  flex: 1;
+  min-height: 0;
+  height: 100%;
   border: 0;
   background: #f4f1ea;
 }
 .cms-preview-wrap {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--card);
@@ -70,20 +89,47 @@
   color: var(--muted-foreground);
 }
 .cms-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  max-height: calc(100dvh - 5.25rem);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow: 0 1px 2px rgba(0, 43, 80, 0.06);
 }
 .cms-panel-head {
+  flex-shrink: 0;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
 .cms-panel-body {
-  padding: 14px;
-  max-height: min(75vh, 900px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  padding: 14px;
+}
+.cms-panel-fields {
+  display: flex;
+  flex-direction: column;
+  min-height: min(100%, 100%);
+  gap: 0.75rem;
+}
+.cms-panel-foot {
+  flex-shrink: 0;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--border);
+  background: #fafbfc;
+}
+.cms-field-area {
+  min-height: clamp(11rem, 32vh, 22rem);
+}
+@media (min-width: 1200px) {
+  .cms-field-area {
+    min-height: clamp(12rem, 38vh, 28rem);
+  }
 }
 .cms-orders-lead {
   margin: 0;
@@ -115,9 +161,17 @@
 @media (max-width: 900px) {
   .cms-layout {
     grid-template-columns: 1fr;
+    height: auto;
+  }
+  .cms-preview-wrap {
+    min-height: min(52vh, 520px);
   }
   .cms-panel {
-    position: static;
+    max-height: none;
+    height: auto;
+  }
+  .cms-field-area {
+    min-height: 10rem;
   }
 }
 
@@ -150,6 +204,17 @@
   --pastel-chrome-fg: #002b50;
   --pastel-chrome-border: rgba(0, 43, 80, 0.14);
   --radius: 0.75rem;
+  /* 게스트 공개 — 네이버 포털식 본문 폭 (PC·노트북·4K 동일 상한) */
+  --site-content-max: 71rem; /* 1136px */
+  --site-content-pad-x: 1rem;
+}
+
+.site-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--site-content-max);
+  margin-inline: auto;
+  padding-inline: var(--site-content-pad-x);
 }
 
 /* 모바일: 얇은 헤더·햄버거 시트에서 본문이 비칠 때 대비 여유 */
@@ -258,24 +323,12 @@
 }
 
 /*
- * AMP-77: 특징·분양절차 본문 폭 (6xl=72rem 기준 · 공지와 동일 +20% / 4K +50%).
+ * 특징·분양절차 등 — .site-container와 동일 상한(네이버식).
  * 풀블리드 아님. 오시는길 dense 카드는 미적용.
  */
 .pc-soft-card-fill {
   width: 100%;
-  max-width: 72rem; /* 6xl */
-}
-
-@media (min-width: 768px) {
-  .pc-soft-card-fill {
-    max-width: 86.4rem; /* 72×1.2 — 노트북·일반 PC */
-  }
-}
-
-@media (min-width: 2560px) {
-  .pc-soft-card-fill {
-    max-width: 108rem; /* 72×1.5 — 4K */
-  }
+  max-width: var(--site-content-max);
 }
 
 /*
@@ -445,16 +498,10 @@
   }
 }
 
-/* AMP-58/59/60: 공지 목록 — 잔여 높이 + 가로 폭(노트북 +20% · 4K +50% vs 7xl) */
+/* 공지 목록 — 게스트 본문 폭과 동일 */
 .pc-notices-fill {
   width: 100%;
-  max-width: 96rem; /* 80rem(7xl)×1.2 — 노트북·일반 PC */
-}
-
-@media (min-width: 2560px) {
-  .pc-notices-fill {
-    max-width: 120rem; /* 80rem×1.5 — 4K */
-  }
+  max-width: var(--site-content-max);
 }
 
 @media (min-width: 768px) {

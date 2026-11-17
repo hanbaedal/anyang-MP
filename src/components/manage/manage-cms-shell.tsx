@@ -135,22 +135,24 @@ export function ManageCmsShell({
     isManageVisualCmsSlug(page.slug);
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] min-h-0 flex-1 flex-col bg-background">
+    <div className="flex min-h-[calc(100dvh-4rem)] flex-col bg-background">
       <div className="shrink-0 border-b bg-[#fffcf7] px-3 py-2 md:px-4">
         <CmsWorkspaceSelect value={workspace} disabled={false} onChange={onWorkspaceChange} />
       </div>
       {workspace.kind === "home" ? (
         homeSettings ? (
-          <ManageHomeCms
-            initial={homeSettings}
-            onPersisted={(settings) => setHomeSettings(settings)}
-          />
+          <div className="flex min-h-[calc(100dvh-7rem)] flex-1 flex-col overflow-hidden">
+            <ManageHomeCms
+              initial={homeSettings}
+              onPersisted={(settings) => setHomeSettings(settings)}
+            />
+          </div>
         ) : (
           <p className="p-6 text-sm text-muted-foreground">{homeLoading ? "메인 설정을 불러오는 중…" : ""}</p>
         )
       ) : pageReady ? (
         <>
-          <div className="relative min-h-0 flex-1">
+          <div className="relative flex min-h-[calc(100dvh-7rem)] flex-1 flex-col overflow-hidden">
             {pageFetching ? (
               <p className="pointer-events-none absolute right-4 top-2 z-10 rounded-md bg-card/90 px-2 py-1 text-xs text-muted-foreground shadow-sm">
                 최신 데이터 동기화 중…

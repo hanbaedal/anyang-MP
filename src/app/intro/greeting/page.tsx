@@ -32,7 +32,7 @@ export default async function GreetingPage({
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <article className="mx-auto max-w-6xl px-4 py-8 md:py-10">
+      <article className="site-container py-8 md:py-10">
         <PastelBox>
           <div
             className={

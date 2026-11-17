@@ -25,7 +25,7 @@ export default async function GalleryPage() {
         imageAlt={t(locale, "gallery.title")}
         large
       />
-      <div className="mx-auto w-full max-w-7xl min-w-0 overflow-x-hidden px-3 py-8 sm:px-4 sm:py-10">
+      <div className="site-container w-full min-w-0 overflow-x-hidden py-8 sm:py-10">
         <h1 className="sr-only">{t(locale, "gallery.title")}</h1>
         <GalleryGrid items={items} />
       </div>

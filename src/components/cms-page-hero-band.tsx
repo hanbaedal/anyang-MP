@@ -66,7 +66,7 @@ export function CmsPageHeroBand({
       />
       <div
         className={cn(
-          "relative mx-auto max-w-6xl px-4",
+          "site-container relative",
           large ? "py-12 md:py-16 lg:py-[4.5rem]" : "py-4 md:py-6",
         )}
       >

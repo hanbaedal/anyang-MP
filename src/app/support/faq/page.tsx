@@ -18,7 +18,7 @@ export default async function FaqPage() {
   return (
     <>
       <PageHero kicker={t(locale, "faq.kicker")} title={t(locale, "faq.title")} lead={t(locale, "faq.lead")} />
-      <div className="mx-auto max-w-6xl space-y-8 px-4 py-12">
+      <div className="site-container space-y-8 py-12">
         {items.length === 0 ? (
           <p className="text-muted-foreground">{t(locale, "faq.empty")}</p>
         ) : (

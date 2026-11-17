@@ -18,7 +18,7 @@ export default async function RemodelPage() {
     ? cms.items
     : REMODEL_TYPES.map((item) => ({ id: item.title, title: item.title, text: item.text, image: item.image }));
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-12">
+    <div className="site-container w-full py-12">
       <h1 className="sr-only">{cms.title || t(locale, "remodel.title")}</h1>
       <Prose>
         {cms.body ? (

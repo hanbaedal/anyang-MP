@@ -31,7 +31,7 @@ export default async function BurialPage({
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 md:py-10">
+      <div className="site-container w-full space-y-8 py-8 md:py-10">
         <PastelBox className="p-5 md:p-6">
           <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
             {cms.body ? (

@@ -45,7 +45,7 @@ export default async function LotsHubPage() {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-16 px-4 py-12">
+    <div className="site-container w-full space-y-16 py-12">
       <h1 className="sr-only">{t(locale, "nav.lots")}</h1>
         <MenuHubSection id="lawn" title={lawn.title} href="/lots/lawn" moreLabel={t(locale, "more.detail")}>
           <Prose>{lawn.body}</Prose>
