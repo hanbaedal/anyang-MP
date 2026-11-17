@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CmsHomeSlidesPanel } from "@/components/manage/cms-home-slides-panel";
 import { CmsFontPick } from "@/components/manage/cms-font-pick";
@@ -575,34 +574,6 @@ export function ManageHomeCms({
     <div className="flex min-h-0 flex-1 flex-col bg-background">
       <div className="cms-layout mx-auto w-full max-w-[100rem] flex-1 gap-4 p-3 md:p-4">
         <div className="cms-preview-wrap flex min-h-0 min-w-0 flex-col">
-          <div className="cms-preview-toolbar">
-            <span className="text-muted-foreground">미리보기 언어</span>
-            <select
-              className="h-8 rounded-md border border-input bg-card px-2 text-xs"
-              value="ko"
-              disabled
-              aria-label="미리보기 언어"
-            >
-              <option value="ko">한국어</option>
-            </select>
-            <Button
-              type="button"
-              size="sm"
-              variant={activeKey === "home.slides" ? "default" : "outline"}
-              className="h-8 text-xs"
-              onClick={() => setActiveKey("home.slides")}
-            >
-              전경 슬라이드·갤러리
-            </Button>
-            <Link
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto rounded-md border border-input bg-card px-2.5 py-1 text-xs font-medium hover:bg-accent"
-            >
-              공개 홈 새 창
-            </Link>
-          </div>
           <iframe
             ref={iframeRef}
             key={iframeSrc}
