@@ -634,14 +634,6 @@ export function ManageHomeCms({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
-      <p className="cms-orders-lead">
-        실제 홈페이지(<code>/</code>)와 동일한 배치입니다. 오른쪽 패널에서 <strong>갤러리 사진</strong>을 고르거나
-        전경·문구·<strong>우측 SNS</strong>를 클릭해 수정하세요. 영상·음악은{" "}
-        <Link href="/manage/home-hero" className="text-primary underline-offset-2 hover:underline">
-          메인 영상·음악
-        </Link>
-        .
-      </p>
       <div className="cms-layout mx-auto w-full max-w-[100rem] flex-1 gap-4 p-3 md:p-4">
         <div className="cms-preview-wrap flex min-h-0 min-w-0 flex-col">
           <div className="cms-preview-toolbar">
