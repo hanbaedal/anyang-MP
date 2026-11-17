@@ -44,16 +44,27 @@ export function guideCardPastelSurface(index: number) {
   return cn("border", pastelCardClass(index));
 }
 
-/** 공원특징 2×2 — 무지개 파스텔 4색 (연한 톤, 좌상·우상·좌하·우하) */
+/** 공원특징 2×2 — 첨부 팔레트 (좌상 하늘·우상 민트·좌하 노랑·우하 분홍) */
 export const FEATURE_RAINBOW_PASTELS = [
-  "border-[#d4ebf2] bg-[#eef9fc]",
-  "border-[#ddd9f0] bg-[#f0eff9]",
-  "border-[#e6ecc8] bg-[#f4f7e8]",
-  "border-[#d0e8f4] bg-[#eaf6fc]",
+  "bg-[#d6f0f8]",
+  "bg-[#d8f2d0]",
+  "bg-[#f4eeb8]",
+  "bg-[#ead8f4]",
+] as const;
+
+const FEATURE_RAINBOW_SHAPES = [
+  "feature-rainbow-shape-tl",
+  "feature-rainbow-shape-tr",
+  "feature-rainbow-shape-bl",
+  "feature-rainbow-shape-br",
 ] as const;
 
 export function featureRainbowPastelClass(index: number) {
-  return cn("border", FEATURE_RAINBOW_PASTELS[index % FEATURE_RAINBOW_PASTELS.length]!);
+  return FEATURE_RAINBOW_PASTELS[index % FEATURE_RAINBOW_PASTELS.length]!;
+}
+
+export function featureRainbowShapeClass(index: number) {
+  return FEATURE_RAINBOW_SHAPES[index % FEATURE_RAINBOW_SHAPES.length]!;
 }
 
 export function guideCardTitleClass({

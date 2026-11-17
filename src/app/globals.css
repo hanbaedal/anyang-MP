@@ -401,6 +401,45 @@
   }
 }
 
+/* 공원특징 4카드 — 첨부 목업형 사다리꼴·중앙 마름모 여백 */
+.features-rainbow-grid {
+  gap: 0.25rem;
+}
+
+@media (min-width: 640px) {
+  .features-rainbow-grid {
+    gap: 0.35rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .features-rainbow-grid {
+    gap: 0.45rem;
+  }
+}
+
+.feature-rainbow-card {
+  overflow: hidden;
+  border-radius: 0;
+  filter: drop-shadow(0 0 0 1.25px rgba(15, 23, 42, 0.92));
+}
+
+.feature-rainbow-shape-tl {
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+}
+
+.feature-rainbow-shape-tr {
+  clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.feature-rainbow-shape-bl {
+  clip-path: polygon(0 0, 84% 0, 100% 100%, 0 100%);
+}
+
+.feature-rainbow-shape-br {
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 16% 100%);
+}
+
 /*
  * AMP-58 PC: 특징·절차 소프트 카드 높이 — 짧은 뷰포트에서 한 화면에 가깝게.
  * AMP-77 scale 카드는 짧은 창에서 aspect를 끄고 rem 바닥으로 복귀.

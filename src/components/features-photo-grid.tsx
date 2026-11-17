@@ -3,6 +3,7 @@ import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
 import {
   cardHasGalleryImage,
   featureRainbowPastelClass,
+  featureRainbowShapeClass,
   guideCardBodyTextClass,
   guideCardPastelSurface,
   guideCardTitleClass,
@@ -90,6 +91,7 @@ export function FeaturesPhotoGrid({
         dense && !transit && "gap-3 sm:gap-3",
         transit && "grid-cols-1 gap-4 sm:gap-4 md:gap-3 lg:gap-4",
         fill && "pc-onepage-grow pc-onepage-grid-2 md:gap-3",
+        featureRainbow && !dense && !transit && "features-rainbow-grid",
         className,
       )}
     >
@@ -119,8 +121,14 @@ export function FeaturesPhotoGrid({
           <article
             key={itemId}
             className={cn(
-              "pc-viewport-card relative isolate overflow-hidden rounded-2xl shadow-sm",
-              rainbow && cn(featureRainbowPastelClass(index), "pc-viewport-card--features-rainbow"),
+              "pc-viewport-card relative isolate",
+              !rainbow && "overflow-hidden rounded-2xl shadow-sm",
+              rainbow &&
+                cn(
+                  featureRainbowPastelClass(index),
+                  featureRainbowShapeClass(index),
+                  "feature-rainbow-card pc-viewport-card--features-rainbow",
+                ),
               !rainbow && !hasPhoto && guideCardPastelSurface(index),
               transit && "flex flex-col shadow-md ring-1 ring-[color:var(--pastel-chrome-border)]",
               !dense && "pc-viewport-card--scale",
