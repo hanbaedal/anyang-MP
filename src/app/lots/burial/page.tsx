@@ -2,7 +2,6 @@ import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { PastelBox } from "@/components/pastel-box";
 import { LotsPhotoGrid } from "@/components/lots-photo-grid";
 import { Prose } from "@/components/page-hero";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
@@ -32,17 +31,15 @@ export default async function BurialPage({
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="site-container w-full space-y-8 py-8 md:py-10">
-        <PastelBox className="p-5 md:p-6">
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            {cms.body ? (
-              <CmsBodyMark cmsSlug="burial" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
-            ) : (
-              <CmsBodyMark cmsSlug="burial" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
-                <p>{t(displayLocale, "burial.body")}</p>
-              </CmsBodyMark>
-            )}
-          </Prose>
-        </PastelBox>
+        <Prose className="max-w-none">
+          {cms.body ? (
+            <CmsBodyMark cmsSlug="burial" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
+          ) : (
+            <CmsBodyMark cmsSlug="burial" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
+              <p>{t(displayLocale, "burial.body")}</p>
+            </CmsBodyMark>
+          )}
+        </Prose>
         <LotsPhotoGrid items={items} layout="detail" emptyLabel={t(locale, "lots.galleryEmpty")} />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}

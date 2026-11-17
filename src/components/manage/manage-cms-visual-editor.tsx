@@ -290,20 +290,23 @@ export function ManageCmsVisualEditor({
           </div>
         ) : galleryDriven ? (
           <div className="space-y-6">
-            <PastelBox>
+            <div className="space-y-3">
               <ManageEditableIntro
                 title={page.title}
                 lead={page.lead}
                 onTitle={(title) => setPage((p) => ({ ...p, title }))}
                 onLead={(lead) => setPage((p) => ({ ...p, lead }))}
               />
-              <textarea
-                className={cnBodyArea()}
-                value={page.body}
-                disabled={busy}
-                onChange={(e) => setPage((p) => ({ ...p, body: e.target.value }))}
-              />
-            </PastelBox>
+              <label className="block space-y-1">
+                <span className="text-xs text-muted-foreground">본문</span>
+                <textarea
+                  className={cnBodyArea()}
+                  value={page.body}
+                  disabled={busy}
+                  onChange={(e) => setPage((p) => ({ ...p, body: e.target.value }))}
+                />
+              </label>
+            </div>
             <LotsPhotoGrid items={lotsPreviewItems} layout="detail" emptyLabel="갤러리에 해당 태그 사진을 올리면 여기에 보입니다." />
           </div>
         ) : (
