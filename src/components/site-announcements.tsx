@@ -120,7 +120,8 @@ export function SiteAnnouncements() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-12 z-30 max-h-[min(78vh,640px)] overflow-y-auto px-2 py-2.5 sm:px-3 lg:left-36 lg:px-4"
+      className="pointer-events-none fixed inset-x-0 z-40 max-h-[min(78vh,640px)] overflow-y-auto px-2 py-2.5 sm:px-3 lg:left-36 lg:px-4"
+      style={{ top: "var(--site-header-h)" }}
       aria-label={t("home.events")}
     >
       <div

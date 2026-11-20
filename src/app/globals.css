@@ -242,16 +242,31 @@
 }
 
 /*
- * AMP-107: 게스트 헤더 — 불투명 크림 바로 고정(투명 시 본문 대비에 따라
- * 보였다 안 보였다 하는 깜빡임). 로고색 글자 유지.
+ * AMP-107/137: 게스트 헤더 — 셸·바 모두 불투명 크림(투명 잔여 제거).
+ * 본문·공지·한페이지 히어로보다 위에 고정. 로고색 글자 유지.
  */
+:root {
+  --site-header-bg: #fffcf7;
+  --site-header-h: 3rem; /* h-12 */
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --site-header-h: 3.5rem; /* lg:h-14 */
+  }
+}
+
 .site-header-shell {
-  background: #fffcf7;
+  position: relative;
+  z-index: 50;
+  isolation: isolate;
+  flex-shrink: 0;
+  background: var(--site-header-bg);
   border-bottom: 1px solid var(--pastel-chrome-border);
 }
 
 .site-header-bar {
-  background: transparent !important;
+  background: var(--site-header-bg) !important;
   backdrop-filter: none;
   color: var(--pastel-chrome-fg);
   border-color: transparent;
