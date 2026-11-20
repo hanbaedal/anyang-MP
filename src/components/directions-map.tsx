@@ -139,7 +139,8 @@ export function DirectionsMap({
     <div className={cn(fill ? "flex min-h-0 flex-1 flex-col gap-2 md:gap-3" : "space-y-4")}>
       <div
         className={cn(
-          "flex shrink-0 flex-wrap gap-2",
+          /* AMP-106: 모바일도 3버튼 한 줄 고정 — wrap 금지 · 패딩·글자 축소 */
+          "flex w-full shrink-0 flex-nowrap items-stretch gap-1.5 sm:gap-2",
           fill && contentColumnWidth != null && contentColumnWidth > 0 && "mx-auto max-w-full",
         )}
         style={
@@ -148,14 +149,31 @@ export function DirectionsMap({
             : undefined
         }
       >
-        <Button type="button" disabled={busy !== null} onClick={() => void openRoute("naver")}>
+        <Button
+          type="button"
+          disabled={busy !== null}
+          onClick={() => void openRoute("naver")}
+          className="h-auto min-w-0 flex-1 whitespace-normal px-2 py-2 text-center text-[0.6875rem] leading-snug sm:whitespace-nowrap sm:px-3 sm:text-sm md:px-4 md:text-sm"
+        >
           {t("map.naver")}
         </Button>
-        <Button type="button" variant="outline" disabled={busy !== null} onClick={() => void openRoute("kakao")}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy !== null}
+          onClick={() => void openRoute("kakao")}
+          className="h-auto min-w-0 flex-1 whitespace-normal px-2 py-2 text-center text-[0.6875rem] leading-snug sm:whitespace-nowrap sm:px-3 sm:text-sm md:px-4 md:text-sm"
+        >
           {t("map.kakao")}
         </Button>
-        <Button asChild variant="secondary">
-          <a href={googleMapsViewUrl()} target="_blank" rel="noreferrer" title={`${DEST_NAME} 구글 지도`}>
+        <Button asChild variant="secondary" className="h-auto min-w-0 flex-1">
+          <a
+            href={googleMapsViewUrl()}
+            target="_blank"
+            rel="noreferrer"
+            title={`${DEST_NAME} 구글 지도`}
+            className="whitespace-normal px-2 py-2 text-center text-[0.6875rem] leading-snug sm:whitespace-nowrap sm:px-3 sm:text-sm md:px-4 md:text-sm"
+          >
             {t("map.view")}
           </a>
         </Button>
