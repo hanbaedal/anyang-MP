@@ -483,6 +483,76 @@
   transform-origin: center center;
 }
 
+/* AMP-138: 모바일 공원특징 — fees 사각형(둥근 패널)처럼 · 사다리꼴/회전 해제 */
+@media (max-width: 767px) {
+  .features-rainbow-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    overflow: visible;
+  }
+
+  .features-rainbow-grid > * {
+    overflow: visible;
+  }
+
+  .feature-rainbow-card {
+    --fr-rotate: 0deg !important;
+    --fr-flip-x: 1 !important;
+    border-radius: 1.25rem;
+    clip-path: none;
+    filter: none;
+    transform: none !important;
+    min-height: 9.5rem;
+    border: 1px solid transparent;
+    box-shadow:
+      0 0.55rem 1.15rem rgba(15, 23, 42, 0.1),
+      0 0.12rem 0.25rem rgba(15, 23, 42, 0.05),
+      inset 0 0.14rem 0.3rem rgba(255, 255, 255, 0.55),
+      inset 0 -0.22rem 0.45rem rgba(15, 23, 42, 0.07);
+  }
+
+  .feature-rainbow-card-inner {
+    transform: none !important;
+    min-height: 9.5rem;
+  }
+
+  .feature-rainbow-card .pc-viewport-card-body {
+    position: relative !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: 9.5rem;
+    padding: 1.25rem !important;
+    justify-content: center !important;
+  }
+
+  /* fees-orbit-oval 톤에 맞춘 파스텔 그라데이션 */
+  .features-rainbow-grid > .feature-rainbow-card:nth-child(1) {
+    border-color: color-mix(in srgb, #a8c8d8 88%, #fff);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+      linear-gradient(145deg, #eef6fa 0%, #c8dde8 55%, #9ebfd4 100%);
+  }
+  .features-rainbow-grid > .feature-rainbow-card:nth-child(2) {
+    border-color: color-mix(in srgb, #9ec9a2 88%, #fff);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+      linear-gradient(145deg, #eef8f0 0%, #c5e4c8 55%, #8fbf96 100%);
+  }
+  .features-rainbow-grid > .feature-rainbow-card:nth-child(3) {
+    border-color: color-mix(in srgb, #ddd0a0 88%, #fff);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+      linear-gradient(145deg, #faf6e4 0%, #ebe2b8 55%, #d4c890 100%);
+  }
+  .features-rainbow-grid > .feature-rainbow-card:nth-child(4) {
+    border-color: color-mix(in srgb, #c8b8d8 88%, #fff);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+      linear-gradient(145deg, #f6f0fa 0%, #ddd0ea 55%, #b8a4cc 100%);
+  }
+}
+
 /*
  * AMP-58 PC: 특징·절차 소프트 카드 높이 — 짧은 뷰포트에서 한 화면에 가깝게.
  * AMP-77 scale 카드는 짧은 창에서 aspect를 끄고 rem 바닥으로 복귀.
