@@ -976,10 +976,11 @@
   --fees-orbit-w: min(54rem, 100%);
   --fees-orbit-h: min(44rem, 96vw);
   /* AMP-118: 4박스 공통 크기 · 패딩 여유(스크롤/잘림 없음) */
-  --fees-box-w: 16rem;
+  /* AMP-119: 폭 축소 · 내용 중앙 */
+  --fees-box-w: 13rem;
   --fees-box-h: 15.5rem;
   --fees-box-pad-y: 1.45rem;
-  --fees-box-pad-x: 1.5rem;
+  --fees-box-pad-x: 1.15rem;
   position: relative;
   width: var(--fees-orbit-w);
   height: var(--fees-orbit-h);
@@ -1058,7 +1059,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem;
   text-align: center;
   border: 1px solid transparent;
@@ -1073,6 +1074,7 @@
   margin: 0;
   flex-shrink: 0;
   width: 100%;
+  text-align: center;
   font-size: clamp(0.95rem, 1.9vw, 1.1rem);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -1080,11 +1082,11 @@
 }
 
 .fees-orbit-oval-body {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   width: 100%;
   min-height: 0;
   overflow: visible;
-  padding-inline: 0.2rem;
+  padding-inline: 0.15rem;
   font-size: clamp(0.78rem, 1.4vw, 0.875rem);
   line-height: 1.5;
   text-align: center;
@@ -1093,6 +1095,11 @@
 
 .fees-orbit-oval-body .cms-paragraphs {
   gap: 0.5em;
+  align-items: center;
+}
+
+.fees-orbit-oval-body .cms-paragraphs > p {
+  text-align: center;
 }
 
 .fees-orbit-slot--n {
@@ -1166,20 +1173,21 @@
     min-height: 9.5rem;
     max-height: none;
     border-radius: 1.25rem;
-    align-items: flex-start;
-    text-align: left;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .fees-orbit-oval-label {
     font-size: 1.05rem;
-    text-align: left;
+    text-align: center;
   }
 
   .fees-orbit-oval-body {
     overflow: visible;
     font-size: 0.875rem;
     line-height: 1.55;
-    text-align: left;
+    text-align: center;
   }
 
   .fees-orbit-slot--n,
