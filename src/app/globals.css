@@ -783,11 +783,13 @@
   display: flex;
   flex-direction: column;
   width: var(--procedure-orb-size);
-  height: var(--procedure-orb-size);
-  aspect-ratio: 1;
+  /* AMP-140: 고정 height+overflow 클리핑 해제 — CMS 제목·본문 전부 표시 */
+  min-height: var(--procedure-orb-size);
+  height: auto;
+  aspect-ratio: auto;
   border-radius: 9999px;
-  padding: 1.1rem 1.1rem 1rem;
-  overflow: hidden;
+  padding: 1.1rem 1.1rem 1.15rem;
+  overflow: visible;
   position: relative;
   isolation: isolate;
   border: 1px solid color-mix(in srgb, var(--orb-border) 88%, #fff);
@@ -910,8 +912,9 @@
   width: 100%;
   margin: 0.45rem 0 0;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
+  overflow: visible;
 }
 
 .procedure-orb-blank {
@@ -925,13 +928,12 @@
 .procedure-orb-desc {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   width: 100%;
   margin: 0;
-  overflow: auto;
+  overflow: visible;
   text-align: center;
-  scrollbar-width: thin;
 }
 
 .procedure-orbs-arrow {
