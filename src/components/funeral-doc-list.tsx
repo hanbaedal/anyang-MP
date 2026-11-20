@@ -22,10 +22,10 @@ import {
   type FuneralDocRow,
 } from "@/lib/funeral-docs-types";
 import { mediaUrl } from "@/lib/media";
-import { Prose } from "@/components/page-hero";
 import { PastelBox } from "@/components/pastel-box";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 type PreviewDoc = {
   label: string;
@@ -40,7 +40,10 @@ const DOC_ROW_LABEL_FIELD: Record<FuneralDocId, FuneralDocsKoField> = {
   cremation: "cremation",
 };
 
-function DocItems({
+function DocTable({
+  caption,
+  captionField,
+  hint,
   rows,
   docs,
   locale,
@@ -48,6 +51,9 @@ function DocItems({
   cmsEditMarkers = false,
   onOpen,
 }: {
+  caption: string;
+  captionField: FuneralDocsKoField;
+  hint: string;
   rows: FuneralDocRow[];
   docs: Partial<Record<FuneralDocId, FuneralDocFile>>;
   locale: Locale;
@@ -56,51 +62,104 @@ function DocItems({
   onOpen: (doc: PreviewDoc) => void;
 }) {
   return (
-    <ul className="list-none space-y-2 pl-0">
-      {rows.map((row) => {
-        if (row.type === "text") {
-          return (
-            <li
-              key={row.i18n}
-              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "idLine") } : {})}
-              className="text-[15px] leading-7 text-foreground/90"
-            >
-              {labels.idLine}
-            </li>
-          );
-        }
-        const field = DOC_ROW_LABEL_FIELD[row.docId];
-        const label = labels[field];
-        const file = docs[row.docId];
-        const labelKey = cmsEditMarkers ? pageSlotFuneralDocsField("funeral", field) : undefined;
-        if (file) {
-          const href = mediaUrl(file.filePath);
-          return (
-            <li key={row.docId} className="flex flex-wrap items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => onOpen({ label, href, fileName: file.fileName })}
-                className="inline-flex flex-wrap items-center gap-1.5 text-left text-[15px] text-primary underline-offset-4 hover:underline"
-              >
-                <span {...(labelKey ? { "data-cms-key": labelKey } : {})}>{label}</span>
-                <FileText className="size-4 shrink-0 opacity-80" aria-hidden />
-                <span className="sr-only">{t(locale, "fun.docView")}</span>
-              </button>
-              {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
-            </li>
-          );
-        }
-        return (
-          <li key={row.docId} className="flex flex-wrap items-center gap-0.5 text-[15px] leading-7">
-            <span {...(labelKey ? { "data-cms-key": labelKey } : {})} className="text-foreground/90">
-              {label}
-            </span>
-            <span className="ml-1 text-sm text-muted-foreground">({t(locale, "fun.docPreparing")})</span>
-            {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
-          </li>
-        );
-      })}
-    </ul>
+    <PastelBox className="overflow-hidden p-0">
+      <div className="space-y-1 border-b border-[color:var(--pastel-chrome-border)] px-4 py-3 md:px-5">
+        <h2
+          {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", captionField) } : {})}
+          className="text-xl font-semibold text-[color:var(--pastel-chrome-fg)]"
+        >
+          {caption}
+        </h2>
+        <p
+          {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "hint") } : {})}
+          className="text-sm text-[color:var(--pastel-chrome-fg)]/75"
+        >
+          {hint}
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="fun-docs-table w-full border-collapse text-left text-[15px]">
+          <caption className="sr-only">{caption}</caption>
+          <thead>
+            <tr className="border-b border-[color:var(--pastel-chrome-border)] bg-[color:color-mix(in_srgb,var(--pastel-chrome-bg)_55%,#fff)]">
+              <th scope="col" className="px-4 py-2.5 font-semibold text-[color:var(--pastel-chrome-fg)] md:px-5">
+                {t(locale, "fun.docColName")}
+              </th>
+              <th scope="col" className="px-4 py-2.5 font-semibold text-[color:var(--pastel-chrome-fg)] md:px-5">
+                {t(locale, "fun.docColFile")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => {
+              const zebra = index % 2 === 1 ? "bg-[color:color-mix(in_srgb,#fff_40%,transparent)]" : "";
+              if (row.type === "text") {
+                return (
+                  <tr key={row.i18n} className={cn("border-b border-[color:var(--pastel-chrome-border)]/70", zebra)}>
+                    <td
+                      colSpan={2}
+                      {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "idLine") } : {})}
+                      className="px-4 py-3 leading-7 text-[color:var(--pastel-chrome-fg)]/90 md:px-5"
+                    >
+                      {labels.idLine}
+                    </td>
+                  </tr>
+                );
+              }
+              const field = DOC_ROW_LABEL_FIELD[row.docId];
+              const label = labels[field];
+              const file = docs[row.docId];
+              const labelKey = cmsEditMarkers ? pageSlotFuneralDocsField("funeral", field) : undefined;
+              return (
+                <tr key={row.docId} className={cn("border-b border-[color:var(--pastel-chrome-border)]/70 last:border-b-0", zebra)}>
+                  <th
+                    scope="row"
+                    {...(labelKey ? { "data-cms-key": labelKey } : {})}
+                    className="px-4 py-3 font-medium leading-7 text-[color:var(--pastel-chrome-fg)] md:px-5"
+                  >
+                    {label}
+                  </th>
+                  <td className="px-4 py-3 md:px-5">
+                    {file ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onOpen({
+                              label,
+                              href: mediaUrl(file.filePath),
+                              fileName: file.fileName,
+                            })
+                          }
+                          className="inline-flex items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                        >
+                          <FileText className="size-4 shrink-0 opacity-80" aria-hidden />
+                          <span>{t(locale, "fun.docView")}</span>
+                        </button>
+                        <a
+                          href={mediaUrl(file.filePath)}
+                          download={file.fileName}
+                          className="inline-flex items-center gap-1 text-sm text-[color:var(--pastel-chrome-fg)]/75 underline-offset-4 hover:underline"
+                        >
+                          <Download className="size-3.5 shrink-0" aria-hidden />
+                          {t(locale, "fun.docDownload")}
+                        </a>
+                        {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-sm text-muted-foreground">({t(locale, "fun.docPreparing")})</span>
+                        {cmsEditMarkers ? <CmsFuneralDocPdfSlot docId={row.docId} /> : null}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </PastelBox>
   );
 }
 
@@ -120,54 +179,28 @@ export function FuneralDocList({
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-        <PastelBox>
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <h2
-              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "burialTitle") } : {})}
-              className="text-xl text-[color:var(--pastel-chrome-fg)]"
-            >
-              {labels.burialTitle}
-            </h2>
-            <p
-              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "hint") } : {})}
-              className="text-sm text-[color:var(--pastel-chrome-fg)]/75"
-            >
-              {labels.hint}
-            </p>
-            <DocItems
-              rows={FUNERAL_BURIAL_ROWS}
-              docs={docs}
-              locale={locale}
-              labels={labels}
-              cmsEditMarkers={cmsEditMarkers}
-              onOpen={setPreview}
-            />
-          </Prose>
-        </PastelBox>
-        <PastelBox>
-          <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-            <h2
-              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "cremationTitle") } : {})}
-              className="text-xl text-[color:var(--pastel-chrome-fg)]"
-            >
-              {labels.cremationTitle}
-            </h2>
-            <p
-              {...(cmsEditMarkers ? { "data-cms-key": pageSlotFuneralDocsField("funeral", "hint") } : {})}
-              className="text-sm text-[color:var(--pastel-chrome-fg)]/75"
-            >
-              {labels.hint}
-            </p>
-            <DocItems
-              rows={FUNERAL_CREMATION_ROWS}
-              docs={docs}
-              locale={locale}
-              labels={labels}
-              cmsEditMarkers={cmsEditMarkers}
-              onOpen={setPreview}
-            />
-          </Prose>
-        </PastelBox>
+        <DocTable
+          caption={labels.burialTitle}
+          captionField="burialTitle"
+          hint={labels.hint}
+          rows={FUNERAL_BURIAL_ROWS}
+          docs={docs}
+          locale={locale}
+          labels={labels}
+          cmsEditMarkers={cmsEditMarkers}
+          onOpen={setPreview}
+        />
+        <DocTable
+          caption={labels.cremationTitle}
+          captionField="cremationTitle"
+          hint={labels.hint}
+          rows={FUNERAL_CREMATION_ROWS}
+          docs={docs}
+          locale={locale}
+          labels={labels}
+          cmsEditMarkers={cmsEditMarkers}
+          onOpen={setPreview}
+        />
       </div>
 
       <Dialog open={Boolean(preview)} onOpenChange={(open) => !open && setPreview(null)}>
