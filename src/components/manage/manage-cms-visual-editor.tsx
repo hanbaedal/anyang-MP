@@ -78,7 +78,7 @@ export function ManageCmsVisualEditor({
       pageRef.current = json.page;
     }
     setStatus("ok");
-    setMessage("저장했습니다. 공개에 반영되며 영어·중국어는 자동 번역됩니다.");
+    setMessage("저장했습니다. 공개에 바로 반영되며, 영어·중국어는 백그라운드에서 자동 번역됩니다.");
     return true;
   }, []);
 

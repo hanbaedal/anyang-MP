@@ -129,7 +129,7 @@ export function CmsEditor({ initial }: { initial: CmsPage }) {
     try {
       // Use render-state `page`, not a setState snapshot side-effect (that sent empty bodies).
       const ok = await putPage(page);
-      if (ok) setMessage("저장했습니다. 공개 페이지에 바로 반영되며, 영어·중국어는 한글 기준으로 자동 번역됩니다.");
+      if (ok) setMessage("저장했습니다. 공개 페이지에 바로 반영되며, 영어·중국어는 백그라운드에서 한글 기준으로 자동 번역됩니다.");
     } catch {
       setStatus("error");
       setMessage("네트워크 오류입니다.");

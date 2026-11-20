@@ -305,7 +305,7 @@ export function ManagePageCms({
       }
       setDirty(false);
       setMessage(
-        `저장했습니다 (${json.page?.updatedAt ? new Date(json.page.updatedAt).toLocaleString("ko-KR") : "방금"}). 공개 ${publicPath} 에 반영됩니다. 한국어 사이트에서 Ctrl+F5로 확인하세요.`,
+        `저장했습니다 (${json.page?.updatedAt ? new Date(json.page.updatedAt).toLocaleString("ko-KR") : "방금"}). 공개 ${publicPath} 에 바로 반영됩니다. 영어·중국어는 백그라운드 번역. 한국어는 Ctrl+F5로 확인하세요.`,
       );
       setStatus("ok");
       setFrameRev((n) => n + 1);

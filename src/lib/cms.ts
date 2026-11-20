@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { BURIAL, COLUMBARIUM, LAWN, REMODEL_TYPES } from "./content";
 import { MESSAGES, type Locale } from "./i18n";
 import { dataFile, readJsonFile, writeJsonFile } from "./local-json";
@@ -7,6 +8,7 @@ import { FEATURES, SALE_STEPS, SITE } from "./site";
 import { PRICES, REMAINING } from "./facts";
 import { normalizeFuneralDocsKo } from "./funeral-docs-cms";
 import { normalizePageCmsTextStyles } from "./page-cms-text-style";
+import { revalidateCmsPublicPages } from "./cms-revalidate";
 import { type CmsItem, type CmsLocaleFields, type CmsPage, type CmsSlug } from "./cms-types";
 import { CONTENT_LOCALES, stillHasHangul, translateText, type ContentLocale } from "./translate-content";
 
@@ -486,7 +488,36 @@ export async function getCmsPageLocalized(slug: CmsSlug, locale: Locale): Promis
   };
 }
 
-async function buildLocaleFields(page: Omit<CmsPage, "updatedAt" | "i18n">, to: ContentLocale): Promise<CmsLocaleFields> {
+type CmsKoSnapshot = {
+  title: string;
+  lead: string;
+  body: string;
+  items: CmsItem[];
+};
+
+function cmsKoSnapshot(page: Pick<CmsPage, "title" | "lead" | "body" | "items">): CmsKoSnapshot {
+  return { title: page.title, lead: page.lead, body: page.body, items: page.items ?? [] };
+}
+
+/** 한국어 텍스트가 바뀌었거나 locale 번역이 비었을 때만 재번역이 필요 */
+function cmsKoTextChanged(next: CmsKoSnapshot, prev: CmsKoSnapshot | null | undefined): boolean {
+  if (!prev) return true;
+  if (prev.title !== next.title || prev.lead !== next.lead || prev.body !== next.body) return true;
+  if (prev.items.length !== next.items.length) return true;
+  for (let i = 0; i < next.items.length; i++) {
+    const a = next.items[i];
+    const b = prev.items.find((row) => row.id === a.id) ?? prev.items[i];
+    if (!b) return true;
+    if (b.title !== a.title || (b.text ?? "") !== (a.text ?? "")) return true;
+  }
+  return false;
+}
+
+function cmsI18nComplete(i18n: CmsPage["i18n"] | undefined): boolean {
+  return Boolean(i18n?.en?.title && i18n?.zh?.title);
+}
+
+async function buildLocaleFields(page: CmsKoSnapshot & { slug?: string }, to: ContentLocale): Promise<CmsLocaleFields> {
   const items: CmsItem[] = [];
   for (const item of page.items ?? []) {
     items.push({
@@ -503,18 +534,93 @@ async function buildLocaleFields(page: Omit<CmsPage, "updatedAt" | "i18n">, to: 
   };
 }
 
-export async function fillCmsI18n(page: CmsPage, force = false): Promise<CmsPage["i18n"]> {
+/** AMP-129: 이전 한국어와 같은 필드는 기존 번역 재사용 */
+async function buildLocaleFieldsIncremental(
+  page: CmsKoSnapshot,
+  to: ContentLocale,
+  prevKo: CmsKoSnapshot | null | undefined,
+  prevLoc: CmsLocaleFields | undefined,
+): Promise<CmsLocaleFields> {
+  if (!prevKo || !prevLoc) return buildLocaleFields(page, to);
+
+  const prevById = new Map(prevKo.items.map((item) => [item.id, item]));
+  const prevLocById = new Map((prevLoc.items ?? []).map((item) => [item.id, item]));
+
+  const items: CmsItem[] = [];
+  for (const item of page.items ?? []) {
+    const prevItem = prevById.get(item.id);
+    const prevLocItem = prevLocById.get(item.id);
+    const titleSame = Boolean(prevItem && prevLocItem && prevItem.title === item.title && prevLocItem.title);
+    const textSame = Boolean(
+      prevItem && prevLocItem && (prevItem.text ?? "") === (item.text ?? "") && prevLocItem.text !== undefined,
+    );
+    items.push({
+      ...item,
+      title: titleSame ? prevLocItem!.title : item.title ? await translateText(item.title, to) : "",
+      text: textSame ? prevLocItem!.text : item.text ? await translateText(item.text, to) : item.text,
+    });
+  }
+
+  return {
+    title:
+      prevKo.title === page.title && prevLoc.title
+        ? prevLoc.title
+        : await translateText(page.title, to),
+    lead:
+      prevKo.lead === page.lead && prevLoc.lead !== undefined
+        ? prevLoc.lead
+        : await translateText(page.lead, to),
+    body:
+      prevKo.body === page.body && prevLoc.body !== undefined
+        ? prevLoc.body
+        : await translateText(page.body, to),
+    items,
+  };
+}
+
+export async function fillCmsI18n(
+  page: CmsPage,
+  force = false,
+  previous?: CmsPage | null,
+): Promise<CmsPage["i18n"]> {
   const i18n: NonNullable<CmsPage["i18n"]> = { ...(page.i18n ?? {}) };
-  const base = { slug: page.slug, title: page.title, lead: page.lead, body: page.body, items: page.items };
+  const base = cmsKoSnapshot(page);
+  const prevBase = previous ? cmsKoSnapshot(previous) : null;
+
   for (const to of CONTENT_LOCALES) {
-    if (!force && i18n[to]?.title) continue;
+    if (!force && !previous && i18n[to]?.title) continue;
     try {
-      i18n[to] = await buildLocaleFields(base, to);
+      if (force && !previous) {
+        i18n[to] = await buildLocaleFields(base, to);
+      } else {
+        i18n[to] = await buildLocaleFieldsIncremental(base, to, prevBase, i18n[to] ?? previous?.i18n?.[to]);
+      }
     } catch (error) {
       console.error(`[cms] translate ${page.slug} ${to} failed`, error);
     }
   }
   return i18n;
+}
+
+/** AMP-129: 저장 스냅샷 기준으로 변경분만 번역 후 i18n 필드만 갱신 */
+async function refreshCmsPageI18nInBackground(saved: CmsPage, previous: CmsPage | null | undefined) {
+  try {
+    const latest = await getCmsPage(saved.slug);
+    if (!latest || latest.updatedAt !== saved.updatedAt) return;
+
+    const nextKo = cmsKoSnapshot(saved);
+    const prevKo = previous ? cmsKoSnapshot(previous) : null;
+    if (!cmsKoTextChanged(nextKo, prevKo) && cmsI18nComplete(latest.i18n)) return;
+
+    const i18n = await fillCmsI18n(saved, false, previous ?? null);
+    const again = await getCmsPage(saved.slug);
+    if (!again || again.updatedAt !== saved.updatedAt) return;
+
+    await writeCmsPageDocument({ ...again, i18n });
+    revalidateCmsPublicPages(saved.slug);
+  } catch (error) {
+    console.error("[cms] i18n refresh failed (korean content saved)", error);
+  }
 }
 
 async function writeCmsPageDocument(page: CmsPage) {
@@ -573,15 +679,12 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
     ...(existing?.i18n ? { i18n: existing.i18n } : {}),
   });
 
-  /** 한국어·이미지 먼저 저장 — 번역 API 지연/실패 시에도 공개에 반영 */
+  /** AMP-129: 한국어·이미지 저장 직후 반환 — en/zh는 after() 백그라운드(변경분만) */
   await writeCmsPageDocument(page);
 
-  try {
-    page.i18n = await fillCmsI18n(page, true);
-    await writeCmsPageDocument(page);
-  } catch (error) {
-    console.error("[cms] i18n refresh failed (korean content saved)", error);
-  }
+  const savedAt = page.updatedAt;
+  const previous = existing;
+  after(() => refreshCmsPageI18nInBackground({ ...page, updatedAt: savedAt }, previous));
 
   return page;
 }
