@@ -1143,6 +1143,7 @@
 }
 
 @media (max-width: 767px) {
+  /* AMP-127: 모바일 — 중앙「관리비」원만 숨김 · 4박스는 세로 스택 · 점선 숨김 */
   .fees-orbit {
     --fees-orbit-w: 100%;
     --fees-orbit-h: auto;
@@ -1154,13 +1155,16 @@
     grid-template-columns: 1fr;
     grid-template-rows: none;
     grid-template-areas:
-      "hub"
       "n"
       "w"
       "e"
       "s";
     gap: 0.85rem;
     justify-items: stretch;
+  }
+
+  .fees-orbit-hub {
+    display: none;
   }
 
   .fees-orbit-lines {
