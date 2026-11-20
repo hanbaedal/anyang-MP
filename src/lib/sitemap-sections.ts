@@ -2,13 +2,14 @@ import type { Role } from "./auth-types";
 import {
   canAccessExecOverview,
   canAccessHomepageManage,
+  canAccessSupervisorNav,
   canAccessWorkProgram,
 } from "./auth-types";
 import { EXEC_NAV } from "./exec-nav";
 import { manageNavItems } from "./manage-nav";
 import { SUPERVISOR_NAV } from "./supervisor-nav";
 import { NAV, type NavChild } from "./site";
-import { WORK_NAV } from "./work-nav";
+import { WORK_NAV_GROUPS } from "./work-nav";
 
 export type SitemapColumn = {
   titleI18n: string;
@@ -64,39 +65,22 @@ function manageSitemapColumns(): SitemapColumn[] {
   ];
 }
 
-function workSitemapColumns(role?: Role | null, username?: string | null): SitemapColumn[] {
-  const pick = (indexes: number[]) =>
-    indexes.map((i) => WORK_NAV[i]).filter(Boolean).map((row) => ({
-      href: row.href,
-      label: row.i18n,
-      i18n: row.i18n,
-    }));
+function workSitemapColumns(role?: Role | null, _username?: string | null): SitemapColumn[] {
+  const columns: SitemapColumn[] = WORK_NAV_GROUPS.map((group) => ({
+    titleI18n: group.i18n,
+    href: group.href,
+    children: group.items.map((row) => ({ href: row.href, label: row.i18n, i18n: row.i18n })),
+  }));
 
-  const columns: SitemapColumn[] = [
-    {
-      titleI18n: "sitemap.workCol.contracts",
-      href: WORK_NAV[0].href,
-      children: pick([0, 1, 2, 8]),
-    },
-    {
-      titleI18n: "sitemap.workCol.master",
-      href: WORK_NAV[3].href,
-      children: pick([3, 4, 5]),
-    },
-    {
-      titleI18n: "sitemap.workCol.trade",
-      href: WORK_NAV[6].href,
-      children: pick([6, 7, 9]),
-    },
-  ];
-
-  if (role === "ceo") {
+  // AMP-147: ceo·supervisor 모두 경영관리, supervisor는 슈퍼바이저 추가
+  if (canAccessExecOverview(role)) {
     columns.push({
       titleI18n: "work.overview",
       href: "/work/exec/fees",
       children: EXEC_NAV.map((row) => ({ href: row.href, label: row.i18n, i18n: row.i18n })),
     });
-  } else if (role === "supervisor") {
+  }
+  if (canAccessSupervisorNav(role)) {
     columns.push({
       titleI18n: "nav.supervisor",
       href: "/supervisor/contracts",

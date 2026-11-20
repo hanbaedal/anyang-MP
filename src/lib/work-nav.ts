@@ -10,3 +10,25 @@ export const WORK_NAV = [
   { href: "/work/statements", i18n: "work.statements" },
   { href: "/work/inventory", i18n: "work.inventory" },
 ] as const;
+
+/**
+ * AMP-147: 업무 GNB·사이트맵 3그룹
+ * - 계약·수납 / 거래처·품목 / 주문·재고
+ */
+export const WORK_NAV_GROUPS = [
+  {
+    i18n: "sitemap.workCol.contracts",
+    href: WORK_NAV[0].href,
+    items: [WORK_NAV[0], WORK_NAV[1], WORK_NAV[2], WORK_NAV[8]] as const,
+  },
+  {
+    i18n: "sitemap.workCol.master",
+    href: WORK_NAV[3].href,
+    items: [WORK_NAV[3], WORK_NAV[4], WORK_NAV[5]] as const,
+  },
+  {
+    i18n: "sitemap.workCol.trade",
+    href: WORK_NAV[6].href,
+    items: [WORK_NAV[6], WORK_NAV[7], WORK_NAV[9]] as const,
+  },
+] as const;

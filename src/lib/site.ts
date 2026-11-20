@@ -1,9 +1,14 @@
 import type { Role } from "./auth-types";
-import { canAccessExecOverview, canAccessHomepageManage, canAccessWorkProgram } from "./auth-types";
+import {
+  canAccessExecOverview,
+  canAccessHomepageManage,
+  canAccessSupervisorNav,
+  canAccessWorkProgram,
+} from "./auth-types";
 import { EXEC_NAV } from "./exec-nav";
 import { manageNavItems, MANAGE_HOME } from "./manage-nav";
 import { SUPERVISOR_HOME, SUPERVISOR_NAV } from "./supervisor-nav";
-import { WORK_NAV } from "./work-nav";
+import { WORK_NAV_GROUPS } from "./work-nav";
 
 export const SITE = {
   legalName: "(재)안양공원묘원",
@@ -239,7 +244,7 @@ export function sitemapMenus(role?: Role | null, username?: string | null): Site
       children: item.children ?? [],
     });
   }
-  // AMP-70: 홈페이지관리 → 업무프로그램 → 경영관리 순 (헤더와 동일)
+  // AMP-147: 홈페이지관리 → 계약수납·거래처품목·주문재고 → 경영관리 → 슈퍼바이저
   if (canAccessHomepageManage(role)) {
     menus.push({
       href: MANAGE_HOME,
@@ -253,12 +258,14 @@ export function sitemapMenus(role?: Role | null, username?: string | null): Site
     });
   }
   if (canAccessWorkProgram(role, username)) {
-    menus.push({
-      href: WORK_NAV[0].href,
-      i18n: "work.program",
-      tone: "guide",
-      children: WORK_NAV.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
-    });
+    for (const group of WORK_NAV_GROUPS) {
+      menus.push({
+        href: group.href,
+        i18n: group.i18n,
+        tone: "guide",
+        children: group.items.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
+      });
+    }
   }
   if (canAccessExecOverview(role)) {
     menus.push({
@@ -268,7 +275,7 @@ export function sitemapMenus(role?: Role | null, username?: string | null): Site
       children: EXEC_NAV.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
     });
   }
-  if (role === "supervisor") {
+  if (canAccessSupervisorNav(role)) {
     menus.push({
       href: SUPERVISOR_HOME,
       i18n: "nav.supervisor",
@@ -344,10 +351,8 @@ export function publicGnbItems(): NavItem[] {
 }
 
 /**
- * AMP-70: 로그인 역할별 GNB (갤러리 오른쪽).
- * - anyang001 admin: 홈페이지관리만
- * - anyang005 admin: 홈페이지관리 + 업무프로그램 (WORK_PROGRAM_ADMINS)
- * - ceo: 홈페이지관리 + 업무프로그램 + 경영관리
+ * AMP-147: 로그인 역할별 GNB (게스트=공개 홈 메뉴만 · 레이아웃 변경 없음).
+ * 스태프 추가는 갤러리 오른쪽에 삽입.
  */
 export function publicGnbItemsForRole(role?: Role | null, username?: string | null): NavItem[] {
   const items = [...publicGnbItems()];
@@ -368,17 +373,19 @@ export function publicGnbItemsForRole(role?: Role | null, username?: string | nu
   }
 
   if (canAccessWorkProgram(role, username)) {
-    extras.push({
-      href: WORK_NAV[0].href,
-      label: "업무프로그램",
-      i18n: "work.program",
-      tone: "guide",
-      children: WORK_NAV.map((item) => ({
-        href: item.href,
-        label: item.i18n,
-        i18n: item.i18n,
-      })),
-    });
+    for (const group of WORK_NAV_GROUPS) {
+      extras.push({
+        href: group.href,
+        label: group.i18n,
+        i18n: group.i18n,
+        tone: "guide",
+        children: group.items.map((item) => ({
+          href: item.href,
+          label: item.i18n,
+          i18n: item.i18n,
+        })),
+      });
+    }
   }
 
   if (canAccessExecOverview(role)) {
@@ -388,6 +395,20 @@ export function publicGnbItemsForRole(role?: Role | null, username?: string | nu
       i18n: "work.overview",
       tone: "lots",
       children: EXEC_NAV.map((item) => ({
+        href: item.href,
+        label: item.i18n,
+        i18n: item.i18n,
+      })),
+    });
+  }
+
+  if (canAccessSupervisorNav(role)) {
+    extras.push({
+      href: SUPERVISOR_HOME,
+      label: "슈퍼바이저",
+      i18n: "nav.supervisor",
+      tone: "more",
+      children: SUPERVISOR_NAV.map((item) => ({
         href: item.href,
         label: item.i18n,
         i18n: item.i18n,

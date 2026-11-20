@@ -26,15 +26,24 @@ export function isStatusStaff(role: Role | string | undefined | null): role is "
   return role === "supervisor" || role === "ceo";
 }
 
+/**
+ * AMP-147 역할 메뉴 매트릭스 (게스트 홈 레이아웃과 무관 — GNB만)
+ * - guest: 홈(공개) 메뉴만
+ * - anyang001 admin: 홈 + 홈페이지관리
+ * - anyang005 admin: 홈 + 관리 + 계약수납·거래처품목·주문재고
+ * - ceo (ceoisme): 위 + 경영관리
+ * - supervisor: 전부 + 슈퍼바이저
+ */
+
 /** 홈페이지 관리 GNB — admin·ceo·supervisor */
 export function canAccessHomepageManage(role?: Role | string | null) {
   return isCmsStaff(role);
 }
 
 /**
- * 업무프로그램 GNB.
+ * 업무(계약수납·거래처품목·주문재고) GNB.
  * - ceo·supervisor: 항상
- * - admin: WORK_PROGRAM_ADMINS(기본 anyang005)에 포함된 아이디만 (anyang001은 홈페이지만)
+ * - admin: WORK_PROGRAM_ADMINS(기본 anyang005)만 (anyang001 제외)
  */
 export function canAccessWorkProgram(role?: Role | string | null, username?: string | null) {
   if (role === "ceo" || role === "supervisor") return true;
@@ -49,6 +58,11 @@ export function canAccessWorkProgram(role?: Role | string | null, username?: str
 /** 경영관리 GNB — ceo·supervisor */
 export function canAccessExecOverview(role?: Role | string | null) {
   return isStatusStaff(role);
+}
+
+/** 슈퍼바이저 전용 GNB */
+export function canAccessSupervisorNav(role?: Role | string | null) {
+  return role === "supervisor";
 }
 
 export function afterLoginPath(_user?: SessionUser) {
