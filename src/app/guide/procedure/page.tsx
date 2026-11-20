@@ -1,11 +1,8 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
+import { ProcedureNoteAside } from "@/components/procedure-note-aside";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { pageSlotBody } from "@/lib/page-cms-slots";
-import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
 import { SaleSteps } from "@/components/sale-steps";
-import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -15,40 +12,6 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const locale = await readLocale();
   return { title: t(locale, "proc.title") };
-}
-
-/** 분양 절차 하단 — CMS 본문 (빈 줄 단락 · 단일 줄바꿈은 한 단락 안에서 처리) */
-function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, body?: string) {
-  const trimmed = body?.trim() ?? "";
-  const fromCms = cmsBodyBlocks(body);
-
-  const proseClass =
-    "max-w-none space-y-3 text-center text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]";
-
-  if (fromCms.length) {
-    return fromCms.map((block, index) => (
-      <Prose key={`note-${index}`} className={proseClass}>
-        <Paragraphs text={block} />
-      </Prose>
-    ));
-  }
-
-  if (trimmed) {
-    return [
-      <Prose key="body-single" className={proseClass}>
-        <Paragraphs text={trimmed} />
-      </Prose>,
-    ];
-  }
-
-  return [
-    <Prose key="account" className={proseClass}>
-      <p>{t(locale, "proc.account")}</p>
-    </Prose>,
-    <Prose key="use-date" className={proseClass}>
-      <p>{t(locale, "proc.twoDays")}</p>
-    </Prose>,
-  ];
 }
 
 export default async function ProcedurePage({
@@ -67,16 +30,6 @@ export default async function ProcedurePage({
     image: item.image?.trim() || undefined,
   }));
 
-  const noteAside = (
-    <div className="pc-procedure-note procedure-orbs-aside-text w-full">
-      <div
-        {...(cmsEdit ? { "data-cms-key": pageSlotBody("procedure"), "data-cms-body-root": "1" as const } : {})}
-      >
-        {procedureNoteBlocks(displayLocale, cms.body)}
-      </div>
-    </div>
-  );
-
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
@@ -84,7 +37,14 @@ export default async function ProcedurePage({
         <SaleSteps
           variant="orbs"
           steps={steps.length ? steps : undefined}
-          aside={noteAside}
+          aside={
+            <ProcedureNoteAside
+              locale={displayLocale}
+              body={cms.body}
+              textStyles={cms.textStyles}
+              cmsEdit={cmsEdit}
+            />
+          }
           cmsSlug="procedure"
           cmsEditMarkers={cmsEdit}
           cmsTextStyles={cms.textStyles}

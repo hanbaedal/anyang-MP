@@ -3,12 +3,11 @@ import { FuneralDocList } from "@/components/funeral-doc-list";
 import { NoticesList } from "@/components/notices-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
+import { ProcedureNoteAside } from "@/components/procedure-note-aside";
 import { SaleSteps } from "@/components/sale-steps";
 import { FeesOrbitDiagram } from "@/components/fees-orbit-diagram";
 import { FuneralAttachedOrbit } from "@/components/funeral-attached-orbit";
 import { ServicesAttachedCards } from "@/components/services-attached-cards";
-import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
 import { funeralDocsById } from "@/lib/funeral-docs";
@@ -46,38 +45,6 @@ export async function generateMetadata() {
   return { title: t(locale, "nav.guide") };
 }
 
-function procedureNoteBlocks(locale: Awaited<ReturnType<typeof readLocale>>, body?: string) {
-  const trimmed = body?.trim() ?? "";
-  const fromCms = cmsBodyBlocks(body);
-  const proseClass =
-    "max-w-none space-y-3 text-center text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]";
-
-  if (fromCms.length) {
-    return fromCms.map((block, index) => (
-      <Prose key={`note-${index}`} className={proseClass}>
-        <Paragraphs text={block} />
-      </Prose>
-    ));
-  }
-
-  if (trimmed) {
-    return [
-      <Prose key="body-single" className={proseClass}>
-        <Paragraphs text={trimmed} />
-      </Prose>,
-    ];
-  }
-
-  return [
-    <Prose key="account" className={proseClass}>
-      <p>{t(locale, "proc.account")}</p>
-    </Prose>,
-    <Prose key="use-date" className={proseClass}>
-      <p>{t(locale, "proc.twoDays")}</p>
-    </Prose>,
-  ];
-}
-
 export default async function GuideHubPage() {
   const locale = await readLocale();
   const [procedure, fees, services, funeral, docs, notices] = await Promise.all([
@@ -96,12 +63,6 @@ export default async function GuideHubPage() {
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
   }));
-  const procedureNoteAside = (
-    <div className="pc-procedure-note procedure-orbs-aside-text w-full">
-      {procedureNoteBlocks(locale, procedure.body)}
-    </div>
-  );
-
   const feeOrbitItems = (fees.items?.length
     ? fees.items
     : FEE_FALLBACK.map((row) => ({
@@ -163,7 +124,9 @@ export default async function GuideHubPage() {
         <SaleSteps
           variant="orbs"
           steps={steps.length ? steps : undefined}
-          aside={procedureNoteAside}
+          aside={
+            <ProcedureNoteAside locale={locale} body={procedure.body} textStyles={procedure.textStyles} />
+          }
           cmsSlug="procedure"
           cmsTextStyles={procedure.textStyles}
         />
