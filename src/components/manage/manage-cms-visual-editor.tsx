@@ -13,6 +13,7 @@ import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { Prose } from "@/components/page-hero";
 import { SaleSteps } from "@/components/sale-steps";
+import { ServicesAttachedCards } from "@/components/services-attached-cards";
 import type { CmsItem, CmsPage } from "@/lib/cms-types";
 import { uploadOriginalUrl } from "@/lib/media";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
@@ -314,6 +315,31 @@ export function ManageCmsVisualEditor({
               </label>
             </div>
             <LotsPhotoGrid items={lotsPreviewItems} layout="detail" emptyLabel="갤러리에 해당 태그 사진을 올리면 여기에 보입니다." />
+          </div>
+        ) : slug === "services" ? (
+          <div className="pc-soft-card-fill space-y-6">
+            <PastelBox>
+              <ManageEditableIntro
+                title={page.title}
+                lead={page.lead}
+                onTitle={(title) => setPage((p) => ({ ...p, title }))}
+                onLead={(lead) => setPage((p) => ({ ...p, lead }))}
+              />
+            </PastelBox>
+            <ServicesAttachedCards items={gridItems} cmsSlug="services" cmsTextStyles={page.textStyles} />
+            <div className="grid gap-4 md:grid-cols-2">
+              {page.items.map((item, index) => (
+                <ManageCmsItemEditor
+                  key={item.id}
+                  slug={slug}
+                  item={item}
+                  index={index}
+                  busy={busy}
+                  onPatch={(patch) => patchItem(item.id, patch)}
+                  onMessage={setMessage}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="pc-soft-card-fill space-y-6">

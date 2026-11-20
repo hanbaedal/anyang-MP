@@ -1,7 +1,7 @@
 import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
+import { ServicesAttachedCards } from "@/components/services-attached-cards";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -46,7 +46,7 @@ export default async function ServicesPage({
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="site-container pc-soft-card-fill space-y-8 py-8 md:py-10">
-        <FeaturesPhotoGrid
+        <ServicesAttachedCards
           items={items}
           cmsSlug="services"
           cmsEditMarkers={cmsEdit}

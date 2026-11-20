@@ -6,6 +6,7 @@ import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
+import { ServicesAttachedCards } from "@/components/services-attached-cards";
 import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { getCmsPageLocalized } from "@/lib/cms";
 import { resolveFuneralDocsDisplay } from "@/lib/funeral-docs-cms";
@@ -147,7 +148,7 @@ export default async function GuideHubPage() {
           href="/guide/services"
           moreLabel={t(locale, "more.detail")}
         >
-          <FeaturesPhotoGrid items={serviceCards} />
+          <ServicesAttachedCards items={serviceCards} cmsSlug="services" cmsTextStyles={services.textStyles} />
         </MenuHubSection>
 
         <MenuHubSection

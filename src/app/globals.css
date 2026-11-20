@@ -1205,6 +1205,197 @@
   }
 }
 
+/* AMP-130: 이용안내 — 왼쪽 원(제목) + 오른쪽 3D 막대(내용), 첨부형 */
+.svc-attach {
+  --svc-circle: clamp(6.5rem, 18vw, 8.75rem);
+  --svc-overlap: calc(var(--svc-circle) * 0.42);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.1rem, 2.5vw, 1.65rem);
+  width: min(52rem, 100%);
+  margin-inline: auto;
+}
+
+.svc-attach-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: var(--svc-circle);
+  animation: svc-attach-in 0.55s ease both;
+}
+
+@keyframes svc-attach-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.55rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-attach-row {
+    animation: none;
+  }
+}
+
+.svc-attach-circle {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 var(--svc-circle);
+  width: var(--svc-circle);
+  height: var(--svc-circle);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.7rem;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  color: var(--pastel-chrome-fg);
+  box-shadow:
+    0 0.45rem 1rem rgba(15, 23, 42, 0.1),
+    inset 0 0.12rem 0.35rem rgba(255, 255, 255, 0.55),
+    inset 0 -0.18rem 0.4rem rgba(15, 23, 42, 0.06);
+  transition: transform 0.25s ease;
+}
+
+.svc-attach-row:hover .svc-attach-circle {
+  transform: translateY(-0.12rem);
+}
+
+.svc-attach-circle-label {
+  margin: 0;
+  font-size: clamp(0.92rem, 2.1vw, 1.12rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.svc-attach-bar {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: calc(var(--svc-overlap) * -1);
+  padding: 1rem clamp(1.1rem, 3vw, 1.6rem) 1rem calc(var(--svc-overlap) + 0.85rem);
+  display: flex;
+  align-items: center;
+  border-radius: 1.15rem;
+  border: 1px solid transparent;
+  color: var(--pastel-chrome-fg);
+  box-shadow:
+    0 0.55rem 1.15rem rgba(15, 23, 42, 0.1),
+    0 0.12rem 0.25rem rgba(15, 23, 42, 0.05),
+    inset 0 0.14rem 0.3rem rgba(255, 255, 255, 0.55),
+    inset 0 -0.22rem 0.45rem rgba(15, 23, 42, 0.07);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.svc-attach-row:hover .svc-attach-bar {
+  transform: translateY(-0.1rem);
+  box-shadow:
+    0 0.7rem 1.35rem rgba(15, 23, 42, 0.12),
+    0 0.14rem 0.28rem rgba(15, 23, 42, 0.06),
+    inset 0 0.14rem 0.3rem rgba(255, 255, 255, 0.55),
+    inset 0 -0.22rem 0.45rem rgba(15, 23, 42, 0.07);
+}
+
+.svc-attach-bar-body {
+  width: 100%;
+  font-size: clamp(0.84rem, 1.5vw, 0.95rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--pastel-chrome-fg) 90%, transparent);
+}
+
+.svc-attach-bar-body .cms-paragraphs {
+  gap: 0.45em;
+}
+
+.svc-attach-row--1 .svc-attach-circle {
+  border-color: color-mix(in srgb, #a8c8d8 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #f4fafc 0%, #dcecf4 48%, #9ebfd4 100%);
+}
+.svc-attach-row--1 .svc-attach-bar {
+  border-color: color-mix(in srgb, #b6d2e0 80%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+    linear-gradient(105deg, #e8f3f8 0%, #c5dce8 55%, #a8c5d6 100%);
+}
+
+.svc-attach-row--2 .svc-attach-circle {
+  border-color: color-mix(in srgb, #9ec9a2 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #f2faf3 0%, #d4edd6 48%, #8fbf96 100%);
+}
+.svc-attach-row--2 .svc-attach-bar {
+  border-color: color-mix(in srgb, #b0d6b4 80%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+    linear-gradient(105deg, #e8f6ea 0%, #c5e4c8 55%, #9ec9a2 100%);
+}
+
+.svc-attach-row--3 .svc-attach-circle {
+  border-color: color-mix(in srgb, #e0c4a8 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #fff8f0 0%, #f3e0cc 48%, #d8b48e 100%);
+}
+.svc-attach-row--3 .svc-attach-bar {
+  border-color: color-mix(in srgb, #e6cdb0 80%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+    linear-gradient(105deg, #fff3e8 0%, #edd4b8 55%, #d8b48e 100%);
+}
+
+.svc-attach-row--4 .svc-attach-circle {
+  border-color: color-mix(in srgb, #ddd0a0 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #fbf8ec 0%, #f0eac8 48%, #d4c890 100%);
+}
+.svc-attach-row--4 .svc-attach-bar {
+  border-color: color-mix(in srgb, #e2d6a8 80%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+    linear-gradient(105deg, #faf6e4 0%, #ebe2b8 55%, #d4c890 100%);
+}
+
+.svc-attach-row--5 .svc-attach-circle {
+  border-color: color-mix(in srgb, #d4b8c8 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #fbf2f6 0%, #eddce6 48%, #c9a4b8 100%);
+}
+.svc-attach-row--5 .svc-attach-bar {
+  border-color: color-mix(in srgb, #dfc4d2 80%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+    linear-gradient(105deg, #f8eef3 0%, #e6cedc 55%, #c9a4b8 100%);
+}
+
+@media (max-width: 639px) {
+  .svc-attach {
+    --svc-circle: 5.75rem;
+    --svc-overlap: calc(var(--svc-circle) * 0.36);
+    gap: 0.95rem;
+  }
+
+  .svc-attach-circle-label {
+    font-size: 0.86rem;
+  }
+
+  .svc-attach-bar {
+    padding-block: 0.85rem;
+    border-radius: 1rem;
+  }
+
+  .svc-attach-bar-body {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+}
+
 /* 공지 목록 — 본문 표 1120px 상한, 모바일은 100% + 좌우 패딩 */
 .pc-notices-fill {
   --notices-board-max: 70rem; /* 1120px */
