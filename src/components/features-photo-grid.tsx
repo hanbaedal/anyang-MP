@@ -67,6 +67,8 @@ export function FeaturesPhotoGrid({
   cmsEditMarkers = false,
   locale = "ko" as Locale,
   cmsTextStyles,
+  /** 설정 시 각 카드 `id="{prefix}{item.id}"` — 관리비 궤도 다이어그램 앵커 등 */
+  itemAnchorPrefix,
 }: {
   items: FeaturePhotoItem[];
   className?: string;
@@ -81,6 +83,7 @@ export function FeaturesPhotoGrid({
   cmsEditMarkers?: boolean;
   locale?: Locale;
   cmsTextStyles?: PageCmsTextStyles;
+  itemAnchorPrefix?: string;
 }) {
   if (!items.length) return null;
   const fill = viewportFill && !dense;
@@ -243,8 +246,10 @@ export function FeaturesPhotoGrid({
         return (
           <article
             key={itemId}
+            id={itemAnchorPrefix ? `${itemAnchorPrefix}${itemId}` : undefined}
             className={cn(
               "pc-viewport-card relative isolate",
+              itemAnchorPrefix && "scroll-mt-28",
               !rainbow && "overflow-hidden rounded-2xl shadow-sm",
               rainbow &&
                 cn(
