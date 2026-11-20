@@ -2,7 +2,10 @@
 
 import type { ReactNode } from "react";
 import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
+import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
+import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { useLocale, useT } from "@/components/locale-provider";
+import { cardHasGalleryImage } from "@/lib/guide-photo-card";
 import { PROCEDURE_ORB_COUNT } from "@/lib/procedure-orbs";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
@@ -37,6 +40,8 @@ function ProcedureOrb({
   const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
   const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
   const orbTone = (index % PROCEDURE_ORB_COUNT) + 1;
+  const hasPhoto = cardHasGalleryImage(step.image);
+  const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);
 
   return (
     <div
@@ -44,10 +49,18 @@ function ProcedureOrb({
       className={cn(
         "procedure-orb",
         `procedure-orb--${orbTone}`,
+        hasPhoto && "procedure-orb--photo",
         /* AMP-104: 모바일=좌측 카드 스택 · md+=원형 가운데 */
         "flex flex-col items-start text-left md:items-center md:text-center",
       )}
     >
+      {hasPhoto ? (
+        <div className="procedure-orb-media" aria-hidden>
+          <GuideCardCoverImage imagePath={step.image!.trim()} alt="" index={index} />
+          <div className="procedure-orb-media-scrim" />
+        </div>
+      ) : null}
+      {showCmsImageChip ? <CmsItemImageSlot cmsSlug={cmsSlug!} itemId={stepId} /> : null}
       <p className="procedure-orb-step-label text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm md:text-center">
         {stepLabel}
       </p>

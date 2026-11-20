@@ -687,9 +687,7 @@
 }
 
 .procedure-orb {
-  --procedure-orb-title-top: 4.35rem; /* 4단계 카드 기준 제목 줄 */
-  --procedure-orb-title-band: 2.6rem;
-  --procedure-orb-blank-line: 1.25rem;
+  --procedure-orb-blank-line: 0.55rem;
   --orb-light: #fff6d4;
   --orb-mid: #f5e8b0;
   --orb-dark: #d9c878;
@@ -697,6 +695,8 @@
 
   box-sizing: border-box;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   width: var(--procedure-orb-size);
   height: var(--procedure-orb-size);
   aspect-ratio: 1;
@@ -777,48 +777,76 @@
   --orb-border: #ddd0a0;
 }
 
-.procedure-orb-step-label {
+/* AMP-114: PC도 flex — CMS 다줄·글꼴·사진이 absolute 고정칸에 잘리지 않게 */
+.procedure-orb-media {
   position: absolute;
-  top: 1.1rem;
-  left: 0;
-  right: 0;
-  margin: 0;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.procedure-orb-media-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 252, 247, 0.22) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.18) 0%, rgba(15, 23, 42, 0.45) 100%);
+}
+
+.procedure-orb--photo {
+  border-color: color-mix(in srgb, #fff 55%, var(--orb-border));
+  background: #1f2a44;
+}
+
+.procedure-orb--photo::before,
+.procedure-orb--photo::after {
+  opacity: 0.35;
+}
+
+.procedure-orb--photo .procedure-orb-step-label,
+.procedure-orb--photo .procedure-orb-title,
+.procedure-orb--photo .procedure-orb-desc {
+  color: #fffcf7;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
+}
+
+.procedure-orb-step-label {
+  position: relative;
   z-index: 1;
+  flex-shrink: 0;
+  width: 100%;
+  margin: 0.15rem 0 0;
 }
 
 .procedure-orb-title {
-  position: absolute;
-  top: var(--procedure-orb-title-top);
-  left: 0;
-  right: 0;
-  margin: 0;
-  min-height: var(--procedure-orb-title-band);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 100%;
+  margin: 0.45rem 0 0;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 1;
 }
 
 .procedure-orb-blank {
-  position: absolute;
-  top: calc(var(--procedure-orb-title-top) + var(--procedure-orb-title-band));
-  left: 0;
-  right: 0;
-  height: var(--procedure-orb-blank-line);
+  position: relative;
   z-index: 1;
+  flex-shrink: 0;
+  width: 100%;
+  height: var(--procedure-orb-blank-line);
 }
 
 .procedure-orb-desc {
-  position: absolute;
-  top: calc(var(--procedure-orb-title-top) + var(--procedure-orb-title-band) + var(--procedure-orb-blank-line));
-  left: 0;
-  right: 0;
-  bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
   margin: 0;
   overflow: auto;
   text-align: center;
   scrollbar-width: thin;
-  z-index: 1;
 }
 
 .procedure-orbs-arrow {
