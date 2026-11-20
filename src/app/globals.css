@@ -973,9 +973,9 @@
 
 /* AMP-115/117/118 관리비 — 중앙 원 + 주변 4박스 동일 크기(제목+본문) + 점선 */
 .fees-orbit {
-  /* AMP-121: 폭 150%에 맞춰 궤도 가로 여유 */
-  --fees-orbit-w: min(58rem, 100%);
-  --fees-orbit-h: min(38rem, 96vw);
+  /* AMP-121: 폭 · AMP-123: 박스 간격·상하좌우 여유 확대 */
+  --fees-orbit-w: min(64rem, 100%);
+  --fees-orbit-h: min(48rem, 112vw);
   /* AMP-118: 4박스 공통 크기 · 패딩 여유(스크롤/잘림 없음) */
   /* AMP-119: 내용 중앙 · AMP-121: 폭 19.5rem · AMP-122: 높이 축소 */
   --fees-box-w: 19.5rem;
@@ -988,22 +988,22 @@
   max-width: 100%;
   margin-inline: auto;
   display: grid;
-  grid-template-columns: minmax(var(--fees-box-w), 1fr) minmax(7.5rem, 0.65fr) minmax(var(--fees-box-w), 1fr);
-  grid-template-rows: minmax(var(--fees-box-h), 1fr) minmax(7.5rem, 0.7fr) minmax(var(--fees-box-h), 1fr);
+  grid-template-columns: minmax(var(--fees-box-w), 1.2fr) minmax(8.5rem, 0.55fr) minmax(var(--fees-box-w), 1.2fr);
+  grid-template-rows: minmax(var(--fees-box-h), 1.25fr) minmax(8.5rem, 0.55fr) minmax(var(--fees-box-h), 1.25fr);
   grid-template-areas:
     ". n ."
     "w hub e"
     ". s .";
   align-items: center;
   justify-items: center;
-  gap: 0.55rem 0.65rem;
+  gap: 1.35rem 1.5rem;
 }
 
 .fees-orbit-lines {
   position: absolute;
-  inset: 6%;
-  width: 88%;
-  height: 88%;
+  inset: 4%;
+  width: 92%;
+  height: 92%;
   z-index: 0;
   pointer-events: none;
   overflow: visible;
@@ -1103,24 +1103,25 @@
   text-align: center;
 }
 
+/* AMP-123: 상·하는 바깥쪽, 좌·우도 바깥으로 */
 .fees-orbit-slot--n {
   grid-area: n;
-  align-self: end;
+  align-self: start;
   justify-self: center;
 }
 .fees-orbit-slot--w {
   grid-area: w;
-  justify-self: end;
+  justify-self: start;
   align-self: center;
 }
 .fees-orbit-slot--e {
   grid-area: e;
-  justify-self: start;
+  justify-self: end;
   align-self: center;
 }
 .fees-orbit-slot--s {
   grid-area: s;
-  align-self: start;
+  align-self: end;
   justify-self: center;
 }
 
