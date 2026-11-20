@@ -2,7 +2,6 @@ import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { FeesOrbitDiagram } from "@/components/fees-orbit-diagram";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
@@ -40,32 +39,24 @@ export default async function FeesPage({
   ).map((item) => ({
     ...item,
     id: item.id || item.title,
-    image: item.image?.trim() || undefined,
+    text: item.text ?? "",
   }));
 
   const orbitItems = items.slice(0, 4).map((item) => ({
     id: item.id,
     title: item.title,
-    anchorId: item.id,
+    text: item.text,
   }));
 
   return (
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
-      <div className="site-container pc-soft-card-fill space-y-10 py-8 md:py-10">
+      <div className="site-container pc-soft-card-fill py-8 md:py-10">
         <FeesOrbitDiagram
           hubTitle={cms.title || t(displayLocale, "fees.title")}
           items={orbitItems}
           cmsEditMarkers={cmsEdit}
           cmsTextStyles={cms.textStyles}
-        />
-        <FeaturesPhotoGrid
-          items={items}
-          cmsSlug="fees"
-          cmsEditMarkers={cmsEdit}
-          locale={displayLocale}
-          cmsTextStyles={cms.textStyles}
-          itemAnchorPrefix="fee-"
         />
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}

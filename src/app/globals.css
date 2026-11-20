@@ -971,31 +971,32 @@
   text-align: center;
 }
 
-/* AMP-115 관리비 — 중앙 원 + 주변 타원 4 + 점선 */
+/* AMP-115/117 관리비 — 중앙 원 + 주변 타원(제목+본문) + 점선 */
 .fees-orbit {
-  --fees-orbit-size: min(36rem, 100%);
+  --fees-orbit-w: min(52rem, 100%);
+  --fees-orbit-h: min(38rem, 92vw);
   position: relative;
-  width: var(--fees-orbit-size);
-  aspect-ratio: 1;
+  width: var(--fees-orbit-w);
+  height: var(--fees-orbit-h);
   max-width: 100%;
   margin-inline: auto;
   display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  grid-template-rows: 1fr 1.15fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(7.5rem, 0.7fr) minmax(0, 1.15fr);
+  grid-template-rows: minmax(0, 1.2fr) minmax(7.5rem, 0.75fr) minmax(0, 1.2fr);
   grid-template-areas:
     ". n ."
     "w hub e"
     ". s .";
   align-items: center;
   justify-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem 0.55rem;
 }
 
 .fees-orbit-lines {
   position: absolute;
-  inset: 8%;
-  width: 84%;
-  height: 84%;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
   z-index: 0;
   pointer-events: none;
   overflow: visible;
@@ -1014,14 +1015,14 @@
   position: relative;
   z-index: 2;
   box-sizing: border-box;
-  width: min(11.5rem, 42%);
+  width: min(9.75rem, 100%);
   aspect-ratio: 1;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0.85rem;
+  padding: 0.75rem;
   border: 1px solid color-mix(in srgb, #e6d48a 88%, #fff);
   background: radial-gradient(circle at 32% 28%, #fff6d4 0%, #f5e8b0 46%, #d9c878 100%);
   box-shadow:
@@ -1031,7 +1032,7 @@
 }
 
 .fees-orbit-hub-label {
-  font-size: clamp(1.15rem, 2.6vw, 1.55rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.45rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.25;
@@ -1041,53 +1042,67 @@
   position: relative;
   z-index: 2;
   box-sizing: border-box;
-  width: min(10.5rem, 88%);
-  min-height: 4.25rem;
-  padding: 0.7rem 1rem;
-  border-radius: 9999px;
+  width: 100%;
+  max-width: 16.5rem;
+  min-height: 7.5rem;
+  max-height: 100%;
+  padding: 0.85rem 1.05rem 0.95rem;
+  border-radius: 9999px / 72%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   text-align: center;
-  cursor: pointer;
   border: 1px solid transparent;
   color: var(--pastel-chrome-fg);
-  font: inherit;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+  overflow: hidden;
   box-shadow:
     0 0.4rem 0.9rem rgba(15, 23, 42, 0.08),
     inset 0 0.1rem 0.28rem rgba(255, 255, 255, 0.5);
 }
 
-.fees-orbit-oval:hover,
-.fees-orbit-oval:focus-visible {
-  transform: translateY(-2px) scale(1.03);
-  outline: none;
-  box-shadow:
-    0 0.55rem 1.15rem rgba(15, 23, 42, 0.14),
-    inset 0 0.1rem 0.28rem rgba(255, 255, 255, 0.55);
-}
-
 .fees-orbit-oval-label {
-  font-size: clamp(0.95rem, 2.1vw, 1.12rem);
+  margin: 0;
+  flex-shrink: 0;
+  font-size: clamp(0.95rem, 1.9vw, 1.1rem);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
 
+.fees-orbit-oval-body {
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  width: 100%;
+  padding-inline: 0.15rem;
+  font-size: clamp(0.75rem, 1.45vw, 0.875rem);
+  line-height: 1.45;
+  text-align: center;
+  scrollbar-width: thin;
+  color: color-mix(in srgb, var(--pastel-chrome-fg) 88%, transparent);
+}
+
+.fees-orbit-oval-body .cms-paragraphs {
+  gap: 0.45em;
+}
+
 .fees-orbit-slot--n {
   grid-area: n;
+  align-self: end;
 }
 .fees-orbit-slot--w {
   grid-area: w;
+  justify-self: end;
 }
 .fees-orbit-slot--e {
   grid-area: e;
+  justify-self: start;
 }
 .fees-orbit-slot--s {
   grid-area: s;
+  align-self: start;
 }
 
 .fees-orbit-oval--1 {
@@ -1107,30 +1122,30 @@
   background: radial-gradient(ellipse at 35% 30%, #faf6e8 0%, #f0eac8 55%, #d4c890 100%);
 }
 
-@keyframes fees-detail-flash {
-  0% {
-    box-shadow: 0 0 0 0 rgba(0, 43, 80, 0.35);
-  }
-  40% {
-    box-shadow: 0 0 0 6px rgba(0, 43, 80, 0.18);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(0, 43, 80, 0);
-  }
-}
-
-.fees-detail-flash {
-  animation: fees-detail-flash 1.1s ease;
-}
-
 @media (max-width: 767px) {
   .fees-orbit {
-    --fees-orbit-size: min(22.5rem, 100%);
-    gap: 0.2rem;
+    --fees-orbit-w: 100%;
+    --fees-orbit-h: auto;
+    height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      "hub"
+      "n"
+      "w"
+      "e"
+      "s";
+    gap: 0.75rem;
+    justify-items: stretch;
+  }
+
+  .fees-orbit-lines {
+    display: none;
   }
 
   .fees-orbit-hub {
-    width: min(8.25rem, 46%);
+    width: min(7.5rem, 42%);
+    margin-inline: auto;
     padding: 0.55rem;
   }
 
@@ -1139,19 +1154,34 @@
   }
 
   .fees-orbit-oval {
-    width: min(7.75rem, 92%);
-    min-height: 3.35rem;
-    padding: 0.45rem 0.55rem;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
+    border-radius: 1.25rem;
+    padding: 1rem 1.1rem;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .fees-orbit-oval-label {
-    font-size: 0.875rem;
+    font-size: 1.05rem;
+    text-align: left;
   }
 
-  .fees-orbit-lines {
-    inset: 10%;
-    width: 80%;
-    height: 80%;
+  .fees-orbit-oval-body {
+    overflow: visible;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    text-align: left;
+  }
+
+  .fees-orbit-slot--n,
+  .fees-orbit-slot--w,
+  .fees-orbit-slot--e,
+  .fees-orbit-slot--s {
+    align-self: stretch;
+    justify-self: stretch;
   }
 }
 
