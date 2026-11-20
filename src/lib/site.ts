@@ -8,7 +8,7 @@ import {
 import { EXEC_NAV } from "./exec-nav";
 import { manageNavItems, MANAGE_HOME } from "./manage-nav";
 import { SUPERVISOR_HOME, SUPERVISOR_NAV } from "./supervisor-nav";
-import { WORK_NAV_GROUPS } from "./work-nav";
+import { WORK_NAV, WORK_NAV_GROUPS } from "./work-nav";
 
 export const SITE = {
   legalName: "(재)안양공원묘원",
@@ -244,7 +244,7 @@ export function sitemapMenus(role?: Role | null, username?: string | null): Site
       children: item.children ?? [],
     });
   }
-  // AMP-147: 홈페이지관리 → 계약수납·거래처품목·주문재고 → 경영관리 → 슈퍼바이저
+  // AMP-147/149: 홈페이지관리 → 업무프로그램(1탑) → 경영관리 → 슈퍼바이저
   if (canAccessHomepageManage(role)) {
     menus.push({
       href: MANAGE_HOME,
@@ -258,14 +258,12 @@ export function sitemapMenus(role?: Role | null, username?: string | null): Site
     });
   }
   if (canAccessWorkProgram(role, username)) {
-    for (const group of WORK_NAV_GROUPS) {
-      menus.push({
-        href: group.href,
-        i18n: group.i18n,
-        tone: "guide",
-        children: group.items.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
-      });
-    }
+    menus.push({
+      href: WORK_NAV[0].href,
+      i18n: "work.program",
+      tone: "guide",
+      children: WORK_NAV.map((item) => ({ href: item.href, label: item.i18n, i18n: item.i18n })),
+    });
   }
   if (canAccessExecOverview(role)) {
     menus.push({
@@ -372,20 +370,21 @@ export function publicGnbItemsForRole(role?: Role | null, username?: string | nu
     });
   }
 
+  // AMP-149: GNB는 업무 1탑(계약·수납·거래처·품목·주문·재고 하위) — 3탑 분할은 폭 초과로 메뉴 잠김
   if (canAccessWorkProgram(role, username)) {
-    for (const group of WORK_NAV_GROUPS) {
-      extras.push({
-        href: group.href,
-        label: group.i18n,
-        i18n: group.i18n,
-        tone: "guide",
-        children: group.items.map((item) => ({
+    extras.push({
+      href: WORK_NAV[0].href,
+      label: "업무프로그램",
+      i18n: "work.program",
+      tone: "guide",
+      children: WORK_NAV_GROUPS.flatMap((group) =>
+        group.items.map((item) => ({
           href: item.href,
           label: item.i18n,
           i18n: item.i18n,
         })),
-      });
-    }
+      ),
+    });
   }
 
   if (canAccessExecOverview(role)) {

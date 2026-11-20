@@ -57,7 +57,10 @@ export function PublicGnb({
     <nav
       ref={rootRef}
       aria-label={chrome("menu")}
-      className={cn("hidden h-full min-w-0 flex-1 items-stretch justify-center overflow-visible lg:flex", className)}
+      className={cn(
+        "hidden h-full min-w-0 flex-1 items-stretch justify-center overflow-x-auto overflow-y-visible lg:flex",
+        className,
+      )}
     >
       <ul className="flex h-full min-w-0 items-stretch overflow-visible">
         {items.map((item) => {
@@ -74,8 +77,8 @@ export function PublicGnb({
             <li
               key={item.i18n}
               className={cn(
-                "relative flex h-full overflow-visible",
-                "after:absolute after:top-1/2 after:right-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--pastel-chrome-border)] last:after:hidden",
+                "relative flex h-full shrink-0 overflow-visible",
+                "after:absolute after:top-1/2 after:right-0 after:z-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--pastel-chrome-border)] last:after:hidden",
               )}
               onMouseEnter={() => hasChildren && setOpenKey(item.i18n)}
               onMouseLeave={() => hasChildren && setOpenKey(null)}
@@ -83,7 +86,7 @@ export function PublicGnb({
               <Link
                 href={item.href}
                 className={cn(
-                  "flex h-full min-w-[4.5rem] items-center justify-center px-2.5 text-[0.9375rem] font-medium whitespace-nowrap transition-colors xl:min-w-[5.5rem] xl:px-3 xl:text-base",
+                  "relative z-[1] flex h-full min-w-[4.25rem] items-center justify-center px-2 text-[0.9375rem] font-medium whitespace-nowrap transition-colors xl:min-w-[5rem] xl:px-2.5 xl:text-base",
                   "text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8",
                   (open || parentActive) && "bg-primary/12",
                 )}
@@ -100,40 +103,42 @@ export function PublicGnb({
                   id={panelId}
                   hidden={!open}
                   className={cn(
-                    "absolute top-full left-1/2 z-[100] w-max min-w-[9.5rem] -translate-x-1/2 overflow-visible border border-white/35 bg-primary text-primary-foreground shadow-lg",
+                    "absolute top-full left-1/2 z-[200] w-max min-w-[9.5rem] -translate-x-1/2 pt-1",
                     "motion-safe:origin-top motion-safe:transition motion-safe:duration-150",
                     open
                       ? "motion-safe:scale-y-100 motion-safe:opacity-100"
                       : "pointer-events-none motion-safe:scale-y-95 motion-safe:opacity-0",
                   )}
                 >
-                  {/* AMP-83/87: 비링크 부모 그룹 제목 — 대비·계층 강화 */}
-                  <p
-                    id={labelId}
-                    className="border-b border-white/40 bg-[#001a33] px-3.5 py-2.5 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee] xl:text-[0.9375rem]"
-                  >
-                    {chrome(item.i18n)}
-                  </p>
-                  <ul role="menu" aria-labelledby={labelId}>
-                    {children.map((child) => {
-                      const active = isNavActive(pathname, child.href);
-                      return (
-                        <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
-                          <Link
-                            role="menuitem"
-                            href={child.href}
-                            className={cn(
-                              "block px-3.5 py-3 text-left text-[0.9375rem] leading-snug whitespace-nowrap text-primary-foreground transition-colors hover:bg-white/15 xl:text-base",
-                              active && "bg-white/20 font-medium",
-                            )}
-                            onClick={() => setOpenKey(null)}
-                          >
-                            {chrome(child.i18n)}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <div className="overflow-visible border border-white/35 bg-primary text-primary-foreground shadow-lg">
+                    {/* AMP-83/87: 비링크 부모 그룹 제목 — 대비·계층 강화 */}
+                    <p
+                      id={labelId}
+                      className="border-b border-white/40 bg-[#001a33] px-3.5 py-2.5 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee] xl:text-[0.9375rem]"
+                    >
+                      {chrome(item.i18n)}
+                    </p>
+                    <ul role="menu" aria-labelledby={labelId}>
+                      {children.map((child) => {
+                        const active = isNavActive(pathname, child.href);
+                        return (
+                          <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
+                            <Link
+                              role="menuitem"
+                              href={child.href}
+                              className={cn(
+                                "block px-3.5 py-3 text-left text-[0.9375rem] leading-snug whitespace-nowrap text-primary-foreground transition-colors hover:bg-white/15 xl:text-base",
+                                active && "bg-white/20 font-medium",
+                              )}
+                              onClick={() => setOpenKey(null)}
+                            >
+                              {chrome(child.i18n)}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
               ) : null}
             </li>

@@ -256,16 +256,21 @@
   }
 }
 
+/*
+ * AMP-149: isolation:isolate 제거 — 드롭다운이 헤더 밖으로 나와도
+ * 본문(#content) 스크롤 레이어에 가리지 않도록 z-index만 높게 유지.
+ */
 .site-header-shell {
   position: relative;
-  z-index: 50;
-  isolation: isolate;
+  z-index: 100;
   flex-shrink: 0;
+  overflow: visible;
   background: var(--site-header-bg);
   border-bottom: 1px solid var(--pastel-chrome-border);
 }
 
 .site-header-bar {
+  overflow: visible !important;
   background: var(--site-header-bg) !important;
   backdrop-filter: none;
   color: var(--pastel-chrome-fg);
