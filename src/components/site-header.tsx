@@ -27,8 +27,8 @@ export function SiteHeader({
   const chrome = guestPath ? t : tKo;
 
   return (
-    <header className="relative z-50 shrink-0 overflow-visible">
-      <div className="site-chrome-shell site-header-bar flex h-12 min-w-0 items-center gap-1 overflow-visible border-b sm:gap-2 lg:h-14">
+    <header className="site-header-shell relative z-50 shrink-0 overflow-visible">
+      <div className="site-chrome-shell site-header-bar flex h-12 min-w-0 items-center gap-1 overflow-visible sm:gap-2 lg:h-14">
         <PublicNavSheet role={role} username={username} />
 
         <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">

@@ -241,12 +241,25 @@
   overflow: hidden;
 }
 
-/* 게스트 헤더 — 투명 바 + 로고색 글자 */
+/*
+ * AMP-107: 게스트 헤더 — 불투명 크림 바로 고정(투명 시 본문 대비에 따라
+ * 보였다 안 보였다 하는 깜빡임). 로고색 글자 유지.
+ */
+.site-header-shell {
+  background: #fffcf7;
+  border-bottom: 1px solid var(--pastel-chrome-border);
+}
+
 .site-header-bar {
   background: transparent !important;
   backdrop-filter: none;
   color: var(--pastel-chrome-fg);
-  border-color: var(--pastel-chrome-border);
+  border-color: transparent;
+}
+
+/* 스크롤바 등장으로 폭이 흔들리지 않게 */
+#content-scroll {
+  scrollbar-gutter: stable;
 }
 
 @media (max-width: 767px) {
