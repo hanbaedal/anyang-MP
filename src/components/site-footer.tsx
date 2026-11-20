@@ -21,21 +21,34 @@ export async function SiteFooter() {
   const homeSettings = await getHomeIntroSlidesSettings();
   const socialLinks = homeSettings.socialLinks?.length ? homeSettings.socialLinks : defaultSiteSocialLinks();
 
+  const callProps = {
+    videoSrc: heroMedia.videoSrc,
+    audioSrc: heroMedia.audioSrc,
+    posterSrc: heroMedia.posterSrc,
+    placement: "footer" as const,
+  };
+
   return (
     <>
       <footer className="relative z-10 mt-auto shrink-0 pb-[env(safe-area-inset-bottom)]">
         <div className="site-chrome-shell border-t border-[#e8dcc8]/80 bg-[#fffcf7]/92 text-xs leading-snug text-[color:var(--pastel-chrome-fg)] backdrop-blur-[2px] md:text-base md:leading-snug">
-          <div className="flex flex-col gap-3 py-2 md:flex-row md:items-end md:justify-between md:gap-4 md:py-3">
-          <div className="min-w-0 text-left leading-snug">
-            <p className="font-serif text-sm leading-tight md:text-lg">{t(uiLocale, "site.legalName")}</p>
-            <p className="mt-0.5 text-[0.6875rem] opacity-75 md:text-sm">{t(uiLocale, "site.address")}</p>
+          {/* AMP-105 모바일: 문의전화 → 회사명 → 주소 → 오시는길·공원영상 (가운데) */}
+          <div className="flex flex-col items-center gap-2.5 py-2.5 md:hidden">
+            <HeroCallActions {...callProps} showPhone showDirections={false} showParkView={false} />
+            <div className="min-w-0 w-full text-center leading-snug">
+              <p className="font-serif text-sm leading-tight">{t(uiLocale, "site.legalName")}</p>
+              <p className="mt-0.5 text-[0.6875rem] opacity-75">{t(uiLocale, "site.address")}</p>
+            </div>
+            <HeroCallActions {...callProps} showPhone={false} showDirections showParkView />
           </div>
-          <HeroCallActions
-            videoSrc={heroMedia.videoSrc}
-            audioSrc={heroMedia.audioSrc}
-            posterSrc={heroMedia.posterSrc}
-            placement="footer"
-          />
+
+          {/* PC: 기존 — 좌측 회사명·주소 / 우측 CTA */}
+          <div className="hidden py-3 md:flex md:flex-row md:items-end md:justify-between md:gap-4">
+            <div className="min-w-0 text-left leading-snug">
+              <p className="font-serif text-lg leading-tight">{t(uiLocale, "site.legalName")}</p>
+              <p className="mt-0.5 text-sm opacity-75">{t(uiLocale, "site.address")}</p>
+            </div>
+            <HeroCallActions {...callProps} />
           </div>
         </div>
       </footer>

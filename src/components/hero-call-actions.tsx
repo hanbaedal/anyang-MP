@@ -6,6 +6,7 @@ import { MapPin, Phone, Trees } from "lucide-react";
 import { ParkViewVideoModal } from "@/components/park-view-video-modal";
 import { useT } from "@/components/locale-provider";
 import { SITE } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 type Props = {
   videoSrc: string;
@@ -14,6 +15,11 @@ type Props = {
   onParkViewOpenChange?: (open: boolean) => void;
   /** hero: 흰 테두리(전경 위). footer: 사이트 크롬에 맞춤 */
   placement?: "hero" | "footer";
+  /** AMP-105: 푸터 모바일에서 전화/링크를 회사명 위·아래로 쪼갤 때 */
+  showPhone?: boolean;
+  showDirections?: boolean;
+  showParkView?: boolean;
+  className?: string;
 };
 
 /** 문의전화 · 오시는 길 · 공원영상 (푸터 기본, 홈 히어로에서는 placement=hero) */
@@ -23,6 +29,10 @@ export function HeroCallActions({
   posterSrc,
   onParkViewOpenChange,
   placement = "footer",
+  showPhone = true,
+  showDirections = true,
+  showParkView = true,
+  className,
 }: Props) {
   const t = useT();
   const [viewOpen, setViewOpen] = useState(false);
@@ -44,38 +54,46 @@ export function HeroCallActions({
 
   return (
     <>
-      <nav aria-label={t("home.call")} className={navClass}>
-        <a
-          href={SITE.phoneTel}
-          className="inline-flex shrink-0 items-center gap-2.5 rounded-full bg-secondary px-5 py-3.5 text-base font-semibold text-secondary-foreground shadow-md hover:bg-[#dce8e0] sm:gap-3 sm:px-6 sm:py-4 sm:text-lg md:gap-3.5 md:px-7 md:py-[1.125rem] md:text-xl"
-        >
-          <Phone className="size-5 sm:size-6 md:size-7" aria-hidden />
-          <span className="whitespace-nowrap">{t("home.call")}</span>
-          <span className="whitespace-nowrap tabular-nums">{SITE.phone}</span>
-        </a>
-        <Link
-          href="/intro/directions"
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[color:var(--pastel-chrome-fg)] sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm md:px-4 md:py-2.5 ${chromeBtn}`}
-        >
-          <MapPin className="size-3.5 sm:size-4" aria-hidden />
-          {t("directions")}
-        </Link>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[color:var(--pastel-chrome-fg)] sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm md:px-4 md:py-2.5 ${chromeBtn}`}
-        >
-          <Trees className="size-3.5 sm:size-4" aria-hidden />
-          {t("home.parkView")}
-        </button>
+      <nav aria-label={t("home.call")} className={cn(navClass, className)}>
+        {showPhone ? (
+          <a
+            href={SITE.phoneTel}
+            className="inline-flex shrink-0 items-center gap-2.5 rounded-full bg-secondary px-5 py-3.5 text-base font-semibold text-secondary-foreground shadow-md hover:bg-[#dce8e0] sm:gap-3 sm:px-6 sm:py-4 sm:text-lg md:gap-3.5 md:px-7 md:py-[1.125rem] md:text-xl"
+          >
+            <Phone className="size-5 sm:size-6 md:size-7" aria-hidden />
+            <span className="whitespace-nowrap">{t("home.call")}</span>
+            <span className="whitespace-nowrap tabular-nums">{SITE.phone}</span>
+          </a>
+        ) : null}
+        {showDirections ? (
+          <Link
+            href="/intro/directions"
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[color:var(--pastel-chrome-fg)] sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm md:px-4 md:py-2.5 ${chromeBtn}`}
+          >
+            <MapPin className="size-3.5 sm:size-4" aria-hidden />
+            {t("directions")}
+          </Link>
+        ) : null}
+        {showParkView ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[color:var(--pastel-chrome-fg)] sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm md:px-4 md:py-2.5 ${chromeBtn}`}
+          >
+            <Trees className="size-3.5 sm:size-4" aria-hidden />
+            {t("home.parkView")}
+          </button>
+        ) : null}
       </nav>
-      <ParkViewVideoModal
-        open={viewOpen}
-        onOpenChange={setOpen}
-        videoSrc={videoSrc}
-        audioSrc={audioSrc}
-        posterSrc={posterSrc}
-      />
+      {showParkView ? (
+        <ParkViewVideoModal
+          open={viewOpen}
+          onOpenChange={setOpen}
+          videoSrc={videoSrc}
+          audioSrc={audioSrc}
+          posterSrc={posterSrc}
+        />
+      ) : null}
     </>
   );
 }
