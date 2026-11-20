@@ -1,11 +1,10 @@
-import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { NoticesList } from "@/components/notices-list";
 import { MenuHubSection } from "@/components/menu-hub-section";
 import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
-import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
+import { FeesOrbitDiagram } from "@/components/fees-orbit-diagram";
 import { FuneralAttachedOrbit } from "@/components/funeral-attached-orbit";
 import { ServicesAttachedCards } from "@/components/services-attached-cards";
 import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
@@ -58,16 +57,16 @@ export default async function GuideHubPage() {
     return [t(locale, "proc.account"), t(locale, "proc.twoDays")];
   })();
   const procedureNoteAside = (
-    <PastelBox className="pc-procedure-note flex h-full min-h-0 flex-col justify-center gap-3 overflow-auto p-4 md:p-5">
-      {procedureNoteParts.map((block) => (
+    <div className="pc-procedure-note procedure-orbs-aside-text w-full">
+      {procedureNoteParts.map((block, index) => (
         <Prose
-          key={block.slice(0, 48)}
-          className="max-w-none space-y-3 text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]"
+          key={`note-${index}-${block.slice(0, 24)}`}
+          className="max-w-none space-y-3 text-center text-[15px] leading-7 text-[color:var(--pastel-chrome-fg)] md:space-y-[0.65em] md:text-[length:inherit] md:leading-[inherit]"
         >
           <Paragraphs text={block} />
         </Prose>
       ))}
-    </PastelBox>
+    </div>
   );
 
   const feeCardFallback = [
@@ -76,7 +75,7 @@ export default async function GuideHubPage() {
     { titleKey: "fees.c3.title", bodyKey: "fees.p3" },
     { titleKey: "fees.c4.title", bodyKey: "fees.p4" },
   ] as const;
-  const feeCards = (fees.items?.length
+  const feeOrbitItems = (fees.items?.length
     ? fees.items
     : feeCardFallback.map((row) => ({
         id: row.titleKey,
@@ -84,10 +83,13 @@ export default async function GuideHubPage() {
         text: t(locale, row.bodyKey),
         image: "",
       }))
-  ).map((item) => ({
-    ...item,
-    image: item.image?.trim() || undefined,
-  }));
+  )
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.id || item.title,
+      title: item.title,
+      text: item.text ?? "",
+    }));
 
   const serviceCards = (services.items?.length
     ? services.items
@@ -127,6 +129,7 @@ export default async function GuideHubPage() {
           moreLabel={t(locale, "more.detail")}
         >
           <SaleSteps
+            variant="orbs"
             steps={steps.length ? steps : undefined}
             aside={procedureNoteAside}
             cmsSlug="procedure"
@@ -140,7 +143,11 @@ export default async function GuideHubPage() {
           href="/guide/fees"
           moreLabel={t(locale, "more.detail")}
         >
-          <FeaturesPhotoGrid items={feeCards} />
+          <FeesOrbitDiagram
+            hubTitle={fees.title || t(locale, "fees.title")}
+            items={feeOrbitItems}
+            cmsTextStyles={fees.textStyles}
+          />
         </MenuHubSection>
 
         <MenuHubSection
