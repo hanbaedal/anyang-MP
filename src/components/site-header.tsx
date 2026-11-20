@@ -10,7 +10,7 @@ import { PublicNavSheet } from "@/components/public-nav-sheet";
 import { LoginModal } from "@/components/login-modal";
 import { useT } from "@/components/locale-provider";
 import { isGuestLocalePath, tKo } from "@/lib/i18n";
-import type { Role } from "@/lib/auth-types";
+import { isStaffRole, type Role } from "@/lib/auth-types";
 
 export function SiteHeader({
   signedIn,
@@ -25,6 +25,9 @@ export function SiteHeader({
   const pathname = usePathname();
   const guestPath = isGuestLocalePath(pathname);
   const chrome = guestPath ? t : tKo;
+  const staff = signedIn && isStaffRole(role);
+  /** AMP-150: 국기는 게스트만 — 스태프 로그인 시 숨김 */
+  const showFlags = !signedIn;
 
   return (
     <header className="site-header-shell shrink-0 overflow-visible">
@@ -46,16 +49,10 @@ export function SiteHeader({
           </p>
         </Link>
 
-        <PublicGnb role={role} username={username} />
+        <PublicGnb role={role} username={username} compact={staff} />
 
-        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-          <Link
-            href="/sitemap"
-            className="whitespace-nowrap rounded-md px-1 py-1 text-[0.625rem] text-[color:var(--pastel-chrome-fg)]/80 underline-offset-4 hover:bg-primary/8 hover:underline sm:px-1.5 sm:text-xs"
-          >
-            {chrome("nav.sitemap")}
-          </Link>
-          {guestPath ? <FlagSwitcher /> : null}
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
+          {showFlags ? <FlagSwitcher /> : null}
           {signedIn ? (
             <Link
               href="/account"
@@ -68,6 +65,13 @@ export function SiteHeader({
           ) : (
             <LoginModal />
           )}
+          {/* AMP-150: 사이트맵은 맨 오른쪽 */}
+          <Link
+            href="/sitemap"
+            className="whitespace-nowrap rounded-md px-1 py-1 text-[0.625rem] text-[color:var(--pastel-chrome-fg)]/80 underline-offset-4 hover:bg-primary/8 hover:underline sm:px-1.5 sm:text-xs"
+          >
+            {chrome("nav.sitemap")}
+          </Link>
         </div>
       </div>
     </header>

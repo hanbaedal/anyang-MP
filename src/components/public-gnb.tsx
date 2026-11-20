@@ -15,10 +15,13 @@ export function PublicGnb({
   className,
   role,
   username,
+  compact = false,
 }: {
   className?: string;
   role?: Role | null;
   username?: string | null;
+  /** AMP-150: 스태프 로그인 시 역할 메뉴를 헤더에 작게 */
+  compact?: boolean;
 }) {
   const t = useT();
   const pathname = usePathname();
@@ -86,8 +89,11 @@ export function PublicGnb({
               <Link
                 href={item.href}
                 className={cn(
-                  "relative z-[1] flex h-full min-w-[4.25rem] items-center justify-center px-2 text-[0.9375rem] font-medium whitespace-nowrap transition-colors xl:min-w-[5rem] xl:px-2.5 xl:text-base",
+                  "relative z-[1] flex h-full items-center justify-center font-medium whitespace-nowrap transition-colors",
                   "text-[color:var(--pastel-chrome-fg)] hover:bg-primary/8",
+                  compact
+                    ? "min-w-0 px-1.5 text-[0.75rem] xl:px-2 xl:text-[0.8125rem]"
+                    : "min-w-[4.25rem] px-2 text-[0.9375rem] xl:min-w-[5rem] xl:px-2.5 xl:text-base",
                   (open || parentActive) && "bg-primary/12",
                 )}
                 aria-expanded={hasChildren ? open : undefined}
