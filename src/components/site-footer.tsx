@@ -35,8 +35,11 @@ export async function SiteFooter() {
           {/* AMP-105 모바일: 문의전화 → 회사명 → 주소 → 오시는길·공원영상 (가운데) */}
           <div className="flex flex-col items-center gap-2.5 py-2.5 md:hidden">
             <HeroCallActions {...callProps} showPhone showDirections={false} showParkView={false} />
-            <div className="min-w-0 w-full text-center leading-snug">
-              <p className="font-serif text-sm leading-tight">{t(uiLocale, "site.legalName")}</p>
+            <div className="min-w-0 w-full px-2 text-center leading-snug">
+              {/* AMP-116: 회사명 한 줄 */}
+              <p className="whitespace-nowrap font-serif text-[0.8125rem] leading-tight tracking-tight">
+                {t(uiLocale, "site.legalName")}
+              </p>
               <p className="mt-0.5 text-[0.6875rem] opacity-75">{t(uiLocale, "site.address")}</p>
             </div>
             <HeroCallActions {...callProps} showPhone={false} showDirections showParkView />

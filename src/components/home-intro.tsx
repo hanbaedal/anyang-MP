@@ -263,7 +263,8 @@ export function HomeIntro({
                 >
                   <span
                     className={cn(
-                      "block break-keep text-2xl md:text-4xl lg:text-[2.75rem]",
+                      /* AMP-116: 모바일 「(재)안양공원묘원」한 줄 */
+                      "block whitespace-nowrap text-[clamp(1.05rem,5.1vw,1.5rem)] leading-tight md:text-4xl lg:text-[2.75rem]",
                       cmsEditMarkers && "pointer-events-none",
                     )}
                     style={koSlotStyle("heroLine2")}

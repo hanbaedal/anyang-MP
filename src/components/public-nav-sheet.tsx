@@ -58,7 +58,9 @@ export function PublicNavSheet({ role, username }: { role?: Role | null; usernam
         className="inset-0 z-50 flex h-dvh max-h-dvh w-full max-w-none flex-col gap-0 border-0 bg-[color:var(--chrome)] p-0 text-[color:var(--chrome-foreground)] backdrop-blur data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 border-b border-[color:var(--chrome-border)] px-3 py-2">
-          <SheetTitle className="font-serif text-base text-[color:var(--chrome-foreground)]">{chrome("site.legalName")}</SheetTitle>
+          <SheetTitle className="whitespace-nowrap font-serif text-sm tracking-tight text-[color:var(--chrome-foreground)] sm:text-base">
+            {chrome("site.legalName")}
+          </SheetTitle>
           <SheetClose asChild>
             <Button size="icon" variant="ghost" className="shrink-0 text-[color:var(--chrome-foreground)] hover:bg-white/15" aria-label={chrome("close")}>
               <X />
