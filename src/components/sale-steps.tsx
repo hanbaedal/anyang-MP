@@ -19,7 +19,6 @@ import { CmsItemImageSlot } from "@/components/cms-edit/cms-item-image-slot";
 import { useLocale } from "@/components/locale-provider";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
 import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
-import { GuideDetailList } from "@/components/guide-detail-list";
 import { ProcedureOrbsSteps } from "@/components/procedure-orbs-steps";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +27,6 @@ export type SaleStepView = { n: string; title: string; text: string; image?: str
 /**
  * 분양 절차 — 2열·소프트 오버레이.
  * AMP-77 폭/aspect · AMP-79 `viewportFill` · AMP-81 `aside` = 5번 옆(6번째 셀).
- * AMP-108 `detail` = 분양안내 상세보기형 교차 행.
  */
 export function SaleSteps({
   compact = false,
@@ -40,7 +38,7 @@ export function SaleSteps({
   cmsSlug,
   cmsEditMarkers = false,
   cmsTextStyles,
-  /** cards | orbs(허브) | detail(상세보기 기준, AMP-108) */
+  /** 분양 절차 상세 — 파스텔 원 5개 */
   variant = "cards",
 }: {
   compact?: boolean;
@@ -53,7 +51,7 @@ export function SaleSteps({
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
   cmsTextStyles?: PageCmsTextStyles;
-  variant?: "cards" | "orbs" | "detail";
+  variant?: "cards" | "orbs";
 }) {
   const locale = useLocale();
   const t = useT();
@@ -65,25 +63,6 @@ export function SaleSteps({
           title: t(step.titleKey),
           text: t(step.textKey),
         }));
-
-  if (variant === "detail") {
-    return (
-      <GuideDetailList
-        className={className}
-        cmsSlug={cmsSlug}
-        cmsEditMarkers={cmsEditMarkers}
-        cmsTextStyles={cmsTextStyles}
-        items={rows.map((step) => ({
-          id: step.id || `step-${step.n}`,
-          title: step.title,
-          text: compact ? undefined : step.text,
-          image: step.image,
-          eyebrow: t("step.n", { n: step.n }),
-        }))}
-        footer={aside ? <div className="mt-8 w-full max-w-none md:mt-10">{aside}</div> : null}
-      />
-    );
-  }
 
   if (variant === "orbs") {
     return (
