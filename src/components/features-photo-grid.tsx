@@ -1,5 +1,6 @@
 import { CmsInlineBreaks, Paragraphs } from "@/components/paragraphs";
 import { GuideCardCoverImage } from "@/components/guide-card-cover-image";
+import { GuideDetailList } from "@/components/guide-detail-list";
 import {
   cardHasGalleryImage,
   featureRainbowPastelClass,
@@ -63,6 +64,8 @@ export function FeaturesPhotoGrid({
   viewportFill = false,
   /** 공원특징 4카드 — 연한 무지개 파스텔·상단 가운데 정렬 */
   featureRainbow = false,
+  /** AMP-108: 분양안내 상세보기형 교차 행 */
+  layout = "grid",
   cmsSlug,
   cmsEditMarkers = false,
   locale = "ko" as Locale,
@@ -77,12 +80,36 @@ export function FeaturesPhotoGrid({
   captionFirstLine?: boolean;
   viewportFill?: boolean;
   featureRainbow?: boolean;
+  layout?: "grid" | "detail";
   cmsSlug?: string;
   cmsEditMarkers?: boolean;
   locale?: Locale;
   cmsTextStyles?: PageCmsTextStyles;
 }) {
   if (!items.length) return null;
+
+  if (layout === "detail") {
+    return (
+      <GuideDetailList
+        className={className}
+        cmsSlug={cmsSlug}
+        cmsEditMarkers={cmsEditMarkers}
+        cmsTextStyles={cmsTextStyles}
+        items={items.map((item, index) => {
+          const title = normalizeFeatureCopy(item.title ?? "");
+          const raw = item.text ? normalizeFeatureCopy(item.text) : "";
+          const text = captionFirstLine ? firstBodyLine(raw) : raw;
+          return {
+            id: item.id || item.title || String(index),
+            title: hideTitle ? "" : title,
+            text: text || undefined,
+            image: item.image,
+          };
+        })}
+      />
+    );
+  }
+
   const fill = viewportFill && !dense;
   const transit = dense && titleBar;
 
