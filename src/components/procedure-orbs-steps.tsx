@@ -50,8 +50,8 @@ function ProcedureOrb({
         "procedure-orb",
         `procedure-orb--${orbTone}`,
         hasPhoto && "procedure-orb--photo",
-        /* AMP-104: 모바일=좌측 카드 스택 · md+=원형 가운데 */
-        "flex flex-col items-start text-left md:items-center md:text-center",
+        /* AMP-104: 모바일=좌측 카드 · md+=원 안 가운데(flex+text-align) */
+        "flex flex-col items-start justify-start text-left md:items-center md:justify-center md:text-center",
       )}
     >
       {hasPhoto ? (
@@ -67,13 +67,15 @@ function ProcedureOrb({
       <h3
         {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
         className={cn(
-          "procedure-orb-title px-0 text-lg font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] md:px-3 md:text-lg",
+          "procedure-orb-title px-0 text-left text-lg font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] md:px-3 md:text-center md:text-lg",
           titleStyleProps.className,
         )}
         style={titleStyleProps.style}
         {...(titleColored ? { "data-hero-custom-color": "1" as const } : {})}
       >
-        <CmsInlineBreaks text={step.title} />
+        <span className="block w-full text-left md:text-center">
+          <CmsInlineBreaks text={step.title} />
+        </span>
       </h3>
       <div aria-hidden className="procedure-orb-blank" />
       {compact || !step.text ? null : (
@@ -82,13 +84,13 @@ function ProcedureOrb({
             ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
             : { "data-cms-body-root": "1" as const })}
           className={cn(
-            "procedure-orb-desc px-0 text-[0.9375rem] leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 md:px-3 md:text-sm md:leading-6",
+            "procedure-orb-desc px-0 text-left text-[0.9375rem] leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 md:px-3 md:text-center md:text-sm md:leading-6",
             textStyleProps.className,
           )}
           style={textStyleProps.style}
           {...(textColored ? { "data-hero-custom-color": "1" as const } : {})}
         >
-          <Paragraphs text={step.text} className="text-inherit" />
+          <Paragraphs text={step.text} className="w-full text-inherit md:items-center" />
         </div>
       )}
     </div>
