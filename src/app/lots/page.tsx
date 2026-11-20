@@ -1,15 +1,7 @@
-import { LotsPhotoGrid } from "@/components/lots-photo-grid";
-import { MenuHubSection } from "@/components/menu-hub-section";
-import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
-import { getCmsPageLocalized } from "@/lib/cms";
-import { listLotsPhotosFromGallery } from "@/lib/gallery";
+import { MenuHubIndex } from "@/components/menu-hub-index";
+import { buildMenuHubIndexItems } from "@/lib/menu-hub";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import type { CmsSlug } from "@/lib/cms-types";
-import type { Locale } from "@/lib/i18n";
-import type { LotsGallerySlug } from "@/lib/gallery-types";
-import type { LotsPhotoItem } from "@/components/lots-photo-grid";
 
 export const dynamic = "force-dynamic";
 
@@ -18,52 +10,15 @@ export async function generateMetadata() {
   return { title: t(locale, "nav.lots") };
 }
 
-async function lotsSection(
-  locale: Locale,
-  slug: Extract<CmsSlug, "burial" | "lawn" | "columbarium">,
-  gallerySlug: LotsGallerySlug,
-  fallbackBodyKey: string,
-) {
-  const [cms, items] = await Promise.all([
-    getCmsPageLocalized(slug, locale),
-    listLotsPhotosFromGallery(gallerySlug, locale),
-  ]);
-  return {
-    title: cms.title || t(locale, `${slug === "columbarium" ? "col" : slug}.title`),
-    body: cms.body ? <Paragraphs text={cms.body} /> : <p>{t(locale, fallbackBodyKey)}</p>,
-    items: items as LotsPhotoItem[],
-  };
-}
-
+/** AMP-112: 서브메뉴 링크 허브 — 상세·CMS는 /lots/* */
 export default async function LotsHubPage() {
   const locale = await readLocale();
-  const emptyLabel = t(locale, "lots.galleryEmpty");
-  const [lawn, burial, col] = await Promise.all([
-    lotsSection(locale, "lawn", "lawn", "lawn.body"),
-    lotsSection(locale, "burial", "burial", "burial.body"),
-    lotsSection(locale, "columbarium", "columbarium", "col.body"),
-  ]);
+  const items = await buildMenuHubIndexItems("/lots", locale);
 
   return (
-    <div className="site-container w-full space-y-16 py-12">
-      <h1 className="sr-only">{t(locale, "nav.lots")}</h1>
-        <MenuHubSection id="lawn" title={lawn.title} href="/lots/lawn" moreLabel={t(locale, "more.detail")}>
-          <Prose>{lawn.body}</Prose>
-          <LotsPhotoGrid items={lawn.items} emptyLabel={emptyLabel} />
-        </MenuHubSection>
-        <MenuHubSection id="burial" title={burial.title} href="/lots/burial" moreLabel={t(locale, "more.detail")}>
-          <Prose>{burial.body}</Prose>
-          <LotsPhotoGrid items={burial.items} emptyLabel={emptyLabel} />
-        </MenuHubSection>
-        <MenuHubSection
-          id="columbarium"
-          title={col.title}
-          href="/lots/columbarium"
-          moreLabel={t(locale, "more.detail")}
-        >
-          <Prose>{col.body}</Prose>
-          <LotsPhotoGrid items={col.items} emptyLabel={emptyLabel} />
-        </MenuHubSection>
+    <div className="site-container space-y-8 py-12 md:py-14">
+      <h1 className="font-serif text-2xl text-primary md:text-3xl">{t(locale, "nav.lots")}</h1>
+      <MenuHubIndex items={items} />
     </div>
   );
 }

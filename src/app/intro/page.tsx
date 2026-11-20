@@ -1,15 +1,7 @@
-import Image from "next/image";
-import { DirectionsMap } from "@/components/directions-map";
-import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
-import { MenuHubSection } from "@/components/menu-hub-section";
-import { Prose } from "@/components/page-hero";
-import { Paragraphs } from "@/components/paragraphs";
-import { PastelBox } from "@/components/pastel-box";
-import { getCmsPageLocalized } from "@/lib/cms";
+import { MenuHubIndex } from "@/components/menu-hub-index";
+import { buildMenuHubIndexItems } from "@/lib/menu-hub";
 import { t } from "@/lib/i18n";
 import { readLocale } from "@/lib/i18n-server";
-import { uploadOriginalUrl } from "@/lib/media";
-import { FEATURES, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -18,91 +10,15 @@ export async function generateMetadata() {
   return { title: t(locale, "nav.intro") };
 }
 
+/** AMP-112: 서브메뉴 링크 허브 — 상세·CMS는 /intro/* */
 export default async function IntroHubPage() {
   const locale = await readLocale();
-  const [greeting, featuresCms] = await Promise.all([
-    getCmsPageLocalized("greeting", locale),
-    getCmsPageLocalized("features", locale),
-  ]);
-  const bodyImage = greeting.bodyImage?.trim() || "";
-  const imageSrc = bodyImage ? uploadOriginalUrl(bodyImage) : "";
-  const featureItems = (featuresCms.items?.length
-    ? featuresCms.items
-    : FEATURES.map((feature) => ({
-        id: feature.titleKey,
-        title: t(locale, feature.titleKey),
-        text: t(locale, feature.bodyKey),
-        image: "",
-      }))
-  ).map((item) => ({
-    ...item,
-    image: item.image?.trim() || undefined,
-  }));
+  const items = await buildMenuHubIndexItems("/intro", locale);
 
   return (
-    <div className="site-container space-y-16 py-12">
-      <h1 className="sr-only">{t(locale, "nav.intro")}</h1>
-        <MenuHubSection
-          id="greeting"
-          title={greeting.title || t(locale, "greeting.title")}
-          href="/intro/greeting"
-          moreLabel={t(locale, "more.detail")}
-        >
-          <PastelBox>
-            <div
-              className={
-                imageSrc
-                  ? "grid gap-6 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-start lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]"
-                  : undefined
-              }
-            >
-              {imageSrc ? (
-                <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-lg bg-black/5 md:mx-0 md:max-w-none">
-                  <Image
-                    src={imageSrc}
-                    alt={greeting.title || t(locale, "greeting.title")}
-                    fill
-                    className="guest-photo-bright object-cover"
-                    sizes="(max-width: 768px) 90vw, 22rem"
-                    unoptimized
-                  />
-                </div>
-              ) : null}
-              <Prose className="max-w-none text-[color:var(--pastel-chrome-fg)]">
-                {greeting.body ? (
-                  <Paragraphs text={greeting.body} />
-                ) : (
-                  <>
-                    <p>{t(locale, "greeting.p1")}</p>
-                    <p>{t(locale, "greeting.p2")}</p>
-                    <p>{t(locale, "greeting.p3")}</p>
-                    <p>{t(locale, "greeting.thanks")}</p>
-                    <p className="font-medium">{t(locale, "greeting.sign")}</p>
-                  </>
-                )}
-              </Prose>
-            </div>
-          </PastelBox>
-        </MenuHubSection>
-
-        <MenuHubSection
-          id="features"
-          title={featuresCms.title || t(locale, "features.title")}
-          href="/intro/features"
-          moreLabel={t(locale, "more.detail")}
-        >
-          <FeaturesPhotoGrid items={featureItems} featureRainbow />
-        </MenuHubSection>
-
-        <MenuHubSection
-          id="directions"
-          title={t(locale, "dir.title")}
-          href="/intro/directions"
-          moreLabel={t(locale, "more.detail")}
-        >
-          <p className="mb-4 text-sm text-muted-foreground">{SITE.address}</p>
-          <DirectionsMap />
-        </MenuHubSection>
+    <div className="site-container space-y-8 py-12 md:py-14">
+      <h1 className="font-serif text-2xl text-primary md:text-3xl">{t(locale, "nav.intro")}</h1>
+      <MenuHubIndex items={items} />
     </div>
   );
 }
