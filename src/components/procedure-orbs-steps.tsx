@@ -41,15 +41,20 @@ function ProcedureOrb({
   return (
     <div
       role="listitem"
-      className={cn("procedure-orb", `procedure-orb--${orbTone}`, "flex flex-col items-center text-center")}
+      className={cn(
+        "procedure-orb",
+        `procedure-orb--${orbTone}`,
+        /* AMP-104: 모바일=좌측 카드 스택 · md+=원형 가운데 */
+        "flex flex-col items-start text-left md:items-center md:text-center",
+      )}
     >
-      <p className="procedure-orb-step-label text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm">
+      <p className="procedure-orb-step-label text-xs font-medium tracking-wide text-[color:var(--pastel-chrome-fg)]/75 sm:text-sm md:text-center">
         {stepLabel}
       </p>
       <h3
         {...(cmsTitleKey ? { "data-cms-key": cmsTitleKey } : {})}
         className={cn(
-          "procedure-orb-title px-3 text-base font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] sm:text-lg",
+          "procedure-orb-title px-0 text-lg font-semibold leading-snug text-[color:var(--pastel-chrome-fg)] md:px-3 md:text-lg",
           titleStyleProps.className,
         )}
         style={titleStyleProps.style}
@@ -64,7 +69,7 @@ function ProcedureOrb({
             ? { "data-cms-key": cmsTextKey, "data-cms-body-root": "1" as const }
             : { "data-cms-body-root": "1" as const })}
           className={cn(
-            "procedure-orb-desc px-3 text-xs leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 sm:text-sm sm:leading-6",
+            "procedure-orb-desc px-0 text-[0.9375rem] leading-relaxed text-[color:var(--pastel-chrome-fg)]/90 md:px-3 md:text-sm md:leading-6",
             textStyleProps.className,
           )}
           style={textStyleProps.style}
