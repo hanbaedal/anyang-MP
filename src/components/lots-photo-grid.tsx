@@ -17,7 +17,8 @@ export type LotsPhotoItem = {
 type Layout = "grid" | "detail";
 
 /**
- * 분양안내 허브는 작은 격자, 매장·평장·봉안 상세는 한 줄에 큰 사진 좌·우 교차.
+ * `detail`: 한 줄에 큰 사진 좌·우 교차(허브·매장·평장·봉안).
+ * `grid`: 작은 격자(리모델링 등).
  */
 export function LotsPhotoGrid({
   items,
