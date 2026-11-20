@@ -974,11 +974,13 @@
 /* AMP-115/117/118 관리비 — 중앙 원 + 주변 4박스 동일 크기(제목+본문) + 점선 */
 .fees-orbit {
   --fees-orbit-w: min(54rem, 100%);
-  --fees-orbit-h: min(44rem, 96vw);
+  /* AMP-120: 박스 높이 150%에 맞춰 궤도 영역 확대 */
+  --fees-orbit-h: min(58rem, 110vw);
   /* AMP-118: 4박스 공통 크기 · 패딩 여유(스크롤/잘림 없음) */
   /* AMP-119: 폭 축소 · 내용 중앙 */
   --fees-box-w: 13rem;
-  --fees-box-h: 15.5rem;
+  /* AMP-120: 높이 = 기존 15.5rem × 1.5 */
+  --fees-box-h: 23.25rem;
   --fees-box-pad-y: 1.45rem;
   --fees-box-pad-x: 1.15rem;
   position: relative;
