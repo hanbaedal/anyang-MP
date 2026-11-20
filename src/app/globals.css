@@ -1396,6 +1396,262 @@
   }
 }
 
+/* AMP-131: 이용절차 — 중앙「안양공원」원 + 상하좌우 넓은 면(제목+설명) */
+.fun-orbit {
+  --fun-orbit-w: min(58rem, 100%);
+  --fun-orbit-h: min(42rem, 104vw);
+  --fun-panel-w: 21rem;
+  --fun-panel-h: 10.5rem;
+  position: relative;
+  width: var(--fun-orbit-w);
+  height: var(--fun-orbit-h);
+  max-width: 100%;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: minmax(var(--fun-panel-w), 1.15fr) minmax(8rem, 0.6fr) minmax(var(--fun-panel-w), 1.15fr);
+  grid-template-rows: minmax(var(--fun-panel-h), 1.1fr) minmax(8rem, 0.6fr) minmax(var(--fun-panel-h), 1.1fr);
+  grid-template-areas:
+    ". n ."
+    "w hub e"
+    ". s .";
+  align-items: center;
+  justify-items: center;
+  gap: 1rem 1.1rem;
+}
+
+.fun-orbit-lines {
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.fun-orbit-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--pastel-chrome-fg) 34%, #9eb8c8);
+  stroke-width: 0.55;
+  stroke-linecap: round;
+  stroke-dasharray: 1.6 2.2;
+}
+
+.fun-orbit-hub {
+  grid-area: hub;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  width: min(9.5rem, 100%);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.7rem;
+  border: 1px solid color-mix(in srgb, #c5dde8 88%, #fff);
+  background: radial-gradient(circle at 32% 28%, #fff9f2 0%, #f0e4d4 48%, #d4bfa4 100%);
+  box-shadow:
+    0 0.55rem 1.2rem rgba(15, 23, 42, 0.1),
+    inset 0 0.12rem 0.35rem rgba(255, 255, 255, 0.55);
+  color: var(--pastel-chrome-fg);
+  animation: fun-orbit-hub-in 0.6s ease both;
+}
+
+@keyframes fun-orbit-hub-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fun-orbit-hub-label {
+  font-size: clamp(1.05rem, 2.3vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.fun-orbit-panel {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  width: var(--fun-panel-w);
+  height: var(--fun-panel-h);
+  min-width: var(--fun-panel-w);
+  min-height: var(--fun-panel-h);
+  max-width: var(--fun-panel-w);
+  max-height: var(--fun-panel-h);
+  padding: 1rem 1.25rem;
+  border-radius: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  border: 1px solid transparent;
+  color: var(--pastel-chrome-fg);
+  overflow: visible;
+  box-shadow:
+    0 0.55rem 1.15rem rgba(15, 23, 42, 0.1),
+    0 0.12rem 0.25rem rgba(15, 23, 42, 0.05),
+    inset 0 0.14rem 0.3rem rgba(255, 255, 255, 0.55),
+    inset 0 -0.22rem 0.45rem rgba(15, 23, 42, 0.07);
+  animation: fun-orbit-panel-in 0.55s ease both;
+  transition: transform 0.25s ease;
+}
+
+.fun-orbit-panel:hover {
+  transform: translateY(-0.12rem);
+}
+
+@keyframes fun-orbit-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fun-orbit-hub,
+  .fun-orbit-panel {
+    animation: none;
+  }
+}
+
+.fun-orbit-panel-title {
+  margin: 0;
+  flex-shrink: 0;
+  width: 100%;
+  font-size: clamp(0.98rem, 1.9vw, 1.12rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.fun-orbit-panel-body {
+  flex: 0 1 auto;
+  width: 100%;
+  min-height: 0;
+  font-size: clamp(0.8rem, 1.4vw, 0.9rem);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--pastel-chrome-fg) 88%, transparent);
+}
+
+.fun-orbit-panel-body .cms-paragraphs {
+  gap: 0.4em;
+  align-items: center;
+}
+
+.fun-orbit-panel-body .cms-paragraphs > p {
+  text-align: center;
+}
+
+.fun-orbit-slot--n {
+  grid-area: n;
+  align-self: center;
+  justify-self: center;
+}
+.fun-orbit-slot--w {
+  grid-area: w;
+  justify-self: center;
+  align-self: center;
+}
+.fun-orbit-slot--e {
+  grid-area: e;
+  justify-self: center;
+  align-self: center;
+}
+.fun-orbit-slot--s {
+  grid-area: s;
+  align-self: center;
+  justify-self: center;
+}
+
+.fun-orbit-panel--1 {
+  border-color: color-mix(in srgb, #a8c8d8 88%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+    linear-gradient(145deg, #eef6fa 0%, #c8dde8 55%, #9ebfd4 100%);
+}
+.fun-orbit-panel--2 {
+  border-color: color-mix(in srgb, #9ec9a2 88%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+    linear-gradient(145deg, #eef8f0 0%, #c5e4c8 55%, #8fbf96 100%);
+}
+.fun-orbit-panel--3 {
+  border-color: color-mix(in srgb, #e0c4a8 88%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+    linear-gradient(145deg, #fff4ea 0%, #edd4b8 55%, #d8b48e 100%);
+}
+.fun-orbit-panel--4 {
+  border-color: color-mix(in srgb, #c8b8d8 88%, #fff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 45%),
+    linear-gradient(145deg, #f6f0fa 0%, #ddd0ea 55%, #b8a4cc 100%);
+}
+
+@media (max-width: 767px) {
+  .fun-orbit {
+    --fun-orbit-w: 100%;
+    --fun-orbit-h: auto;
+    --fun-panel-w: 100%;
+    --fun-panel-h: auto;
+    height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      "hub"
+      "n"
+      "w"
+      "e"
+      "s";
+    gap: 0.85rem;
+    justify-items: stretch;
+  }
+
+  .fun-orbit-lines {
+    display: none;
+  }
+
+  .fun-orbit-hub {
+    width: min(7.5rem, 42vw);
+    margin-inline: auto;
+  }
+
+  .fun-orbit-panel {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    min-height: 7.5rem;
+    max-height: none;
+    border-radius: 1.1rem;
+  }
+
+  .fun-orbit-slot--n,
+  .fun-orbit-slot--w,
+  .fun-orbit-slot--e,
+  .fun-orbit-slot--s {
+    align-self: stretch;
+    justify-self: stretch;
+  }
+}
+
 /* 공지 목록 — 본문 표 1120px 상한, 모바일은 100% + 좌우 패딩 */
 .pc-notices-fill {
   --notices-board-max: 70rem; /* 1120px */

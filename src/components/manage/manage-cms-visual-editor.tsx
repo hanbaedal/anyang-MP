@@ -13,7 +13,9 @@ import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { Prose } from "@/components/page-hero";
 import { SaleSteps } from "@/components/sale-steps";
+import { FuneralAttachedOrbit } from "@/components/funeral-attached-orbit";
 import { ServicesAttachedCards } from "@/components/services-attached-cards";
+import { SITE } from "@/lib/site";
 import type { CmsItem, CmsPage } from "@/lib/cms-types";
 import { uploadOriginalUrl } from "@/lib/media";
 import type { ManageVisualCmsSlug } from "@/lib/manage-visual-pages";
@@ -341,6 +343,48 @@ export function ManageCmsVisualEditor({
               ))}
             </div>
           </div>
+        ) : slug === "funeral" ? (
+          <div className="pc-soft-card-fill space-y-6">
+            <PastelBox>
+              <ManageEditableIntro
+                title={page.title}
+                lead={page.lead}
+                onTitle={(title) => setPage((p) => ({ ...p, title }))}
+                onLead={(lead) => setPage((p) => ({ ...p, lead }))}
+              />
+            </PastelBox>
+            <FuneralAttachedOrbit
+              hubTitle={SITE.shortName}
+              items={gridItems.slice(0, 4).map((item) => ({
+                id: item.id || item.title,
+                title: item.title,
+                text: item.text,
+              }))}
+              cmsTextStyles={page.textStyles}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              {page.items.map((item, index) => (
+                <ManageCmsItemEditor
+                  key={item.id}
+                  slug={slug}
+                  item={item}
+                  index={index}
+                  busy={busy}
+                  onPatch={(patch) => patchItem(item.id, patch)}
+                  onMessage={setMessage}
+                />
+              ))}
+            </div>
+            <PastelBox className="space-y-2">
+              <p className="text-xs font-medium text-[color:var(--pastel-chrome-fg)]/70">카드 아래 안내 본문</p>
+              <textarea
+                className={bodyArea}
+                value={page.body}
+                disabled={busy}
+                onChange={(e) => setPage((p) => ({ ...p, body: e.target.value }))}
+              />
+            </PastelBox>
+          </div>
         ) : (
           <div className="pc-soft-card-fill space-y-6">
             <PastelBox>
@@ -366,17 +410,6 @@ export function ManageCmsVisualEditor({
                 </div>
               ))}
             </div>
-            {slug === "funeral" ? (
-              <PastelBox className="space-y-2">
-                <p className="text-xs font-medium text-[color:var(--pastel-chrome-fg)]/70">카드 아래 안내 본문</p>
-                <textarea
-                  className={bodyArea}
-                  value={page.body}
-                  disabled={busy}
-                  onChange={(e) => setPage((p) => ({ ...p, body: e.target.value }))}
-                />
-              </PastelBox>
-            ) : null}
           </div>
         )}
       </div>

@@ -2,8 +2,7 @@ import { PageCmsEditBridge } from "@/components/cms-edit/page-cms-edit-bridge";
 import { CmsBodyMark } from "@/components/cms-body-mark";
 import { CmsManagedPageHero } from "@/components/cms-managed-page-hero";
 import { readCmsEditEnabled } from "@/lib/cms-edit-server";
-import { PastelBox } from "@/components/pastel-box";
-import { FeaturesPhotoGrid } from "@/components/features-photo-grid";
+import { FuneralAttachedOrbit } from "@/components/funeral-attached-orbit";
 import { FuneralDocList } from "@/components/funeral-doc-list";
 import { Prose } from "@/components/page-hero";
 import { loadCmsPageForView } from "@/lib/cms-page-view";
@@ -49,7 +48,14 @@ export default async function FuneralPage({
       }))
   ).map((item) => ({
     ...item,
-    image: item.image?.trim() || undefined,
+    id: item.id || item.title,
+    text: item.text ?? "",
+  }));
+
+  const orbitItems = items.slice(0, 4).map((item) => ({
+    id: item.id,
+    title: item.title,
+    text: item.text,
   }));
 
   const docLabels = resolveFuneralDocsDisplay(displayLocale, cms.funeralDocs);
@@ -58,28 +64,27 @@ export default async function FuneralPage({
     <>
       <CmsManagedPageHero locale={displayLocale} cms={cms} cmsEdit={cmsEdit} />
       <div className="site-container pc-soft-card-fill space-y-10 py-8 md:py-10">
-        <FeaturesPhotoGrid
-          items={items}
-          cmsSlug="funeral"
+        <FuneralAttachedOrbit
+          hubTitle={SITE.shortName}
+          items={orbitItems}
           cmsEditMarkers={cmsEdit}
-          locale={displayLocale}
           cmsTextStyles={cms.textStyles}
         />
-      <FuneralDocList locale={displayLocale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
-      <Prose>
-        {cms.body?.trim() ? (
-          <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
-        ) : (
-          <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
-            <p className="break-keep">{t(displayLocale, "fun.more")}</p>
-          </CmsBodyMark>
-        )}
-        <p>
-          <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
-            {SITE.phone}
-          </a>
-        </p>
-      </Prose>
+        <FuneralDocList locale={displayLocale} docs={docs} labels={docLabels} cmsEditMarkers={cmsEdit} />
+        <Prose>
+          {cms.body?.trim() ? (
+            <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit} text={cms.body} />
+          ) : (
+            <CmsBodyMark cmsSlug="funeral" locale={displayLocale} textStyles={cms.textStyles} cmsEditMarkers={cmsEdit}>
+              <p className="break-keep">{t(displayLocale, "fun.more")}</p>
+            </CmsBodyMark>
+          )}
+          <p>
+            <a className="text-primary underline-offset-4 hover:underline" href={SITE.phoneTel}>
+              {SITE.phone}
+            </a>
+          </p>
+        </Prose>
       </div>
       {cmsEdit ? <PageCmsEditBridge enabled /> : null}
     </>

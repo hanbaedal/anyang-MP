@@ -6,6 +6,7 @@ import { Prose } from "@/components/page-hero";
 import { Paragraphs } from "@/components/paragraphs";
 import { PastelBox } from "@/components/pastel-box";
 import { SaleSteps } from "@/components/sale-steps";
+import { FuneralAttachedOrbit } from "@/components/funeral-attached-orbit";
 import { ServicesAttachedCards } from "@/components/services-attached-cards";
 import { cmsBodyBlocks } from "@/lib/cms-body-blocks";
 import { getCmsPageLocalized } from "@/lib/cms";
@@ -158,7 +159,15 @@ export default async function GuideHubPage() {
           moreLabel={t(locale, "more.detail")}
         >
           <div className="space-y-10">
-            <FeaturesPhotoGrid items={funeralCards} />
+            <FuneralAttachedOrbit
+              hubTitle={SITE.shortName}
+              items={funeralCards.slice(0, 4).map((item) => ({
+                id: item.id || item.title,
+                title: item.title,
+                text: item.text,
+              }))}
+              cmsTextStyles={funeral.textStyles}
+            />
             <FuneralDocList locale={locale} docs={docs} labels={docLabels} />
             <Prose>
               {funeral.body?.trim() ? <Paragraphs text={funeral.body} /> : <p className="break-keep">{t(locale, "fun.more")}</p>}
