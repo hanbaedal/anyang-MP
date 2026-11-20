@@ -8,7 +8,12 @@ import { useLocale, useT } from "@/components/locale-provider";
 import { cardHasGalleryImage } from "@/lib/guide-photo-card";
 import { PROCEDURE_ORB_COUNT } from "@/lib/procedure-orbs";
 import { pageSlotItemText, pageSlotItemTitle } from "@/lib/page-cms-slots";
-import { pageCmsTextStyleColorized, pageCmsTextStyleProps, type PageCmsTextStyles } from "@/lib/page-cms-text-style";
+import {
+  pageCmsTextStyleColorized,
+  pageCmsTextStyleProps,
+  resolvePageCmsItemStyleKey,
+  type PageCmsTextStyles,
+} from "@/lib/page-cms-text-style";
 import { cn } from "@/lib/utils";
 import type { SaleStepView } from "@/components/sale-steps";
 
@@ -35,10 +40,16 @@ function ProcedureOrb({
   const textSlotKey = cmsSlug ? pageSlotItemText(cmsSlug, stepId) : "";
   const cmsTitleKey = cmsEditMarkers && titleSlotKey ? titleSlotKey : undefined;
   const cmsTextKey = cmsEditMarkers && textSlotKey ? textSlotKey : undefined;
-  const titleStyleProps = titleSlotKey ? pageCmsTextStyleProps(cmsTextStyles, titleSlotKey, locale) : {};
-  const textStyleProps = textSlotKey ? pageCmsTextStyleProps(cmsTextStyles, textSlotKey, locale) : {};
-  const titleColored = titleSlotKey && pageCmsTextStyleColorized(cmsTextStyles, titleSlotKey, locale);
-  const textColored = textSlotKey && pageCmsTextStyleColorized(cmsTextStyles, textSlotKey, locale);
+  const titleStyleKey = cmsSlug
+    ? resolvePageCmsItemStyleKey(cmsTextStyles, cmsSlug, stepId, "title", index)
+    : titleSlotKey;
+  const textStyleKey = cmsSlug
+    ? resolvePageCmsItemStyleKey(cmsTextStyles, cmsSlug, stepId, "text", index)
+    : textSlotKey;
+  const titleStyleProps = titleStyleKey ? pageCmsTextStyleProps(cmsTextStyles, titleStyleKey, locale) : {};
+  const textStyleProps = textStyleKey ? pageCmsTextStyleProps(cmsTextStyles, textStyleKey, locale) : {};
+  const titleColored = Boolean(titleStyleKey && pageCmsTextStyleColorized(cmsTextStyles, titleStyleKey, locale));
+  const textColored = Boolean(textStyleKey && pageCmsTextStyleColorized(cmsTextStyles, textStyleKey, locale));
   const orbTone = (index % PROCEDURE_ORB_COUNT) + 1;
   const hasPhoto = cardHasGalleryImage(step.image);
   const showCmsImageChip = Boolean(cmsSlug && cmsEditMarkers);

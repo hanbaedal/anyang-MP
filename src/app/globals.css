@@ -920,6 +920,7 @@
   justify-content: center;
   text-align: center;
   overflow: visible;
+  /* inline CMS fontFamily가 Tailwind/기본보다 우선 — 자식 span도 상속 */
 }
 
 .procedure-orb-blank {
@@ -948,10 +949,20 @@
 .procedure-orb-desc .cms-paragraphs {
   width: 100%;
   align-items: center;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 
 .procedure-orb-desc .cms-paragraphs > p {
   text-align: center;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 
 .procedure-orbs-arrow {

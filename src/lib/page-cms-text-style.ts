@@ -59,26 +59,89 @@ export function normalizePageCmsTextStyles(raw: unknown): PageCmsTextStyles | un
   return Object.keys(next).length ? next : undefined;
 }
 
+/**
+ * AMP-144: 페이지 CMS textStyles는 로케일과 무관하게 적용.
+ * (이전 ko-only 게이트는 게스트 en/zh·표시 로케일 불일치 시 명조가 고딕으로 떨어짐)
+ */
 export function pageCmsTextStyle(
   styles: PageCmsTextStyles | undefined,
   slotKey: string,
-  locale: Locale,
+  _locale?: Locale,
 ): CSSProperties | undefined {
-  if (locale !== "ko" || !styles?.[slotKey]) return undefined;
+  if (!slotKey || !styles?.[slotKey]) return undefined;
   const { scale, font, color } = styles[slotKey];
   return buildHomeHeroSlotStyle({ scalePct: scale, font, color });
 }
 
-export function pageCmsTextStyleColorized(styles: PageCmsTextStyles | undefined, slotKey: string, locale: Locale) {
-  if (locale !== "ko") return false;
+export function pageCmsTextStyleColorized(
+  styles: PageCmsTextStyles | undefined,
+  slotKey: string,
+  _locale?: Locale,
+) {
+  if (!slotKey) return false;
   return Boolean(normalizeHeroTextColorValue(styles?.[slotKey]?.color));
+}
+
+/**
+ * item id가 바뀌어 저장된 textStyles 키와 어긋날 때 —
+ * 같은 slug·field의 삽입 순서(index)로 donor 키를 찾는다.
+ */
+export function resolvePageCmsItemStyleKey(
+  styles: PageCmsTextStyles | undefined,
+  slug: string,
+  itemId: string,
+  field: "title" | "text",
+  itemIndex: number,
+): string {
+  const exact = `page.${slug}.item.${itemId}.${field}`;
+  if (!styles) return exact;
+  if (styles[exact]) return exact;
+
+  const aliases = [
+    `page.${slug}.item.step-${itemIndex + 1}.${field}`,
+    `page.${slug}.item.item-${itemIndex}.${field}`,
+    `page.${slug}.item.${itemIndex + 1}.${field}`,
+  ];
+  for (const key of aliases) {
+    if (styles[key]) return key;
+  }
+
+  const escaped = slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^page\\.${escaped}\\.item\\.(.+)\\.${field}$`);
+  const ordered = Object.keys(styles).filter((key) => re.test(key));
+  return ordered[itemIndex] ?? exact;
+}
+
+/** 읽기 시 item id와 textStyles 키를 index로 맞춤(렌더용, 디스크 미변경) */
+export function alignPageCmsItemTextStyles(
+  styles: PageCmsTextStyles | undefined,
+  slug: string,
+  itemIds: string[],
+): PageCmsTextStyles | undefined {
+  if (!styles || !itemIds.length) return styles;
+  let changed = false;
+  const next: PageCmsTextStyles = { ...styles };
+  for (const field of ["title", "text"] as const) {
+    for (let i = 0; i < itemIds.length; i++) {
+      const id = itemIds[i]?.trim();
+      if (!id) continue;
+      const exact = `page.${slug}.item.${id}.${field}`;
+      if (next[exact]) continue;
+      const donor = resolvePageCmsItemStyleKey(styles, slug, id, field, i);
+      if (donor !== exact && styles[donor]) {
+        next[exact] = styles[donor]!;
+        changed = true;
+      }
+    }
+  }
+  return changed ? next : styles;
 }
 
 /** 슬롯별 style props — 공개·CMS 마커 공통 */
 export function pageCmsTextStyleProps(
   styles: PageCmsTextStyles | undefined,
   slotKey: string,
-  locale: Locale,
+  locale?: Locale,
 ): { style?: CSSProperties; className?: string } {
   const style = pageCmsTextStyle(styles, slotKey, locale);
   if (!style) return {};

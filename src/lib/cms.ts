@@ -7,7 +7,7 @@ import { getDb, hasMongo } from "./mongo";
 import { FEATURES, SALE_STEPS, SITE } from "./site";
 import { PRICES, REMAINING } from "./facts";
 import { normalizeFuneralDocsKo } from "./funeral-docs-cms";
-import { normalizePageCmsTextStyles } from "./page-cms-text-style";
+import { alignPageCmsItemTextStyles, normalizePageCmsTextStyles } from "./page-cms-text-style";
 import { revalidateCmsPublicPages } from "./cms-revalidate";
 import { type CmsItem, type CmsLocaleFields, type CmsPage, type CmsSlug } from "./cms-types";
 import { CONTENT_LOCALES, stillHasHangul, translateText, type ContentLocale } from "./translate-content";
@@ -357,7 +357,20 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
   const funeralDocs = normalizeFuneralDocsKo(page.funeralDocs);
   const heroImage = String(page.heroImage ?? "").trim();
   const bodyImage = String(page.bodyImage ?? "").trim();
-  const textStyles = normalizePageCmsTextStyles(page.textStyles);
+  const items = (page.items ?? []).map((item, index) => ({
+    id: String(item?.id ?? `item-${index}`),
+    title: String(item?.title ?? ""),
+    text: item?.text != null ? String(item.text) : "",
+    image: item?.image != null ? String(item.image) : "",
+    galleryId: item?.galleryId != null ? String(item.galleryId) : "",
+    ...(item?.won != null ? { won: String(item.won) } : {}),
+    ...(item?.remaining != null ? { remaining: String(item.remaining) } : {}),
+  }));
+  const textStyles = alignPageCmsItemTextStyles(
+    normalizePageCmsTextStyles(page.textStyles),
+    String(page.slug ?? ""),
+    items.map((item) => item.id),
+  );
   return {
     ...page,
     title: String(page.title ?? ""),
@@ -367,15 +380,7 @@ export function normalizeCmsPage(page: CmsPage): CmsPage {
     ...(bodyImage ? { bodyImage } : {}),
     ...(textStyles ? { textStyles } : {}),
     ...(funeralDocs ? { funeralDocs } : {}),
-    items: (page.items ?? []).map((item, index) => ({
-      id: String(item?.id ?? `item-${index}`),
-      title: String(item?.title ?? ""),
-      text: item?.text != null ? String(item.text) : "",
-      image: item?.image != null ? String(item.image) : "",
-      galleryId: item?.galleryId != null ? String(item.galleryId) : "",
-      ...(item?.won != null ? { won: String(item.won) } : {}),
-      ...(item?.remaining != null ? { remaining: String(item.remaining) } : {}),
-    })),
+    items,
   };
 }
 
@@ -664,7 +669,11 @@ export async function saveCmsPage(input: Omit<CmsPage, "updatedAt"> & { updatedA
       remaining: item.remaining,
     };
   });
-  const textStyles = normalizePageCmsTextStyles(input.textStyles ?? existing?.textStyles);
+  const textStyles = alignPageCmsItemTextStyles(
+    normalizePageCmsTextStyles(input.textStyles ?? existing?.textStyles),
+    input.slug,
+    rawItems.map((item) => item.id),
+  );
   const page: CmsPage = sanitizeDirectionsPage({
     slug: input.slug,
     title: input.title.trim(),
