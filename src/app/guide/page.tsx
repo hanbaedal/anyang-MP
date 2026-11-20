@@ -43,6 +43,7 @@ export default async function GuideHubPage() {
 
   const steps = (procedure.items ?? []).map((item, index) => ({
     n: String(index + 1),
+    id: item.id,
     title: item.title,
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
@@ -123,7 +124,12 @@ export default async function GuideHubPage() {
           href="/guide/procedure"
           moreLabel={t(locale, "more.detail")}
         >
-          <SaleSteps steps={steps.length ? steps : undefined} aside={procedureNoteAside} />
+          <SaleSteps
+            steps={steps.length ? steps : undefined}
+            aside={procedureNoteAside}
+            cmsSlug="procedure"
+            cmsTextStyles={procedure.textStyles}
+          />
         </MenuHubSection>
 
         <MenuHubSection

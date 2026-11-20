@@ -125,6 +125,7 @@ export function ManageCmsVisualEditor({
 
   const steps = page.items.map((item, index) => ({
     n: String(index + 1),
+    id: item.id,
     title: item.title,
     text: item.text ?? "",
     image: item.image?.trim() || undefined,
@@ -265,6 +266,8 @@ export function ManageCmsVisualEditor({
             <SaleSteps
               variant="orbs"
               steps={steps}
+              cmsSlug="procedure"
+              cmsTextStyles={page.textStyles}
               aside={
                 <PastelBox className="min-h-[8rem] p-4">
                   <p className="mb-2 text-xs font-medium text-[color:var(--pastel-chrome-fg)]/70">5단계 옆 안내 (본문)</p>
