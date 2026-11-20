@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { publicGnbItemsForRole } from "@/lib/site";
@@ -28,12 +29,66 @@ export function PublicGnb({
   const chrome = isGuestLocalePath(pathname) ? t : tKo;
   const items = publicGnbItemsForRole(role, username);
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties | undefined>();
+  const [portalReady, setPortalReady] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
+  const triggerRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const baseId = useId();
 
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpenKey(null), 120);
+  };
+
+  const openMenu = (key: string) => {
+    cancelClose();
+    setOpenKey(key);
+  };
+
   useEffect(() => {
+    setPortalReady(true);
+    return () => cancelClose();
+  }, []);
+
+  useEffect(() => {
+    cancelClose();
     setOpenKey(null);
   }, [pathname]);
+
+  useLayoutEffect(() => {
+    if (!openKey) {
+      setPanelStyle(undefined);
+      return;
+    }
+    const trigger = triggerRefs.current.get(openKey);
+    if (!trigger) return;
+    const place = () => {
+      const rect = trigger.getBoundingClientRect();
+      setPanelStyle({
+        position: "fixed",
+        top: rect.bottom,
+        left: Math.min(Math.max(rect.left + rect.width / 2, 96), window.innerWidth - 96),
+        transform: "translateX(-50%)",
+        zIndex: 400,
+      });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [openKey]);
 
   useEffect(() => {
     if (!openKey) return;
@@ -41,10 +96,11 @@ export function PublicGnb({
       if (e.key === "Escape") setOpenKey(null);
     };
     const onPointer = (e: MouseEvent | TouchEvent) => {
-      const el = rootRef.current;
-      if (el && e.target instanceof Node && !el.contains(e.target)) {
-        setOpenKey(null);
-      }
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      const inRoot = rootRef.current?.contains(target);
+      const inPanel = panelRef.current?.contains(target);
+      if (!inRoot && !inPanel) setOpenKey(null);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPointer);
@@ -56,14 +112,15 @@ export function PublicGnb({
     };
   }, [openKey]);
 
+  const openItem = openKey ? items.find((item) => item.i18n === openKey) : undefined;
+  const openChildren = openItem?.children ?? [];
+
   return (
     <nav
       ref={rootRef}
       aria-label={chrome("menu")}
-      className={cn(
-        "hidden h-full min-w-0 flex-1 items-stretch justify-center overflow-x-auto overflow-y-visible lg:flex",
-        className,
-      )}
+      /* AMP-151: overflow-x-auto는 overflow-y도 auto로 계산되어 서브메뉴를 자름 → visible 유지 */
+      className={cn("hidden h-full min-w-0 flex-1 items-stretch justify-center overflow-visible lg:flex", className)}
     >
       <ul className="flex h-full min-w-0 items-stretch overflow-visible">
         {items.map((item) => {
@@ -74,17 +131,20 @@ export function PublicGnb({
             isNavActive(pathname, item.href) ||
             children.some((child) => isNavActive(pathname, child.href));
           const panelId = `${baseId}-${item.i18n}`;
-          const labelId = `${panelId}-label`;
 
           return (
             <li
               key={item.i18n}
+              ref={(el) => {
+                if (el) triggerRefs.current.set(item.i18n, el);
+                else triggerRefs.current.delete(item.i18n);
+              }}
               className={cn(
                 "relative flex h-full shrink-0 overflow-visible",
                 "after:absolute after:top-1/2 after:right-0 after:z-0 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[color:var(--pastel-chrome-border)] last:after:hidden",
               )}
-              onMouseEnter={() => hasChildren && setOpenKey(item.i18n)}
-              onMouseLeave={() => hasChildren && setOpenKey(null)}
+              onMouseEnter={() => hasChildren && openMenu(item.i18n)}
+              onMouseLeave={() => hasChildren && scheduleClose()}
             >
               <Link
                 href={item.href}
@@ -99,58 +159,58 @@ export function PublicGnb({
                 aria-expanded={hasChildren ? open : undefined}
                 aria-controls={hasChildren ? panelId : undefined}
                 aria-haspopup={hasChildren ? "menu" : undefined}
-                onFocus={() => hasChildren && setOpenKey(item.i18n)}
+                onFocus={() => hasChildren && openMenu(item.i18n)}
               >
                 {chrome(item.i18n)}
               </Link>
-
-              {hasChildren ? (
-                <div
-                  id={panelId}
-                  hidden={!open}
-                  className={cn(
-                    "absolute top-full left-1/2 z-[200] w-max min-w-[9.5rem] -translate-x-1/2 pt-1",
-                    "motion-safe:origin-top motion-safe:transition motion-safe:duration-150",
-                    open
-                      ? "motion-safe:scale-y-100 motion-safe:opacity-100"
-                      : "pointer-events-none motion-safe:scale-y-95 motion-safe:opacity-0",
-                  )}
-                >
-                  <div className="overflow-visible border border-white/35 bg-primary text-primary-foreground shadow-lg">
-                    {/* AMP-83/87: 비링크 부모 그룹 제목 — 대비·계층 강화 */}
-                    <p
-                      id={labelId}
-                      className="border-b border-white/40 bg-[#001a33] px-3.5 py-2.5 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee] xl:text-[0.9375rem]"
-                    >
-                      {chrome(item.i18n)}
-                    </p>
-                    <ul role="menu" aria-labelledby={labelId}>
-                      {children.map((child) => {
-                        const active = isNavActive(pathname, child.href);
-                        return (
-                          <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
-                            <Link
-                              role="menuitem"
-                              href={child.href}
-                              className={cn(
-                                "block px-3.5 py-3 text-left text-[0.9375rem] leading-snug whitespace-nowrap text-primary-foreground transition-colors hover:bg-white/15 xl:text-base",
-                                active && "bg-white/20 font-medium",
-                              )}
-                              onClick={() => setOpenKey(null)}
-                            >
-                              {chrome(child.i18n)}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </div>
-              ) : null}
             </li>
           );
         })}
       </ul>
+
+      {portalReady && openItem && openChildren.length > 0 && panelStyle
+        ? createPortal(
+            <div
+              ref={panelRef}
+              id={`${baseId}-${openItem.i18n}`}
+              role="presentation"
+              style={panelStyle}
+              className="w-max min-w-[9.5rem] pt-1"
+              onMouseEnter={() => openMenu(openItem.i18n)}
+              onMouseLeave={scheduleClose}
+            >
+              <div className="overflow-visible border border-white/35 bg-primary text-primary-foreground shadow-lg">
+                <p
+                  id={`${baseId}-${openItem.i18n}-label`}
+                  className="border-b border-white/40 bg-[#001a33] px-3.5 py-2.5 font-serif text-sm font-medium tracking-[0.06em] text-[#f7f4ee] xl:text-[0.9375rem]"
+                >
+                  {chrome(openItem.i18n)}
+                </p>
+                <ul role="menu" aria-labelledby={`${baseId}-${openItem.i18n}-label`}>
+                  {openChildren.map((child) => {
+                    const active = isNavActive(pathname, child.href);
+                    return (
+                      <li key={child.href} role="none" className="border-b border-white/25 last:border-b-0">
+                        <Link
+                          role="menuitem"
+                          href={child.href}
+                          className={cn(
+                            "block px-3.5 py-3 text-left text-[0.9375rem] leading-snug whitespace-nowrap text-primary-foreground transition-colors hover:bg-white/15 xl:text-base",
+                            active && "bg-white/20 font-medium",
+                          )}
+                          onClick={() => setOpenKey(null)}
+                        >
+                          {chrome(child.i18n)}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </nav>
   );
 }
