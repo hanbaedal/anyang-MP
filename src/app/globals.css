@@ -1606,6 +1606,7 @@
 }
 
 @media (max-width: 767px) {
+  /* AMP-132: 모바일 — 중앙「안양공원」원만 숨김 · 4패널 세로 스택 · 점선 숨김 (fees AMP-127과 유사) */
   .fun-orbit {
     --fun-orbit-w: 100%;
     --fun-orbit-h: auto;
@@ -1615,7 +1616,6 @@
     grid-template-columns: 1fr;
     grid-template-rows: none;
     grid-template-areas:
-      "hub"
       "n"
       "w"
       "e"
@@ -1624,13 +1624,12 @@
     justify-items: stretch;
   }
 
-  .fun-orbit-lines {
+  .fun-orbit-hub {
     display: none;
   }
 
-  .fun-orbit-hub {
-    width: min(7.5rem, 42vw);
-    margin-inline: auto;
+  .fun-orbit-lines {
+    display: none;
   }
 
   .fun-orbit-panel {
