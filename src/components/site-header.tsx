@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CircleUserRound } from "lucide-react";
+import { BrandHomeLink } from "@/components/brand-home-link";
 import { FlagSwitcher } from "@/components/flag-switcher";
 import { PublicGnb } from "@/components/public-gnb";
 import { PublicNavSheet } from "@/components/public-nav-sheet";
@@ -34,11 +35,10 @@ export function SiteHeader({
       <div className="site-chrome-shell site-header-bar flex h-12 min-w-0 items-center gap-1 overflow-visible sm:gap-2 lg:h-14">
         <PublicNavSheet role={role} username={username} />
 
-        {/* AMP-152: 브랜드 홈 링크 — 탭 영역·레이어를 명시해 유틸/오버레이에 가리지 않게 */}
-        <Link
-          href="/"
+        {/* AMP-154: soft Link 대신 강제 홈 이동 + 모바일 터치 타깃 확대 */}
+        <BrandHomeLink
           aria-label={chrome("site.legalName")}
-          className="relative z-[1] flex shrink-0 items-center gap-1.5 sm:gap-2"
+          className="pointer-events-auto relative z-[2] -my-1 flex min-h-11 shrink-0 touch-manipulation items-center gap-1.5 py-1 sm:gap-2 lg:min-h-0 lg:py-0"
         >
           <Image
             src="/images/logo-512.png"
@@ -49,10 +49,10 @@ export function SiteHeader({
             className="pointer-events-none size-7 object-contain lg:size-9"
             aria-hidden
           />
-          <span className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--pastel-chrome-fg)] lg:text-lg">
+          <span className="pointer-events-none whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--pastel-chrome-fg)] lg:text-lg">
             {chrome("site.legalName")}
           </span>
-        </Link>
+        </BrandHomeLink>
 
         <PublicGnb role={role} username={username} compact={staff} />
 

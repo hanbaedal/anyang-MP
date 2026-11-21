@@ -259,6 +259,8 @@
 /*
  * AMP-149: isolation:isolate 제거 — 드롭다운이 헤더 밖으로 나와도
  * 본문(#content) 스크롤 레이어에 가리지 않도록 z-index만 높게 유지.
+ * AMP-154: Sheet 오픈 시 body가 pointer-events:none이어도 브랜드 링크는
+ * 컴포넌트에서 pointer-events-auto로 탭 가능(헤더 z-100 > 시트 50).
  */
 .site-header-shell {
   position: relative;

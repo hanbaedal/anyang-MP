@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Minus, Plus, X } from "lucide-react";
+import { BrandHomeLink } from "@/components/brand-home-link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { publicGnbItemsForRole } from "@/lib/site";
@@ -60,25 +61,25 @@ export function PublicNavSheet({ role, username }: { role?: Role | null; usernam
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 border-b border-[color:var(--chrome-border)] px-3 py-2">
           {/*
-            AMP-152: 시트 오픈 시 body/header에 pointer-events:none — 크롬 브랜드 탭 불가.
-            시트 타이틀(로고·상호)을 홈 링크로 두어 동일 제스처로 / 이동.
+            AMP-152/154: 시트 오픈 시 body pointer-events:none → 크롬 로고 탭 불가.
+            시트 타이틀을 강제 홈 이동 링크로 둠 (soft Link 우회).
           */}
           <SheetTitle asChild>
-            <Link
-              href="/"
-              onClick={() => setOpen(false)}
-              className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-serif text-sm font-semibold tracking-tight text-[color:var(--chrome-foreground)] sm:text-base"
+            <BrandHomeLink
+              aria-label={chrome("site.legalName")}
+              onNavigate={() => setOpen(false)}
+              className="pointer-events-auto flex min-h-11 min-w-0 touch-manipulation items-center gap-1.5 whitespace-nowrap font-serif text-sm font-semibold tracking-tight text-[color:var(--chrome-foreground)] sm:text-base"
             >
               <Image
                 src="/images/logo-512.png"
                 alt=""
                 width={512}
                 height={512}
-                className="size-7 object-contain"
+                className="pointer-events-none size-7 object-contain"
                 aria-hidden
               />
-              <span className="truncate">{chrome("site.legalName")}</span>
-            </Link>
+              <span className="pointer-events-none truncate">{chrome("site.legalName")}</span>
+            </BrandHomeLink>
           </SheetTitle>
           <SheetClose asChild>
             <Button size="icon" variant="ghost" className="shrink-0 text-[color:var(--chrome-foreground)] hover:bg-white/15" aria-label={chrome("close")}>
