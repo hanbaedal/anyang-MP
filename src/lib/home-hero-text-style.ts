@@ -159,13 +159,29 @@ export function homeHeroFontPresetCss(
   }
 }
 
+/** AMP-166: 모바일 heroLine2 — CMS scale이 clamp를 덮지 않도록 CSS 변수 키 */
+export const HOME_HERO_LINE2_SCALE_VAR = "--home-hero-line2-scale";
+
+/** 모바일에서 clamp에 곱할 scale 상한(100% = 확대 금지, 축소는 허용) */
+export const HOME_HERO_LINE2_MOBILE_SCALE_CAP = 100;
+
 export function buildHomeHeroSlotStyle(opts: {
   scalePct?: number;
   font?: HomeHeroFontPreset;
   color?: string;
+  /**
+   * AMP-166: heroLine2 — `fontSize: N%(h1)` 인라인 금지.
+   * CSS 변수로 두어 모바일은 `clamp * min(scale,1)`, md+는 rem×scale.
+   */
+  asLine2ScaleVar?: boolean;
 }): CSSProperties | undefined {
   const style: CSSProperties = {};
-  if (opts.scalePct && opts.scalePct !== 100) style.fontSize = `${opts.scalePct}%`;
+  if (opts.asLine2ScaleVar) {
+    const pct = typeof opts.scalePct === "number" && opts.scalePct > 0 ? opts.scalePct : 100;
+    (style as Record<string, string>)[HOME_HERO_LINE2_SCALE_VAR] = String(pct / 100);
+  } else if (opts.scalePct && opts.scalePct !== 100) {
+    style.fontSize = `${opts.scalePct}%`;
+  }
   if (opts.font && opts.font !== "default") Object.assign(style, homeHeroFontPresetCss(opts.font));
   const color = normalizeHeroTextColorValue(opts.color);
   if (color) style.color = color;
@@ -203,7 +219,14 @@ export function applyHomeHeroSlotStyleToElement(
 
   if (typeof opts.scalePct === "number") {
     const target = textEl ?? el;
-    target.style.fontSize = opts.scalePct === 100 ? "" : `${opts.scalePct}%`;
+    if (key === "home.heroLine2") {
+      /* AMP-166: % 인라인 제거 → CSS 변수(모바일 clamp 상한과 합성) */
+      target.style.fontSize = "";
+      const pct = opts.scalePct > 0 ? opts.scalePct : 100;
+      target.style.setProperty(HOME_HERO_LINE2_SCALE_VAR, String(pct / 100));
+    } else {
+      target.style.fontSize = opts.scalePct === 100 ? "" : `${opts.scalePct}%`;
+    }
   }
   if (opts.font !== undefined) {
     const target = textEl ?? el;

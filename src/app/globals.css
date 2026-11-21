@@ -242,6 +242,28 @@
 }
 
 /*
+ * AMP-166: 모바일 히어로 「(재)안양공원묘원」(heroLine2)
+ * CMS scale(%)이 h1 기준 인라인 fontSize로 clamp를 덮던 문제(AMP-162) 수정.
+ * --home-hero-line2-scale(기본 1) × clamp, 모바일은 min(scale,1) 상한.
+ */
+.home-hero-line2 {
+  --home-hero-line2-scale: 1;
+  font-size: calc(clamp(0.92rem, 4.2vw, 1.32rem) * min(var(--home-hero-line2-scale), 1));
+}
+
+@media (min-width: 768px) {
+  .home-hero-line2 {
+    font-size: calc(2.25rem * var(--home-hero-line2-scale, 1)); /* md:text-4xl */
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero-line2 {
+    font-size: calc(2.75rem * var(--home-hero-line2-scale, 1));
+  }
+}
+
+/*
  * AMP-107/137: 게스트 헤더 — 셸·바 모두 불투명 크림(투명 잔여 제거).
  * 본문·공지·한페이지 히어로보다 위에 고정. 로고색 글자 유지.
  */

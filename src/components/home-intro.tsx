@@ -163,6 +163,8 @@ export function HomeIntro({
       scalePct: scale?.[field],
       font: fonts?.[field],
       color: colors?.[field],
+      /* AMP-166: heroLine2는 % 인라인 대신 CSS 변수(모바일 clamp·상한) */
+      asLine2ScaleVar: field === "heroLine2",
     });
   }
 
@@ -264,9 +266,8 @@ export function HomeIntro({
                 >
                   <span
                     className={cn(
-                      /* AMP-116/160: 모바일 「(재)안양공원묘원」한 줄·중앙·소폭 축소(우측 잘림 방지) */
-                      "mx-auto block max-w-full whitespace-nowrap text-center tracking-tight",
-                      "text-[clamp(0.92rem,4.2vw,1.32rem)] leading-tight md:mx-0 md:text-left md:text-4xl lg:text-[2.75rem]",
+                      /* AMP-116/160/166: 한 줄·중앙·clamp×CMS scale(모바일 상한 100%) */
+                      "home-hero-line2 mx-auto block max-w-full whitespace-nowrap text-center tracking-tight leading-tight md:mx-0 md:text-left",
                       cmsEditMarkers && "pointer-events-none",
                     )}
                     style={koSlotStyle("heroLine2")}
