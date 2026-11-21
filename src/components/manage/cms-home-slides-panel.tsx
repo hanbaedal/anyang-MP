@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { HOME_INTRO_SLIDES_MAX, type HomeIntroSlide } from "@/lib/home-intro-slides-types";
-import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import { GALLERY_MANAGE_UI_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import { thumbUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -110,7 +110,7 @@ export function CmsHomeSlidesPanel({
             <DialogDescription className="sr-only">갤러리 이미지 선택</DialogDescription>
           </DialogHeader>
           <div className="flex flex-wrap gap-1.5">
-            {(["전체", ...GALLERY_TAGS] as Filter[]).map((tag) => (
+            {(["전체", ...GALLERY_MANAGE_UI_TAGS] as Filter[]).map((tag) => (
               <Button
                 key={tag}
                 type="button"

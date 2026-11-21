@@ -14,7 +14,13 @@ import type { Locale } from "./i18n";
 import { CONTENT_LOCALES, localizeStoredText, translateText, type ContentLocale } from "./translate-content";
 
 export type { GalleryPhoto, LotsGallerySlug } from "./gallery-types";
-export { GALLERY_TAGS, GALLERY_SUBCATEGORY_TAGS, LOTS_GALLERY_TAG, hasGallerySubcategory } from "./gallery-types";
+export {
+  GALLERY_TAGS,
+  GALLERY_MANAGE_UI_TAGS,
+  GALLERY_SUBCATEGORY_TAGS,
+  LOTS_GALLERY_TAG,
+  hasGallerySubcategory,
+} from "./gallery-types";
 
 const localFile = dataFile("gallery.local.json");
 

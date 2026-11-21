@@ -7,7 +7,7 @@ import { DecadePager } from "@/components/decade-pager";
 import { GallerySlideModal } from "@/components/gallery-slide-modal";
 import { ensureImageWithinMaxBytes } from "@/lib/compress-image-client";
 import type { GalleryTag } from "@/lib/content";
-import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import { GALLERY_MANAGE_UI_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryPageSettings } from "@/lib/gallery-page";
 import { ManageImagePicker } from "@/components/manage-image-picker";
 import { MANAGE_IMAGE_MAX_BYTES, MANAGE_IMAGE_MAX_MB } from "@/lib/image-upload-limits";
@@ -17,9 +17,6 @@ const field =
   "h-9 w-full min-w-0 rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const area =
   "min-h-20 w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
-/** AMP-153: 사진 올리기·항목 태그 선택 UI에서만 숨김. GALLERY_TAGS·저장 스키마·공개 화면 유지. */
-const GALLERY_UPLOAD_TAGS: GalleryTag[] = GALLERY_TAGS.filter((tag) => tag !== "리모델링");
 
 function formatMb(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1);
@@ -297,7 +294,7 @@ export function ManageGallery({
           onChange={(e) => patchItem(item.id, { description: e.target.value })}
         />
         <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
-          {GALLERY_UPLOAD_TAGS.map((tag) => (
+          {GALLERY_MANAGE_UI_TAGS.map((tag) => (
             <label key={tag} className="flex items-center gap-1">
               <input
                 type="checkbox"
@@ -327,7 +324,7 @@ export function ManageGallery({
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h2 className="font-medium">등록된 사진 ({items.length})</h2>
       <div className="flex max-w-full flex-wrap gap-1.5">
-        {(["전체", ...GALLERY_TAGS] as Array<"전체" | GalleryTag>).map((tag) => (
+        {(["전체", ...GALLERY_MANAGE_UI_TAGS] as Array<"전체" | GalleryTag>).map((tag) => (
           <Button
             key={tag}
             type="button"
@@ -421,7 +418,7 @@ export function ManageGallery({
             onChange={(e) => setDescription(e.target.value)}
           />
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
-            {GALLERY_UPLOAD_TAGS.map((tag) => (
+            {GALLERY_MANAGE_UI_TAGS.map((tag) => (
               <label key={tag} className="flex items-center gap-1">
                 <input type="checkbox" checked={tags.includes(tag)} onChange={() => setTags(toggleTag(tags, tag))} />
                 {tag}

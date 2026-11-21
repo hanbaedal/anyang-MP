@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import { GALLERY_MANAGE_UI_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import { thumbUrl } from "@/lib/media";
 
@@ -68,7 +68,7 @@ export function ManageGalleryLibrary({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-wrap gap-1.5">
-          {(["전체", ...GALLERY_TAGS] as Filter[]).map((tag) => (
+          {(["전체", ...GALLERY_MANAGE_UI_TAGS] as Filter[]).map((tag) => (
             <Button
               key={tag}
               type="button"

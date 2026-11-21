@@ -26,7 +26,7 @@ import {
   type HomeHeroTextColor,
   type HomeHeroTextFont,
 } from "@/lib/home-hero-text-style";
-import { GALLERY_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
+import type { GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import {
   HOME_SOCIAL_ADD_SLOT,

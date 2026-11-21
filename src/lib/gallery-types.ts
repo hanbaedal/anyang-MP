@@ -13,6 +13,12 @@ export type GalleryPhoto = {
 
 export const GALLERY_TAGS: GalleryTag[] = ["일반", "전경", "매장묘", "평장묘", "봉안묘", "리모델링"];
 
+/**
+ * AMP-153/155: 관리·CMS UI(업로드·등록 필터·「갤러리에서 선택」)에서만 리모델링 숨김.
+ * GALLERY_TAGS·저장·공개 갤러리 데이터는 유지.
+ */
+export const GALLERY_MANAGE_UI_TAGS: GalleryTag[] = GALLERY_TAGS.filter((tag) => tag !== "리모델링");
+
 /** 공개 갤러리·슬라이드용 소분류. 「일반」만 있거나 태그가 비면 공개에서 숨김. */
 export const GALLERY_SUBCATEGORY_TAGS: GalleryTag[] = GALLERY_TAGS.filter((tag) => tag !== "일반");
 
