@@ -18,6 +18,9 @@ const field =
 const area =
   "min-h-20 w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+/** AMP-153: 사진 올리기·항목 태그 선택 UI에서만 숨김. GALLERY_TAGS·저장 스키마·공개 화면 유지. */
+const GALLERY_UPLOAD_TAGS: GalleryTag[] = GALLERY_TAGS.filter((tag) => tag !== "리모델링");
+
 function formatMb(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1);
 }
@@ -294,7 +297,7 @@ export function ManageGallery({
           onChange={(e) => patchItem(item.id, { description: e.target.value })}
         />
         <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
-          {GALLERY_TAGS.map((tag) => (
+          {GALLERY_UPLOAD_TAGS.map((tag) => (
             <label key={tag} className="flex items-center gap-1">
               <input
                 type="checkbox"
@@ -418,7 +421,7 @@ export function ManageGallery({
             onChange={(e) => setDescription(e.target.value)}
           />
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
-            {GALLERY_TAGS.map((tag) => (
+            {GALLERY_UPLOAD_TAGS.map((tag) => (
               <label key={tag} className="flex items-center gap-1">
                 <input type="checkbox" checked={tags.includes(tag)} onChange={() => setTags(toggleTag(tags, tag))} />
                 {tag}
