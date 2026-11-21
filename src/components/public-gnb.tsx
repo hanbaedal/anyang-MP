@@ -78,7 +78,8 @@ export function PublicGnb({
         top: rect.bottom,
         left: Math.min(Math.max(rect.left + rect.width / 2, 96), window.innerWidth - 96),
         transform: "translateX(-50%)",
-        zIndex: 400,
+        /* AMP-165: 헤더 isolation·본문 z-0 위 — 포털 서브메뉴 항상 최상단 */
+        zIndex: 500,
       });
     };
     place();
