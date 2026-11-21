@@ -213,7 +213,8 @@ export function HomeIntro({
             ) : null}
           </div>
           <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end px-[var(--site-content-pad-x)] pb-5 pt-0 sm:pb-7 md:pb-8">
-            <div className="pointer-events-auto w-full min-w-0 text-center md:max-w-[min(100%,40rem)] md:text-left">
+            {/* AMP-160: 모바일 중앙 — SNS 레일(우측)과 겹치지 않게 좌우 여유 */}
+            <div className="pointer-events-auto w-full min-w-0 text-center max-md:px-10 md:max-w-[min(100%,40rem)] md:px-0 md:text-left">
               <CmsPick
                 slotKey="home.kicker"
                 cmsSlot={cmsSlot}
@@ -263,8 +264,9 @@ export function HomeIntro({
                 >
                   <span
                     className={cn(
-                      /* AMP-116: 모바일 「(재)안양공원묘원」한 줄 */
-                      "block whitespace-nowrap text-[clamp(1.05rem,5.1vw,1.5rem)] leading-tight md:text-4xl lg:text-[2.75rem]",
+                      /* AMP-116/160: 모바일 「(재)안양공원묘원」한 줄·중앙·소폭 축소(우측 잘림 방지) */
+                      "mx-auto block max-w-full whitespace-nowrap text-center tracking-tight",
+                      "text-[clamp(0.92rem,4.2vw,1.32rem)] leading-tight md:mx-0 md:text-left md:text-4xl lg:text-[2.75rem]",
                       cmsEditMarkers && "pointer-events-none",
                     )}
                     style={koSlotStyle("heroLine2")}
