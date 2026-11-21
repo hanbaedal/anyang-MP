@@ -157,12 +157,15 @@ export function SocialActions({
         "flex shrink-0",
         verticalFixed
           ? cn(
-              /* z: 본문·공지(40) 위, 헤더(100)·시트(50+)와 겹침 최소 — 포털 후 뷰포트 fixed */
+              /* z: 본문·공지(40) 위, 헤더(100) 아래 — body 포털로 overflow 클리핑 회피 */
               "pointer-events-auto fixed right-2 z-[90] flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5",
-              /* AMP-158/159: 풋터·CTA 위 여백 (포털로 클리핑 해소 후 유지) */
+              /*
+               * AMP-159: 뷰포트 우측 하단 앵커 → 위로 스택.
+               * bottom이 크면(10rem+) 중·우측으로 뜸 — 풋터 CTA만 비키는 최소값.
+               */
               onHome
-                ? "bottom-[calc(10.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(7.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
+                ? "bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
             )
           : cn(
               "items-center",
