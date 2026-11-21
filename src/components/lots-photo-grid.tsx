@@ -107,8 +107,8 @@ export function LotsPhotoGrid({
           "flex flex-col",
           detail
             ? cn(
-                /* 설명 전부 표시 — 길면 카드·행이 함께 성장 (clip 금지) */
-                "justify-start p-4 md:min-h-[22rem] md:p-6 lg:p-8",
+                /* 사진 높이 기준으로 설명 세로 중앙 — 길면 카드·행이 함께 성장 (clip 금지) */
+                "justify-center p-4 md:h-full md:min-h-[22rem] md:p-6 lg:p-8",
                 alignEnd ? "items-start md:items-end" : "items-start",
               )
             : "p-3",
@@ -128,8 +128,8 @@ export function LotsPhotoGrid({
           <div
             className={cn(
               "w-full text-muted-foreground",
-              /* detail: 제목 아래 약 두 줄 간격 */
-              detail ? "mt-[2lh] space-y-2 text-base" : "space-y-1 text-sm",
+              /* detail: 제목–본문 1줄 간격 */
+              detail ? "mt-[1lh] space-y-2 text-base" : "space-y-1 text-sm",
               alignEnd && "md:text-right",
             )}
           >
@@ -167,14 +167,16 @@ export function LotsPhotoGrid({
               key={item.id || item.title || String(i)}
               className={cn(
                 "rounded-xl border border-[#ead7b4] bg-[#fffcf7] shadow-sm",
-                "grid grid-cols-1 md:items-start",
+                "grid grid-cols-1 md:items-stretch",
                 photoOnRight
                   ? "md:grid-cols-[minmax(14rem,1fr)_minmax(0,1.65fr)]"
                   : "md:grid-cols-[minmax(0,1.65fr)_minmax(14rem,1fr)]",
               )}
             >
               <div className={cn("min-w-0", photoOnRight && "md:order-2")}>{photo(item, i)}</div>
-              <div className={cn("min-w-0", photoOnRight && "md:order-1")}>{caption(item, photoOnRight)}</div>
+              <div className={cn("min-w-0 md:h-full", photoOnRight && "md:order-1")}>
+                {caption(item, photoOnRight)}
+              </div>
             </li>
           );
         })}
