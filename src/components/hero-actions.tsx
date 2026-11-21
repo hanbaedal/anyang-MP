@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CmsSocialAddSlot } from "@/components/cms-edit/cms-social-add-slot";
@@ -142,19 +144,25 @@ export function SocialActions({
   const pathname = usePathname();
   const onHome = pathname === "/";
   const sorted = [...links].sort((a, b) => a.sort - b.sort);
+  /** AMP-159: #content-scroll overflow가 fixed를 잘라 미표시 → body 포털 후에만 마운트 */
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
-  return (
+  const nav = (
     <nav
       aria-label="소셜 바로 가기"
       className={cn(
         "flex shrink-0",
         verticalFixed
           ? cn(
-              "pointer-events-auto fixed right-2 z-40 flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5",
-              /* AMP-158: 모바일에서 풋터·CTA 위로 여유 — bottom 상향 */
+              /* z: 본문·공지(40) 위, 헤더(100)·시트(50+)와 겹침 최소 — 포털 후 뷰포트 fixed */
+              "pointer-events-auto fixed right-2 z-[90] flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5",
+              /* AMP-158/159: 풋터·CTA 위 여백 (포털로 클리핑 해소 후 유지) */
               onHome
-                ? "bottom-[calc(12.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(9.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
+                ? "bottom-[calc(10.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(7.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
             )
           : cn(
               "items-center",
@@ -178,4 +186,8 @@ export function SocialActions({
       {cmsEditMarkers && verticalFixed ? <CmsSocialAddSlot compact={compact} /> : null}
     </nav>
   );
+
+  if (!verticalFixed) return nav;
+  if (!portalReady) return null;
+  return createPortal(nav, document.body);
 }
