@@ -12,7 +12,9 @@ import {
   defaultHomeHeroTextScale,
   defaultHomeIntroHeroCopy,
   HOME_INTRO_HERO_COPY_LIMITS,
+  HOME_INTRO_SLIDE_SRC_REJECT_MSG,
   HOME_INTRO_SLIDES_MAX,
+  isPersistableHomeIntroSlideSrc,
   type HomeHeroTextScale,
   type HomeIntroHeroCopy,
   type HomeIntroSlide,
@@ -302,6 +304,11 @@ export function ManageHomeCms({
     if (existing >= 0) {
       next = slides.filter((_, i) => i !== existing).map((s, i) => ({ ...s, sort: i }));
     } else {
+      if (!isPersistableHomeIntroSlideSrc(photo.src)) {
+        setMessage(HOME_INTRO_SLIDE_SRC_REJECT_MSG);
+        setStatus("error");
+        return;
+      }
       if (slides.length >= HOME_INTRO_SLIDES_MAX) {
         setMessage(`최대 ${HOME_INTRO_SLIDES_MAX}장까지 고를 수 있습니다.`);
         setStatus("error");
@@ -320,7 +327,7 @@ export function ManageHomeCms({
     }
     setSlides(next);
     setDirty(true);
-    setMessage("슬라이드 목록을 바꿨습니다. 저장을 눌러 반영하세요.");
+    setMessage("슬라이드 목록을 바꿨습니다. 저장을 눌러 공개 홈에 반영하세요.");
     setStatus("idle");
   }
 

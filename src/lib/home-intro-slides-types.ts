@@ -8,6 +8,20 @@ export const HOME_INTRO_SLIDES_MAX = 12;
 export const HOME_INTRO_SLIDE_FALLBACK_SRC = "/images/intro-slides/05.jpg";
 export const HOME_INTRO_SLIDE_FALLBACK_ALT = "안양공원묘원 전경";
 
+/**
+ * AMP-157: 홈 전경 슬라이드로 저장·선택 가능한 src.
+ * 갤러리 업로드(`/uploads`·`/api/uploads`)와 시드/정적(`/images`)을 허용.
+ */
+export function isPersistableHomeIntroSlideSrc(src: string): boolean {
+  if (!src || typeof src !== "string") return false;
+  const s = src.trim();
+  if (!s.startsWith("/") || s.includes("..") || s.includes("://") || s.includes("\\")) return false;
+  return s.startsWith("/uploads/") || s.startsWith("/api/uploads/") || s.startsWith("/images/");
+}
+
+export const HOME_INTRO_SLIDE_SRC_REJECT_MSG =
+  "이 사진은 홈 배경으로 쓸 수 없습니다. 갤러리 업로드(/uploads) 또는 /images 경로만 가능합니다.";
+
 export type HomeIntroSlide = {
   id: string;
   src: string;

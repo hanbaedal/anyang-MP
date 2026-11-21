@@ -10,6 +10,7 @@ import {
   HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
+  isPersistableHomeIntroSlideSrc,
   type HomeHeroTextScale,
   type HomeIntroHeroCopy,
   type HomeIntroSlide,
@@ -32,6 +33,8 @@ export {
   HOME_INTRO_SLIDE_FALLBACK_ALT,
   HOME_INTRO_SLIDE_FALLBACK_SRC,
   HOME_INTRO_SLIDES_MAX,
+  HOME_INTRO_SLIDE_SRC_REJECT_MSG,
+  isPersistableHomeIntroSlideSrc,
 } from "./home-intro-slides-types";
 
 const localFile = dataFile("home-intro-slides.local.json");
@@ -83,22 +86,17 @@ export function normalizeHomeIntroHeroCopy(raw: unknown): HomeIntroHeroCopy {
   };
 }
 
+/** 공개 표시·폴백 포함. 저장 가능 여부는 isPersistableHomeIntroSlideSrc. */
 export function isSafeHomeIntroSlideSrc(src: string): boolean {
-  if (!src || src.includes("..")) return false;
-  return (
-    src.startsWith("/uploads/") ||
-    src.startsWith("/api/uploads/") ||
-    src === HOME_INTRO_SLIDE_FALLBACK_SRC
-  );
+  return isPersistableHomeIntroSlideSrc(src);
 }
 
 function normalizeSlide(raw: unknown, index: number): HomeIntroSlide | null {
   if (!raw || typeof raw !== "object") return null;
   const row = raw as Record<string, unknown>;
-  const src = String(row.src ?? "");
-  if (!isSafeHomeIntroSlideSrc(src) || src === HOME_INTRO_SLIDE_FALLBACK_SRC) return null;
-  // 폴백 정적 경로는 저장 목록에 넣지 않음 — 업로드만
-  if (!src.startsWith("/uploads/") && !src.startsWith("/api/uploads/")) return null;
+  const src = String(row.src ?? "").trim();
+  // AMP-157: 갤러리 /images 시드와 업로드 경로를 동일 allowlist로 저장
+  if (!isPersistableHomeIntroSlideSrc(src)) return null;
   const sort = typeof row.sort === "number" && Number.isFinite(row.sort) ? row.sort : index;
   return {
     id: String(row.id || randomUUID()),

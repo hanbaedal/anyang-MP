@@ -9,7 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { HOME_INTRO_SLIDES_MAX, type HomeIntroSlide } from "@/lib/home-intro-slides-types";
+import {
+  HOME_INTRO_SLIDE_SRC_REJECT_MSG,
+  HOME_INTRO_SLIDES_MAX,
+  isPersistableHomeIntroSlideSrc,
+  type HomeIntroSlide,
+} from "@/lib/home-intro-slides-types";
 import { GALLERY_MANAGE_UI_TAGS, type GalleryPhoto } from "@/lib/gallery-types";
 import type { GalleryTag } from "@/lib/content";
 import { thumbUrl } from "@/lib/media";
@@ -130,15 +135,18 @@ export function CmsHomeSlidesPanel({
               const id = slideIdForPhoto(item);
               const order = orderById.get(id) ?? orderBySrc.get(item.src);
               const selected = Boolean(order);
+              const persistable = isPersistableHomeIntroSlideSrc(item.src);
+              const blocked = !selected && !persistable;
               return (
                 <li key={item.id}>
                   <button
                     type="button"
-                    disabled={busy || (!selected && atMax)}
+                    disabled={busy || (!selected && atMax) || blocked}
+                    title={blocked ? HOME_INTRO_SLIDE_SRC_REJECT_MSG : undefined}
                     className={cn(
                       "relative w-full rounded-lg border p-1.5 text-left transition",
                       selected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary",
-                      !selected && atMax && "opacity-50",
+                      (!selected && atMax) || blocked ? "opacity-50" : null,
                     )}
                     onClick={() => onTogglePhoto(item)}
                   >
@@ -147,6 +155,11 @@ export function CmsHomeSlidesPanel({
                     {selected ? (
                       <span className="absolute left-2 top-2 rounded-full bg-primary px-1.5 text-[10px] font-bold text-white">
                         {order}
+                      </span>
+                    ) : null}
+                    {blocked ? (
+                      <span className="absolute inset-x-1 bottom-1 rounded bg-black/65 px-1 py-0.5 text-center text-[9px] leading-tight text-white">
+                        홈 배경 불가
                       </span>
                     ) : null}
                   </button>

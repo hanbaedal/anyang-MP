@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   getHomeIntroSlidesSettingsForWrite,
   HOME_INTRO_SLIDES_MAX,
+  isPersistableHomeIntroSlideSrc,
   normalizeHomeHeroTextScale,
   normalizeHomeIntroHeroCopy,
   saveHomeIntroSlidesSettings,
@@ -83,8 +85,9 @@ export async function PUT(request: Request) {
   for (const raw of body.slides) {
     if (!raw || typeof raw !== "object") continue;
     const row = raw as Record<string, unknown>;
-    const src = String(row.src ?? "");
-    if (!src.startsWith("/uploads/") && !src.startsWith("/api/uploads/")) continue;
+    const src = String(row.src ?? "").trim();
+    // AMP-157: normalizeSlide와 동일 allowlist (/uploads|/api/uploads|/images)
+    if (!isPersistableHomeIntroSlideSrc(src)) continue;
     if (seenSrc.has(src)) continue;
     if (nextSlides.length >= HOME_INTRO_SLIDES_MAX) break;
     seenSrc.add(src);
@@ -124,6 +127,9 @@ export async function PUT(request: Request) {
       socialLinks,
       updatedAt: new Date().toISOString(),
     });
+    // AMP-157: 공개 홈·CMS 미리보기 iframe이 최신 슬라이드를 읽도록
+    revalidatePath("/", "layout");
+    revalidatePath("/", "page");
     return NextResponse.json({ ok: true, settings });
   } catch (error) {
     console.error("[home-slides] put failed", error);
