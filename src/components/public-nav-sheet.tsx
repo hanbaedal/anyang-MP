@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Minus, Plus, X } from "lucide-react";
@@ -58,8 +59,26 @@ export function PublicNavSheet({ role, username }: { role?: Role | null; usernam
         className="inset-0 z-50 flex h-dvh max-h-dvh w-full max-w-none flex-col gap-0 border-0 bg-[color:var(--chrome)] p-0 text-[color:var(--chrome-foreground)] backdrop-blur data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top"
       >
         <SheetHeader className="flex-row items-center justify-between space-y-0 border-b border-[color:var(--chrome-border)] px-3 py-2">
-          <SheetTitle className="whitespace-nowrap font-serif text-sm tracking-tight text-[color:var(--chrome-foreground)] sm:text-base">
-            {chrome("site.legalName")}
+          {/*
+            AMP-152: 시트 오픈 시 body/header에 pointer-events:none — 크롬 브랜드 탭 불가.
+            시트 타이틀(로고·상호)을 홈 링크로 두어 동일 제스처로 / 이동.
+          */}
+          <SheetTitle asChild>
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-serif text-sm font-semibold tracking-tight text-[color:var(--chrome-foreground)] sm:text-base"
+            >
+              <Image
+                src="/images/logo-512.png"
+                alt=""
+                width={512}
+                height={512}
+                className="size-7 object-contain"
+                aria-hidden
+              />
+              <span className="truncate">{chrome("site.legalName")}</span>
+            </Link>
           </SheetTitle>
           <SheetClose asChild>
             <Button size="icon" variant="ghost" className="shrink-0 text-[color:var(--chrome-foreground)] hover:bg-white/15" aria-label={chrome("close")}>

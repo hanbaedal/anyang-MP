@@ -34,19 +34,24 @@ export function SiteHeader({
       <div className="site-chrome-shell site-header-bar flex h-12 min-w-0 items-center gap-1 overflow-visible sm:gap-2 lg:h-14">
         <PublicNavSheet role={role} username={username} />
 
-        <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        {/* AMP-152: 브랜드 홈 링크 — 탭 영역·레이어를 명시해 유틸/오버레이에 가리지 않게 */}
+        <Link
+          href="/"
+          aria-label={chrome("site.legalName")}
+          className="relative z-[1] flex shrink-0 items-center gap-1.5 sm:gap-2"
+        >
           <Image
             src="/images/logo-512.png"
             alt=""
             width={512}
             height={512}
             priority
-            className="size-7 object-contain lg:size-9"
+            className="pointer-events-none size-7 object-contain lg:size-9"
             aria-hidden
           />
-          <p className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--pastel-chrome-fg)] lg:text-lg">
+          <span className="whitespace-nowrap font-serif text-[0.6875rem] leading-none text-[color:var(--pastel-chrome-fg)] lg:text-lg">
             {chrome("site.legalName")}
-          </p>
+          </span>
         </Link>
 
         <PublicGnb role={role} username={username} compact={staff} />
