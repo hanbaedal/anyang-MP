@@ -151,9 +151,10 @@ export function SocialActions({
         verticalFixed
           ? cn(
               "pointer-events-auto fixed right-2 z-40 flex-col gap-2 sm:right-3 md:right-4 md:gap-2.5",
+              /* AMP-158: 모바일에서 풋터·CTA 위로 여유 — bottom 상향 */
               onHome
-                ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
+                ? "bottom-[calc(12.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(7.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(9.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(6rem+env(safe-area-inset-bottom))]",
             )
           : cn(
               "items-center",
